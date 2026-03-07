@@ -3,6 +3,9 @@
   <a href="https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml">
     <img src="https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml/badge.svg?branch=main" alt="CI Quality Gates">
   </a>
+  <a href="https://github.com/xSolutions365/skills/tree/main/skills">
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/xSolutions365/skills/main/badges/skills-count.json" alt="Skills Count">
+  </a>
 </p>
 A multi-skill repository for `npx skills add`.  It uses an opinionated approach to the www.agentskills.io standard.
 
@@ -42,6 +45,7 @@ pre-commit install --hook-type commit-msg
 ```
 
 This repo uses a centralized pre-commit and CI runner at `scripts/run-ci-quality-gates.sh`. That runner executes a custom Python linter for this repository's opinionated skill structure and enforces parity between local hooks and the GitHub Actions quality gate workflow.
+It also regenerates `badges/skills-count.json` during local pre-commit runs so the skills-count badge stays in sync with the contents of `skills/`.
 
 ## Included skills
 
