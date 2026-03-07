@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="agent-skills.jpg" alt="Agent Skills" width="220">
+</p>
+
 # createfuture skills
 
 [![CI Quality Gates](https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml/badge.svg?branch=main)](https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml)
