@@ -1,5 +1,7 @@
 # createfuture skills
 
+[![CI Quality Gates](https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml/badge.svg?branch=main)](https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml)
+
 A multi-skill repository for `npx skills add`.  It uses an opinionated approach to the www.agentskills.io standard.
 
 This approach is reinforced by the available create-skill.
@@ -29,6 +31,17 @@ npx skills add <repo-url> --skill create-skill -g
 # Install all skills to all agents at user level without prompts
 npx skills add <repo-url> --all -g
 ```
+
+## Quality gates
+
+Install the Git hooks before your first commit:
+
+```bash
+pre-commit install
+pre-commit install --hook-type commit-msg
+```
+
+This repo uses a centralized pre-commit and CI runner at `scripts/run-ci-quality-gates.sh`. That runner executes a custom Python linter for this repository's opinionated skill structure and enforces parity between local hooks and the GitHub Actions quality gate workflow.
 
 ## Included skills
 

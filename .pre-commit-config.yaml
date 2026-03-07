@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: quality-gates
+        name: quality-gates
+        entry: bash scripts/run-ci-quality-gates.sh --fix --stage
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
