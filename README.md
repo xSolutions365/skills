@@ -7,15 +7,15 @@
     <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/xSolutions365/skills/main/badges/skills-count.json" alt="Skills Count">
   </a>
 </p>
-A multi-skill repository for `npx skills add`.  It uses an opinionated approach to the www.agentskills.io standard.
+An opinionated approach to the www.agentskills.io standard.
 
-## Project structure
+# Project structure
 
-The installer scans for `SKILL.md` files. This repo intentionally uses:
+The npx skills installer scans for `SKILL.md` files. This repo intentionally uses:
 
 - `skills/<skill-folder>/SKILL.md`
 
-This keeps the root free of a top-level `SKILL.md`, so `npx skills add <repo> --list` discovers a collection of skills.
+This allows `npx skills add <repo> --list` discovers a collection of skills.
 
 ## Install examples
 
