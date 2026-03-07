@@ -1,14 +1,12 @@
 <p align="center">
   <img src="agent-skills.jpg" alt="Agent Skills" width="440"><br/>
-
-[![CI Quality Gates](https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml/badge.svg?branch=main)](https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml)
-
+  <a href="https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml">
+    <img src="https://github.com/xSolutions365/skills/actions/workflows/ci-quality-gates.yml/badge.svg?branch=main" alt="CI Quality Gates">
+  </a>
 </p>
 A multi-skill repository for `npx skills add`.  It uses an opinionated approach to the www.agentskills.io standard.
 
-This approach is reinforced by the available create-skill.
-
-## Repository shape
+## Project structure
 
 The installer scans for `SKILL.md` files. This repo intentionally uses:
 
