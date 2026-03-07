@@ -5,7 +5,7 @@
   </a>
   <a href="https://github.com/xSolutions365/skills/tree/main/skills">
     <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/xSolutions365/skills/main/badges/skills-count.json" alt="Skills Count">
-  </a>
+  </a><br/>
   An opinionated approach to the www.agentskills.io standard.
 </p>
 
