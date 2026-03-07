@@ -9,7 +9,7 @@
   An opinionated approach to the www.agentskills.io standard.
 </p>
 
-# Project structure
+## Repo structure
 
 The npx skills installer scans for `SKILL.md` files. This repo intentionally uses:
 
@@ -17,7 +17,7 @@ The npx skills installer scans for `SKILL.md` files. This repo intentionally use
 
 This allows `npx skills add <repo> --list` discovers a collection of skills.
 
-## Install examples
+## Install
 
 By default, `npx skills add` installs into the current project's `.agents/` directory. Use `-g` to install these skills at user level instead.
 
