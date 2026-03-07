@@ -14,18 +14,20 @@ This keeps the root free of a top-level `SKILL.md`, so `npx skills add <repo> --
 
 ## Install examples
 
+By default, `npx skills add` installs into the current project's `.agents/` directory. Use `-g` to install these skills at user level instead.
+
 ```bash
 # List skills from this repo
 npx skills add <repo-url> --list
 
-# Install interactively
-npx skills add <repo-url>
+# Install interactively at user level
+npx skills add <repo-url> -g
 
-# Install one skill only
-npx skills add <repo-url> --skill create-skill
+# Install one skill only at user level
+npx skills add <repo-url> --skill create-skill -g
 
-# Install all skills to all agents without prompts
-npx skills add <repo-url> --all
+# Install all skills to all agents at user level without prompts
+npx skills add <repo-url> --all -g
 ```
 
 ## Included skills
