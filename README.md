@@ -17,12 +17,12 @@ The npx skills installer scans for `SKILL.md` files. This repo intentionally use
 
 This allows `npx skills add <repo> --list` discovers a collection of skills.
 
-The repo accepts two skill layouts:
+The repo accepts two skill layouts, both aligned with [Agent Skills specification](https://agentskills.io/specification):
 
-- Compact skills: a single `SKILL.md` file that stays at or under 500 lines, aligned with the [Agent Skills specification](https://agentskills.io/specification).
-- Structured skills: the repo's multi-file pattern with `README.md` plus linked workflow references for larger or more granular workflows.
+- Compact skills: a single `SKILL.md` file that stays at or under 500 lines.
+- Structured skills: the repo's multi-file pattern for longer multi step workflows.
 
-Use `create-skill` only for the structured pattern. If your existing skill is larger than 500 lines you can convert it to our structured format by referencing our create-skill (needs access to it) with the following:
+If starting fresh use create-skill.  If importing existing skill thats greater than 500 lines 500 lines - convert it to our structured format by referencing our create-skill (needs access to it) with the following request to an agent:
 
 `Refactor <skill-in-question> to align with the create-skill pattern, whilst retaining all content with granular detail moving to reference files`
 
