@@ -22,7 +22,7 @@ The repo accepts two skill layouts, both aligned with [Agent Skills specificatio
 - Compact skills: a single `SKILL.md` file that stays at or under 500 lines.
 - Structured skills: the repo's multi-file pattern for longer multi step workflows.
 
-If starting fresh use create-skill.  If importing existing skill thats greater than 500 lines 500 lines - convert it to our structured format by referencing our create-skill (needs access to it) with the following request to an agent:
+If starting fresh use create-skill.  If importing existing skill thats greater than 500 lines - convert it to our structured format by referencing our create-skill (needs access to it) with the following request to an agent:
 
 `Refactor <skill-in-question> to align with the create-skill pattern, whilst retaining all content with granular detail moving to reference files`
 
