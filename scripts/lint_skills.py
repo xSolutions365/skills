@@ -21,6 +21,7 @@ SKIPPED_LINK_SCHEMES = {"http", "https", "mailto"}
 SCRIPT_EXTENSIONS = (".py", ".sh", ".bash", ".zsh", ".js")
 FENCE_PREFIXES = ("```", "~~~")
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+COMPACT_SKILL_MAX_LINES = 500
 README_EXPECTED_SECTIONS = [
     "Overview",
     "When to use it",
@@ -90,9 +91,6 @@ def lint_skill_dir(skill_dir: Path) -> list[Issue]:
     if not skill_md.exists():
         issues.append(Issue(skill_md, 1, "Skill directory is missing required SKILL.md entrypoint."))
         return issues
-    if not readme_md.exists():
-        issues.append(Issue(readme_md, 1, "Skill directory is missing required README.md overview file."))
-
     markdown_files = sorted(
         path for path in skill_dir.rglob("*.md") if ".git" not in path.parts
     )
@@ -101,19 +99,57 @@ def lint_skill_dir(skill_dir: Path) -> list[Issue]:
         issues.extend(check_markdown_links(skill_dir, markdown_file, content))
 
     skill_content = skill_md.read_text(encoding="utf-8")
-    issues.extend(check_skill_frontmatter(skill_dir, skill_md, skill_content))
-    issues.extend(check_skill_structure(skill_dir, skill_md, skill_content))
+    skill_layout = classify_skill_layout(skill_dir, markdown_files, readme_md.exists())
+
+    issues.extend(
+        check_skill_frontmatter(
+            skill_dir,
+            skill_md,
+            skill_content,
+            require_use_when=skill_layout == "structured",
+        )
+    )
+    if skill_layout == "structured":
+        if not readme_md.exists():
+            issues.append(Issue(readme_md, 1, "Structured skill directory is missing required README.md overview file."))
+        issues.extend(check_skill_structure(skill_dir, skill_md, skill_content))
+    else:
+        issues.extend(check_compact_skill_limits(skill_md, skill_content))
     issues.extend(check_stale_markdown(skill_dir, markdown_files))
     issues.extend(check_skill_script_references(skill_dir, skill_md, skill_content))
 
-    if readme_md.exists():
+    if skill_layout == "structured" and readme_md.exists():
         readme_content = readme_md.read_text(encoding="utf-8")
         issues.extend(check_readme_structure(skill_dir, readme_md, readme_content))
 
     return issues
 
 
-def check_skill_frontmatter(skill_dir: Path, path: Path, content: str) -> list[Issue]:
+def classify_skill_layout(skill_dir: Path, markdown_files: list[Path], has_readme: bool) -> str:
+    if has_readme:
+        return "structured"
+
+    references_dir = skill_dir / "references"
+    scripts_dir = skill_dir / "scripts"
+    assets_dir = skill_dir / "assets"
+    if references_dir.exists() or scripts_dir.exists() or assets_dir.exists():
+        return "structured"
+
+    for path in markdown_files:
+        if path.name in {"SKILL.md", "README.md"}:
+            continue
+        return "structured"
+
+    return "compact"
+
+
+def check_skill_frontmatter(
+    skill_dir: Path,
+    path: Path,
+    content: str,
+    *,
+    require_use_when: bool,
+) -> list[Issue]:
     issues: list[Issue] = []
     frontmatter, _body, error = split_frontmatter(content)
     if error:
@@ -140,12 +176,29 @@ def check_skill_frontmatter(skill_dir: Path, path: Path, content: str) -> list[I
 
     if not description:
         issues.append(Issue(path, 1, "SKILL.md frontmatter must include 'description'."))
-    elif "USE WHEN" not in description:
+    elif require_use_when and "USE WHEN" not in description:
         issues.append(
-            Issue(path, 1, "Skill description must include an explicit 'USE WHEN ...' clause.")
+            Issue(path, 1, "Structured skill description must include an explicit 'USE WHEN ...' clause.")
         )
 
     return issues
+
+
+def check_compact_skill_limits(path: Path, content: str) -> list[Issue]:
+    line_count = len(content.splitlines())
+    if line_count <= COMPACT_SKILL_MAX_LINES:
+        return []
+
+    return [
+        Issue(
+            path,
+            1,
+            (
+                f"Compact SKILL.md must stay at or under {COMPACT_SKILL_MAX_LINES} lines; "
+                "refactor larger skills to the structured create-skill pattern."
+            ),
+        )
+    ]
 
 
 def check_skill_structure(skill_dir: Path, path: Path, content: str) -> list[Issue]:

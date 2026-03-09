@@ -66,6 +66,7 @@ else
   run_step "Check skills badge payload" python3 "$ROOT_DIR/scripts/update_skills_badge.py" --check
 fi
 run_step "Skill lint" python3 "$ROOT_DIR/scripts/lint_skills.py"
+run_step "Lint integration tests" python3 -m unittest discover -s "$ROOT_DIR/tests" -p "test_*.py"
 run_step "Python syntax check" python3 -B -m py_compile "${python_files[@]}"
 run_step "Parity guard" check_parity
 
