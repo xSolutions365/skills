@@ -53,20 +53,19 @@ check_parity() {
 }
 
 python_files=(
-  "$ROOT_DIR/scripts/lint_skills.py"
-  "$ROOT_DIR/scripts/update_skills_badge.py"
   "$ROOT_DIR/skills/create-execplan/scripts/scaffold_execplan.py"
   "$ROOT_DIR/skills/create-execplan/scripts/validate_context_pack.py"
   "$ROOT_DIR/skills/create-execplan/scripts/validate_execplan.py"
 )
 
 if [[ "$FIX_MODE" == "true" ]]; then
-  run_step "Update skills badge payload" python3 "$ROOT_DIR/scripts/update_skills_badge.py"
+  run_step "Update skills badge payload" bash "$ROOT_DIR/scripts/update_skills_badge.sh"
 else
-  run_step "Check skills badge payload" python3 "$ROOT_DIR/scripts/update_skills_badge.py" --check
+  run_step "Check skills badge payload" bash "$ROOT_DIR/scripts/update_skills_badge.sh" --check
 fi
-run_step "Skill lint" python3 "$ROOT_DIR/scripts/lint_skills.py"
-run_step "Lint integration tests" python3 -m unittest discover -s "$ROOT_DIR/tests" -p "test_*.py"
+run_step "Skill lint" bash "$ROOT_DIR/scripts/lint_skills.sh"
+run_step "Lint integration tests" bash "$ROOT_DIR/tests/run_lint_skills_integration.sh"
+run_step "Shell syntax check" bash -n "$ROOT_DIR/scripts/update_skills_badge.sh" "$ROOT_DIR/scripts/lint_skills.sh" "$ROOT_DIR/scripts/run-ci-quality-gates.sh" "$ROOT_DIR/tests/run_lint_skills_integration.sh"
 run_step "Python syntax check" python3 -B -m py_compile "${python_files[@]}"
 run_step "Parity guard" check_parity
 
