@@ -2,7 +2,7 @@
 
 ## Overview
 
-Create a two-part execution plan package that turns validated context into a detailed, trackable implementation plan for downstream execution.
+Create a plan package that turns validated context into a detailed, trackable implementation plan for downstream execution, with a generated runtime task-packet artifact for tooling.
 
 ## When to use it
 

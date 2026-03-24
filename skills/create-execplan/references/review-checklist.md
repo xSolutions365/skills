@@ -39,6 +39,7 @@ Before implementation starts, mark `E*` checks as `na`.
 - P24: Step 1 and Step 3 include checkpoint evidence with prompt text and user approval response excerpts captured after the STOP request.
 - P25: `execplan-validation.json` exists and reports pass.
 - P26: `Test Plan` is scenario-focused BDD coverage (`Given/When/Then`) with valid `Req IDs`, executable `Evidence Command`, valid `Task Ref` mappings, and at least one `P0` smoke scenario.
+- P27: `workspace/execplan-task-packets.json` exists, was regenerated from the finalized ExecPlan, and remains a derived task-structure artifact rather than a second plan.
 
 ## Execution Follow-through (during/after implementation)
 

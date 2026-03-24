@@ -18,6 +18,10 @@ REQUIRED_HEADINGS = (
     "## Quality Gates",
 )
 
+REQUIRED_TOP_METADATA = (
+    "- Runtime Task Packets artifact:",
+)
+
 TABLE_REQUIRED = (
     "## Dependency Preconditions",
     "## Task Table (single source of truth)",
@@ -133,6 +137,18 @@ def validate_top_metadata_placeholders(lines: list[str]) -> list[str]:
         if "<timestamp>" in line:
             errors.append(
                 f"Top metadata still contains <timestamp> token at line {idx}: {line.strip()}"
+            )
+    return errors
+
+
+def validate_required_top_metadata(lines: list[str]) -> list[str]:
+    errors: list[str] = []
+    top_slice = lines[:24]
+    top_text = "\n".join(top_slice)
+    for required_line in REQUIRED_TOP_METADATA:
+        if required_line not in top_text:
+            errors.append(
+                f"Top metadata is missing required artifact reference: {required_line}"
             )
     return errors
 
@@ -401,6 +417,7 @@ def main() -> int:
     errors: list[str] = []
     errors.extend(validate_required_headings(text))
     errors.extend(validate_required_tables(lines))
+    errors.extend(validate_required_top_metadata(lines))
     errors.extend(validate_top_metadata_placeholders(lines))
     errors.extend(validate_task_table(lines))
     errors.extend(validate_test_plan(lines))

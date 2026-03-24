@@ -1,11 +1,11 @@
 ---
 name: create-execplan
-description: Create a two-part execution plan (Context Pack + ExecPlan) optimized for low-reasoning executors and living-document tracking. USE WHEN the user calls for the creation or update of an execplan.
+description: Create an execution plan package (Context Pack + living ExecPlan + generated runtime task packets) optimized for low-reasoning executors and living-document tracking. USE WHEN the user calls for the creation or update of an execplan.
 ---
 
 # Create ExecPlan
 
-Create a two-artifact plan package that turns validated context into an executable, update-in-place implementation plan.
+Create a plan package that turns validated context into an executable, update-in-place implementation plan with a generated machine-readable runtime artifact derived from the ExecPlan.
 
 - Use this when planning must be deterministic and auditable.
 - Use this when implementation will be delegated to a low-reasoning executor that needs explicit, unambiguous steps.
@@ -69,5 +69,5 @@ Reference baseline: [references/openai-codex-exec-plans.md](references/openai-co
 
 ### Step 6: Complete required review checklist
 
-- Hard stop: do not hand off until checklist `P*` checks pass and `context-pack-validation.json` reports `status: pass`.
+- Hard stop: do not hand off until checklist `P*` checks pass, `context-pack-validation.json` reports `status: pass`, `execplan-validation.json` reports `status: pass`, and the generated runtime task packet artifact has been refreshed from the finalized ExecPlan.
 - Details: [references/step-6-checklist.md](references/step-6-checklist.md).

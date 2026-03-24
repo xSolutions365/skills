@@ -26,11 +26,12 @@ Objective: create deterministic plan artifacts under a timestamped run directory
    - `context-discovery.md`
    - `context-evidence.json`
    - `context-codemap.md`
+   - `execplan-task-packets.json`
    - `requirements-freeze.md`
 
 ## Done when
 
 - Artifact root exists and all required files are generated.
 - Workspace artifacts are separated from final handoff artifacts.
-- Context discovery, evidence, codemap, draft review, and requirements freeze artifacts are generated in `workspace/`.
+- Context discovery, evidence, codemap, generated runtime task packets, draft review, and requirements freeze artifacts are generated in `workspace/`.
 - Step references, templates, and scripts are resolvable from the skill root, while artifacts resolve under the caller project root.

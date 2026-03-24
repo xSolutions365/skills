@@ -10,13 +10,14 @@ Objective: enforce final quality gate before plan handoff.
 2. Record results for every `P*` and applicable `E*` check in `<artifact-root>/review-checklist.md` using `pass`/`fail`/`na` plus evidence.
 3. Ensure `context-pack-validation.json` exists at `<artifact-root>/context-pack-validation.json` and reports `status: pass`.
 4. Ensure `execplan-validation.json` exists at `<artifact-root>/execplan-validation.json` and reports `status: pass`.
-5. Ensure Step 3 draft approval evidence exists in `<artifact-root>/workspace/draft-review.md`.
-6. Ensure requirements-freeze confirmation exists in `<artifact-root>/workspace/requirements-freeze.md`.
-7. Ensure Step 1 and Step 3 checkpoint records include:
+5. Ensure `<artifact-root>/workspace/execplan-task-packets.json` exists and was regenerated from the finalized `execplan.md`.
+6. Ensure Step 3 draft approval evidence exists in `<artifact-root>/workspace/draft-review.md`.
+7. Ensure requirements-freeze confirmation exists in `<artifact-root>/workspace/requirements-freeze.md`.
+8. Ensure Step 1 and Step 3 checkpoint records include:
    - checkpoint prompt text
    - user approval response excerpt recorded after the STOP request
-8. Ensure smoke gate, dependency preflight, and Test Plan BDD scenario checks pass in checklist rows before handoff.
-9. Resolve any failing `P*` checks before handoff.
+9. Ensure smoke gate, dependency preflight, and Test Plan BDD scenario checks pass in checklist rows before handoff.
+10. Resolve any failing `P*` checks before handoff.
 
 ## Hard gate
 

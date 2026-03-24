@@ -8,6 +8,9 @@ Objective: verify deterministic executability for low-reasoning executors.
   - working tree
   - `context-pack.md`
   - `execplan.md`
+- Generated runtime artifact exists for tooling consumers without becoming a second source of truth:
+  - `<artifact-root>/workspace/execplan-task-packets.json`
+  - contains task-structure data only; decisions/findings remain in `execplan.md`
 - Requirements freeze artifact exists with explicit confirmation:
   - `<artifact-root>/workspace/requirements-freeze.md`
   - includes `Confirmation prompt` and `User approval response (verbatim excerpt)`
@@ -21,6 +24,8 @@ Objective: verify deterministic executability for low-reasoning executors.
   - `python3 scripts/validate_context_pack.py --context-pack "<artifact-root>/context-pack.md"`
 - ExecPlan passes deterministic validation:
   - `python3 scripts/validate_execplan.py --execplan "<artifact-root>/execplan.md"`
+- Runtime task packet artifact is generated from the current ExecPlan:
+  - `python3 scripts/render_execplan_runtime.py --execplan "<artifact-root>/execplan.md" --output "<artifact-root>/workspace/execplan-task-packets.json"`
 - Every success criterion maps to at least one task and one verification command.
 - `Test Plan` is a scenario-focused BDD table with required columns and concrete rows (`Scenario ID`, `Req IDs`, `Priority`, `Given`, `When`, `Then`, `Evidence Command`, `Task Ref`).
 - Each Test Plan scenario maps to requirement IDs from `Requirements Freeze`, an executable evidence command, and an existing task reference (`P<phase>-T<task>`).
@@ -42,3 +47,4 @@ Objective: verify deterministic executability for low-reasoning executors.
 - All checks pass and no unresolved audit failures remain.
 - `context-pack-validation.json` exists and reports `status: pass`.
 - `execplan-validation.json` exists and reports `status: pass`.
+- `workspace/execplan-task-packets.json` exists and matches the finalized `execplan.md`.

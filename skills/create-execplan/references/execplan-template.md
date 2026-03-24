@@ -14,6 +14,7 @@ The key design constraint: a low-reasoning executor should be able to implement 
 - Artifact root: `.plan/create-execplan/<timestamp>/`
 - Workspace root: `.plan/create-execplan/<timestamp>/workspace/`
 - Context Pack: `.plan/create-execplan/<timestamp>/context-pack.md`
+- Runtime Task Packets artifact: `.plan/create-execplan/<timestamp>/workspace/execplan-task-packets.json` (generated; do not edit)
 - Requirements Freeze artifact: `.plan/create-execplan/<timestamp>/workspace/requirements-freeze.md`
 - Draft Review artifact: `.plan/create-execplan/<timestamp>/workspace/draft-review.md`
 - Links: <issue/PR/spec/runbook>
@@ -142,5 +143,6 @@ Describe what can be safely re-run and how to rollback any destructive steps.
 ## Artifacts & Notes
 
 - Context Pack: `<path>`
+- Runtime Task Packets artifact (generated): `<artifact-root>/workspace/execplan-task-packets.json`
 - Evidence: `<path/to/log-or-json>`
 ```

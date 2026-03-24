@@ -53,6 +53,7 @@ check_parity() {
 }
 
 python_files=(
+  "$ROOT_DIR/skills/create-execplan/scripts/render_execplan_runtime.py"
   "$ROOT_DIR/skills/create-execplan/scripts/scaffold_execplan.py"
   "$ROOT_DIR/skills/create-execplan/scripts/validate_context_pack.py"
   "$ROOT_DIR/skills/create-execplan/scripts/validate_execplan.py"
