@@ -4,22 +4,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
 from execplan_common import (
+    normalize_status,
     parse_requirements,
     parse_table,
     read_section,
     split_csv_tokens,
-    strip_code_markers,
     task_ref,
-    normalize_status,
-    is_na,
 )
 
 TASK_TABLE_HEADING = "## Task Table (single source of truth)"
-TEST_PLAN_HEADING = "## Test Plan"
 REQUIREMENTS_HEADING = "## Requirements Freeze"
 
 TASK_HEADERS = [
@@ -28,20 +26,13 @@ TASK_HEADERS = [
     "Task #",
     "Type",
     "Req IDs",
-    "File Anchors",
-    "Command",
+    "Edit Targets",
+    "Supporting Context Anchors",
+    "Allowed Commands",
+    "Verification Commands",
+    "Evidence Commands",
     "Expected Output",
     "Action",
-]
-
-TEST_PLAN_HEADERS = [
-    "Scenario ID",
-    "Priority",
-    "Given",
-    "When",
-    "Then",
-    "Evidence Command",
-    "Task Ref",
 ]
 
 
@@ -70,6 +61,34 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def discover_project_root(start_path: Path) -> Path:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=start_path,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return start_path.resolve()
+
+    git_root = result.stdout.strip()
+    if not git_root:
+        return start_path.resolve()
+    return Path(git_root).resolve()
+
+
+def render_repo_relative_path(project_root: Path, path: Path) -> str:
+    try:
+        relative_path = path.resolve().relative_to(project_root.resolve())
+    except ValueError:
+        return path.resolve().as_posix()
+    if str(relative_path) == ".":
+        return "."
+    return relative_path.as_posix()
+
+
 def parse_task_rows(source: str) -> list[dict[str, object]]:
     headers, rows = parse_table(read_section(source, TASK_TABLE_HEADING))
     if headers != TASK_HEADERS:
@@ -81,7 +100,6 @@ def parse_task_rows(source: str) -> list[dict[str, object]]:
     for row in rows:
         phase_number = int(row["Phase #"].strip())
         task_number = int(row["Task #"].strip())
-        command = strip_code_markers(row["Command"])
         tasks.append(
             {
                 "taskRef": task_ref(phase_number, task_number),
@@ -90,36 +108,18 @@ def parse_task_rows(source: str) -> list[dict[str, object]]:
                 "taskNumber": task_number,
                 "type": row["Type"].strip(),
                 "requirementIds": split_csv_tokens(row["Req IDs"]),
-                "fileAnchors": split_csv_tokens(row["File Anchors"]),
-                "command": "" if is_na(command) else command,
+                "editTargets": split_csv_tokens(row["Edit Targets"]),
+                "supportingContextAnchors": split_csv_tokens(
+                    row["Supporting Context Anchors"]
+                ),
+                "allowedCommands": split_csv_tokens(row["Allowed Commands"]),
+                "verificationCommands": split_csv_tokens(row["Verification Commands"]),
+                "evidenceCommands": split_csv_tokens(row["Evidence Commands"]),
                 "expectedOutput": row["Expected Output"].strip(),
                 "action": row["Action"].strip(),
             }
         )
     return tasks
-
-
-def parse_test_plan(source: str) -> list[dict[str, object]]:
-    headers, rows = parse_table(read_section(source, TEST_PLAN_HEADING))
-    if headers != TEST_PLAN_HEADERS:
-        raise ValueError(
-            "Test Plan columns must exactly match: " + ", ".join(TEST_PLAN_HEADERS)
-        )
-
-    scenarios: list[dict[str, object]] = []
-    for row in rows:
-        scenarios.append(
-            {
-                "scenarioId": row["Scenario ID"].strip(),
-                "priority": row["Priority"].strip(),
-                "given": row["Given"].strip(),
-                "when": row["When"].strip(),
-                "then": row["Then"].strip(),
-                "evidenceCommand": strip_code_markers(row["Evidence Command"]),
-                "taskRefs": split_csv_tokens(row["Task Ref"]),
-            }
-        )
-    return scenarios
 
 
 def render_runtime_input(
@@ -128,18 +128,19 @@ def render_runtime_input(
     source = execplan_path.read_text(encoding="utf-8")
     requirements = parse_requirements(read_section(source, REQUIREMENTS_HEADING))
     tasks = parse_task_rows(source)
-    scenarios = parse_test_plan(source)
     generated_value = generated_at or datetime.now(UTC).isoformat().replace("+00:00", "Z")
-    source_execplan = source_execplan_value or str(execplan_path.resolve())
+    project_root = discover_project_root(execplan_path.parent)
+    source_execplan = source_execplan_value or render_repo_relative_path(
+        project_root, execplan_path
+    )
     return {
-        "schemaVersion": "2.0",
+        "schemaVersion": "3.0",
         "generated": True,
         "editPolicy": "do-not-edit",
         "generatedAt": generated_value,
         "sourceExecplan": source_execplan,
         "requirements": requirements,
         "tasks": tasks,
-        "verificationScenarios": scenarios,
     }
 
 

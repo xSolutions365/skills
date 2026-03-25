@@ -2,7 +2,8 @@
 
 The ExecPlan is the living execution document. It should stay lean, hold only execution-facing information, and treat the Context Pack as the canonical home for broader repo facts, verification posture, and command inventory.
 
-The key design constraint: a lower-reasoning executor should be able to implement tasks from the structured task rows, using the Context Pack only for navigation and supporting context.
+The key design constraint: a lower-reasoning packet-only executor should be able to implement tasks from the structured task rows, using the Context Pack only for navigation and supporting context anchors.
+For brownfield plans, keep every task row packet-ready: `Code` rows need concrete edit targets, `Read` rows need explicit supporting context anchors, executable `Action`/`Test`/`Gate` rows need concrete allowed commands, and vague discovery-oriented text is not acceptable.
 
 ## Template
 
@@ -59,21 +60,33 @@ Task Types:
 
 - Code, Read, Action, Test, Gate, Human
 
-Use `n/a` when `File Anchors` or `Command` does not apply. Every row must:
+Use `n/a` when `Edit Targets`, `Supporting Context Anchors`, `Allowed Commands`, `Verification Commands`, or `Evidence Commands` does not apply. Every row must:
 
 - map to one or more requirement IDs
-- include at least one concrete file anchor or command
+- distinguish edit targets from read-only supporting context anchors
+- list only commands the executor is allowed to run for that task
 - state the expected output or completion signal
 - avoid implicit discovery
+- stay concrete enough for a packet-only brownfield harness to execute without repo-wide search
 
-| Status | Phase # | Task # | Type | Req IDs | File Anchors | Command | Expected Output | Action |
-| ------ | ------- | ------ | ---- | ------- | ------------ | ------- | --------------- | ------ |
-|        | 1       | 1      | Read | R1      | `path/to/file:10` | `n/a` | context confirmed | Read the linked context before execution starts. |
-|        | 1       | 2      | Action | R1 | `n/a` | `<check-cmd>` | dependency present | Run the dependency precheck. |
-|        | 1       | 3      | Gate | R1 | `n/a` | `n/a` | user escalated if install fails | Mark blocked and escalate immediately when installation fails. |
-|        | 2       | 4      | Code | R2 | `path/to/file:25` | `n/a` | code change applied | Implement the required change at the anchored location. |
-|        | 3       | 5      | Test | R2,R3 | `n/a` | `<smoke-cmd>` | <smoke-success-signal> | Run the mandatory smoke verification. |
-|        | 3       | 6      | Test | R3 | `n/a` | `<test-cmd>` | <expected output> | Run the targeted verification for changed behavior. |
+For task rows:
+
+- `Edit Targets` are the files expected to change for that task.
+- `Supporting Context Anchors` is read-only context that helps the executor navigate adjacent code, policy, or integration surfaces.
+- `Allowed Commands` must be the exact command set the executor may run for that task. Use `n/a` only when no shell command is needed.
+- `Verification Commands` are the direct task-level checks the verifier may run against the completed task.
+- `Evidence Commands` collect broader run evidence for later review and comparison.
+- A brownfield `Code` task must not rely on vague phrases like `relevant`, `canonical`, or `appropriate` in place of concrete edit targets.
+- A brownfield `Read` task must not omit concrete `Supporting Context Anchors`.
+
+| Status | Phase # | Task # | Type | Req IDs | Edit Targets | Supporting Context Anchors | Allowed Commands | Verification Commands | Evidence Commands | Expected Output | Action |
+| ------ | ------- | ------ | ---- | ------- | ------------ | -------------------------- | ---------------- | --------------------- | ----------------- | --------------- | ------ |
+|        | 1       | 1      | Read | R1      | `n/a` | `path/to/file:10`,`path/to/adjacent.md:8` | `n/a` | `n/a` | `n/a` | context confirmed | Read the linked context before execution starts. |
+|        | 1       | 2      | Action | R1 | `n/a` | `n/a` | `<check-cmd>` | `<check-cmd>` | `<status-cmd>` | dependency present | Run the dependency precheck. |
+|        | 1       | 3      | Gate | R1 | `n/a` | `path/to/install.md:5` | `<dependency-precheck-cmd>` | `<dependency-precheck-cmd>` | `<status-cmd>` | dependency present or explicit escalation recorded | Run the dependency precheck before any install step and stop for user escalation on failure. |
+|        | 2       | 4      | Code | R2 | `path/to/file.py:25` | `path/to/adjacent.py:40`,`path/to/policy.md:8` | `n/a` | `<targeted-test-cmd>` | `<evidence-cmd>` | code change applied and targeted verification passes | Implement the required change at the anchored location without expanding beyond the listed edit targets. |
+|        | 3       | 5      | Test | R2,R3 | `n/a` | `path/to/test_file.py:1` | `<smoke-cmd>` | `<smoke-cmd>` | `<smoke-cmd>` | <smoke-success-signal> | Run the mandatory smoke verification. |
+|        | 3       | 6      | Test | R3 | `n/a` | `path/to/test_file.py:1` | `<test-cmd>` | `<test-cmd>` | `<evidence-cmd>` | <expected output> | Run the targeted verification for changed behavior. |
 
 ## Progress Log (running)
 

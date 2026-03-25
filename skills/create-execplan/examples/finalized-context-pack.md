@@ -1,11 +1,11 @@
 # Context Pack: Demo create-execplan rewrite
 
 - Created: 2026-03-24
-- Repo root: `/repo`
+- Repo root: `.`
 - Target path: `.`
 - Project mode: `brownfield`
-- Artifact root: `/repo/.plan/create-execplan/demo`
-- Workspace root: `/repo/.plan/create-execplan/demo/workspace`
+- Artifact root: `.plan/create-execplan/demo`
+- Workspace root: `.plan/create-execplan/demo/workspace`
 - Related links: docs/specs/create-execplan-rewrite.md
 
 ## Change Brief (1-3 paragraphs)
@@ -15,16 +15,16 @@ This example package demonstrates the rewritten create-execplan contract. It kee
 ## Requirement Freeze (user-confirmed)
 
 - R1: Keep the ExecPlan as the living human document.
-- R2: Generate a narrow runtime input artifact from explicit task rows.
-- R3: Remove hardcoded python3 usage from shell-facing invocations.
+- R2: Generate a narrow runtime input artifact from explicit task packets.
+- R3: Keep scaffolded plan metadata and helper examples repo-relative and packet-executable.
 - Confirmed by user at: 2026-03-24T09:00:00Z
 
 ## Discovery Inputs
 
-- Intake artifact: `/repo/.plan/create-execplan/demo/workspace/context-discovery.md`
-- Evidence artifact: `/repo/.plan/create-execplan/demo/workspace/context-evidence.json`
-- Codemap artifact: `/repo/.plan/create-execplan/demo/workspace/context-codemap.md`
-- Requirements freeze artifact: `/repo/.plan/create-execplan/demo/workspace/requirements-freeze.md`
+- Intake artifact: `.plan/create-execplan/demo/workspace/context-discovery.md`
+- Evidence artifact: `.plan/create-execplan/demo/workspace/context-evidence.json`
+- Codemap artifact: `.plan/create-execplan/demo/workspace/context-codemap.md`
+- Requirements freeze artifact: `.plan/create-execplan/demo/workspace/requirements-freeze.md`
 - Notes: The example is intentionally small and uses repo-local references only.
 
 ## Guardrails (must-follow)
@@ -45,15 +45,15 @@ This example package demonstrates the rewritten create-execplan contract. It kee
 
 | Evidence ID | Type | Source | Published | Retrieved | Trust rationale |
 | ----------- | ---- | ------ | --------- | --------- | --------------- |
-| E1 | doc | /repo/skills/create-execplan/references/openai-codex-exec-plans.md | undated:repo-reference | 2026-03-24 | baseline structure reference |
-| E2 | code | /repo/skills/create-execplan/scripts/render_execplan_runtime_input.py | undated:repo-reference | 2026-03-24 | renderer implementation reference |
+| E1 | doc | skills/create-execplan/references/openai-codex-exec-plans.md | undated:repo-reference | 2026-03-24 | baseline structure reference |
+| E2 | code | skills/create-execplan/scripts/render_execplan_runtime_input.py | undated:repo-reference | 2026-03-24 | renderer implementation reference |
 
 ## Verification Baseline & Strategy
 
 - Verification scenario: `brownfield-existing`
 - Existing verification commands: `bash scripts/run-ci-quality-gates.sh`
 - User decision when verification missing: `n/a-existing`
-- Planned verification scope: update create-execplan docs, templates, Python helpers, and repo gates touched by the rewrite
+- Planned verification scope: update create-execplan docs, templates, helper scripts, and golden examples touched by the rewrite
 - Mandatory smoke gate command: `bash tests/run_create_execplan_helpers.sh`
 - Smoke gate expected success signal: create-execplan helper checks passed
 
@@ -67,7 +67,7 @@ This example package demonstrates the rewritten create-execplan contract. It kee
 
 | Area | File anchor | Current behavior | Integration concern | Evidence IDs |
 | ---- | ----------- | ---------------- | ------------------- | ------------ |
-| runtime input | `skills/create-execplan/scripts/render_execplan_runtime_input.py:1` | renderer currently derives too much from prose | runtime artifact must stay narrow and derived only | E2 |
+| runtime input | `skills/create-execplan/scripts/render_execplan_runtime_input.py:1` | renderer currently emits the legacy runtime packet shape | runtime artifact must stay narrow and explicit for packet-only execution | E2 |
 
 ## Repo Facts (execution-relevant only)
 
@@ -101,16 +101,16 @@ List only the places the executor must touch. Prefer `path:line` anchors.
 
 | Area | File anchor | What it contains | Why it matters | Planned change |
 | ---- | ----------- | ---------------- | -------------- | -------------- |
-| runtime resolver | `skills/create-execplan/scripts/resolve_python.sh:1` | shell helper that selects python or python3 | shell-facing invocations must not hardcode python3 | add and use the resolver |
-| runtime renderer | `skills/create-execplan/scripts/render_execplan_runtime_input.py:1` | derived runtime artifact renderer | runtime artifact must serialize only explicit task and scenario fields | replace legacy packet output |
+| scaffolded paths | `skills/create-execplan/scripts/scaffold_execplan.py:1` | scaffold helper that materializes the plan package | in-repo artifact metadata should default to repo-relative paths for worktree portability | render repo-relative artifact metadata |
+| runtime renderer | `skills/create-execplan/scripts/render_execplan_runtime_input.py:1` | derived runtime artifact renderer | runtime artifact must serialize only explicit task packet fields | replace legacy packet output |
 
 ## Requirement to Evidence Traceability
 
 | Requirement ID | Requirement | Evidence IDs | Context section(s) | Planned task refs |
 | -------------- | ----------- | ------------ | ------------------ | ----------------- |
 | R1 | Keep the ExecPlan as the living human document. | E1 | Change Brief, Existing Change Surface | P1-T1,P3-T4 |
-| R2 | Generate a narrow runtime input artifact from explicit task rows. | E1,E2 | Existing Change Surface, Code Map | P2-T2,P3-T4 |
-| R3 | Remove hardcoded python3 usage from shell-facing invocations. | E2 | Execution Command Catalog, Code Map | P2-T3,P3-T4 |
+| R2 | Generate a narrow runtime input artifact from explicit task packets. | E1,E2 | Existing Change Surface, Code Map | P2-T2,P3-T4 |
+| R3 | Keep scaffolded plan metadata and helper examples repo-relative and packet-executable. | E2 | Execution Command Catalog, Code Map | P2-T3,P3-T4 |
 
 ## Contracts & Interfaces
 
@@ -119,9 +119,10 @@ Only include what the change touches:
 - plan package artifact paths
 - helper script invocation contract
 - runtime input JSON schema
+- in-repo artifact path portability
 
 ## Risk Register
 
 | Risk | Impact | Mitigation | Verification command | Evidence IDs |
 | ---- | ------ | ---------- | -------------------- | ------------ |
-| runtime resolver drift | shell invocations pick different interpreters on different machines | centralize resolution in one shell helper and route all shell-facing commands through it | `bash tests/run_create_execplan_helpers.sh` | E2 |
+| packet/schema drift | helper examples and emitted runtime input diverge from the harness packet contract | keep the examples, renderer, validator, and scaffold aligned to one explicit schema | `bash tests/run_create_execplan_helpers.sh` | E2 |

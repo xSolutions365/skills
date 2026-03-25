@@ -1,6 +1,6 @@
 # Runtime Input Schema
 
-`workspace/execplan-runtime-input.json` is the machine-readable companion artifact for tooling. It is generated from the finalized ExecPlan and must stay narrower than the markdown plan.
+`workspace/execplan-runtime-input.json` is the machine-readable companion artifact for tooling. It is generated from the finalized ExecPlan and must stay narrower than the markdown plan while remaining explicit enough for a packet-only executor.
 
 ## Top-level fields
 
@@ -11,13 +11,16 @@
 - `sourceExecplan`
 - `requirements`
 - `tasks`
-- `verificationScenarios`
+
+Current canonical schema version: `3.0`.
 
 ## Derivation rules
 
 - `requirements` come from `## Requirements Freeze`.
 - `tasks` come from the structured `## Task Table (single source of truth)`.
-- `verificationScenarios` come from `## Test Plan`.
+- `sourceExecplan` should be repo-relative for in-repo plan packages and absolute only when the source plan is genuinely external.
+- `verificationCommands` and `evidenceCommands` come from the task row itself, not from late inference at harness runtime.
+- Brownfield source plans are expected to be packet-ready before rendering: `Code` rows should already carry concrete edit targets, supporting context should remain read-only navigation, and executable rows should already name the exact command set the harness may run.
 - No plan-level logs, decisions, findings, or standalone verification inventories belong in the runtime artifact.
 - No policy blocks may be injected into the runtime artifact unless they are explicitly authored in the source ExecPlan.
 
@@ -31,22 +34,23 @@ Each task object must contain only derived execution structure:
 - `taskNumber`
 - `type`
 - `requirementIds`
-- `fileAnchors`
-- `command`
+- `editTargets`
+- `supportingContextAnchors`
+- `allowedCommands`
+- `verificationCommands`
+- `evidenceCommands`
 - `expectedOutput`
 - `action`
 
-## Verification scenario shape
+## Packet executability rules
 
-Each verification scenario object must contain:
-
-- `scenarioId`
-- `priority`
-- `given`
-- `when`
-- `then`
-- `evidenceCommand`
-- `taskRefs`
+- `editTargets` are the files the executor is expected to modify for that task.
+- `supportingContextAnchors` are read-only anchors that provide local context and do not imply edit permission.
+- `allowedCommands` are the only executor shell commands permitted for the task.
+- `verificationCommands` are the commands that directly verify the task's primary completion criteria.
+- `evidenceCommands` collect broader run evidence for later review and comparison.
+- `expectedOutput` must describe an observable completion signal and must not be a placeholder.
+- A brownfield `Code` task that cannot name concrete `editTargets` is under-scoped and should be blocked during planning rather than deferred to execution.
 
 ## Golden example
 

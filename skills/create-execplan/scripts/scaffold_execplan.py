@@ -88,6 +88,16 @@ def resolve_target_path(project_root: Path, working_dir: Path) -> str:
     return relative_path.as_posix()
 
 
+def render_repo_relative_path(project_root: Path, path: Path) -> str:
+    try:
+        relative_path = path.resolve().relative_to(project_root.resolve())
+    except ValueError:
+        return path.resolve().as_posix()
+    if str(relative_path) == ".":
+        return "."
+    return relative_path.as_posix()
+
+
 def ensure_writable(path: Path, overwrite: bool) -> None:
     if path.exists() and not overwrite:
         raise FileExistsError(f"Refusing to overwrite existing artifact root: {path}")
@@ -104,13 +114,16 @@ def render_context_template(
     confirmation_ts: str,
     project_mode: str,
 ) -> str:
+    repo_root_value = render_repo_relative_path(project_root, project_root)
+    artifact_root_value = render_repo_relative_path(project_root, artifact_root)
+    workspace_root_value = render_repo_relative_path(project_root, workspace_root)
     rendered = (
         template.replace("<short title>", "Context Pack")
         .replace("<YYYY-MM-DD>", date_str)
-        .replace("<absolute-or-repo-relative-path>", project_root.as_posix())
+        .replace("<absolute-or-repo-relative-path>", repo_root_value)
         .replace("<path-or-.>", target_path)
-        .replace("<artifact-root>", artifact_root.as_posix())
-        .replace("<workspace-root>", workspace_root.as_posix())
+        .replace("<artifact-root>", artifact_root_value)
+        .replace("<workspace-root>", workspace_root_value)
         .replace("<ISO8601 UTC>", confirmation_ts)
     )
     if project_mode:
@@ -121,19 +134,23 @@ def render_context_template(
 def render_execplan_template(
     template: str,
     title: str,
+    project_root: Path,
     artifact_root: Path,
     date_str: str,
     iso_ts: str,
 ) -> str:
-    artifact_path = artifact_root.as_posix()
+    artifact_path = render_repo_relative_path(project_root, artifact_root)
     return (
         template.replace("<short, action-oriented title>", title)
         .replace("<YYYY-MM-DD>", date_str)
         .replace("<ISO8601 UTC>", iso_ts)
-        .replace(".plan/create-execplan/<timestamp>/", artifact_path + "/")
+        .replace(
+            ".plan/create-execplan/<timestamp>/",
+            artifact_path.rstrip("/") + "/",
+        )
         .replace(
             ".plan/create-execplan/<timestamp>/context-pack.md",
-            artifact_path + "/context-pack.md",
+            artifact_path.rstrip("/") + "/context-pack.md",
         )
     )
 
@@ -284,6 +301,7 @@ def main() -> int:
     execplan_content = render_execplan_template(
         template=execplan_template,
         title=args.title,
+        project_root=project_root,
         artifact_root=artifact_root,
         date_str=date_str,
         iso_ts=iso_ts,

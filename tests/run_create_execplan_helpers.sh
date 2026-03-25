@@ -40,7 +40,7 @@ trap cleanup EXIT
   --execplan "$EXAMPLES_DIR/finalized-execplan.md" \
   --output "$TMP_DIR/actual-runtime-input.json" \
   --generated-at "2026-04-01T09:00:00Z" \
-  --source-execplan-value "/fixture/finalized-execplan.md" >/dev/null
+  --source-execplan-value "fixture/finalized-execplan.md" >/dev/null
 
 diff -u \
   "$EXAMPLES_DIR/expected-runtime-input.json" \
