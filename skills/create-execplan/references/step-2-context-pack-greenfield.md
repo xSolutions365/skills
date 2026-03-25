@@ -43,5 +43,5 @@ Objective: choose a low-complexity implementation approach backed by current evi
 ## Done when
 
 - `Established Library Comparison` is complete and evidence-backed.
-- `Verification Baseline & Strategy` is complete for greenfield setup.
+- `Verification Baseline & Strategy` is complete for greenfield setup and remains in the Context Pack.
 - Recommended approach is explicit, justified, and traceable to requirements.

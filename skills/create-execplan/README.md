@@ -2,16 +2,22 @@
 
 ## Overview
 
-Create a plan package that turns validated context into a detailed, trackable implementation plan for downstream execution, with a generated runtime task-packet artifact for tooling.
+Create a structured execution-plan package with a durable Context Pack, a living ExecPlan, and a generated runtime input artifact for tooling.
 
 ## When to use it
 
-- You need a deterministic plan with explicit steps and dependencies.
-- You want context capture and execution planning separated into clear artifacts.
-- You need a plan that can be updated in place as work progresses.
+- You need a deterministic plan handoff for implementation work.
+- You want context discovery, living execution state, and generated runtime input split into clear artifacts.
+- You need the plan package to stay auditable while work progresses.
 
 ## Example prompts
 
 - "Use `create-execplan` to build an exec plan for migrating this service to a new auth provider."
 - "Use `create-execplan` to update the existing plan for the dashboard rebuild based on these new constraints."
 - "Use `create-execplan` to produce a brownfield plan for adding SSO to this codebase."
+
+## References
+
+- [Artifact Contract](references/artifact-contract.md)
+- [Runtime Input Schema](references/runtime-input-schema.md)
+- [Runtime Resolution](references/runtime-resolution.md)

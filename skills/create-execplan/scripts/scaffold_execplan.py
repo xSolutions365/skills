@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Scaffold Context Pack, living ExecPlan, and related context artifacts."""
+"""Scaffold Context Pack, living ExecPlan, and related authoring artifacts."""
 
 from __future__ import annotations
 
@@ -36,20 +35,6 @@ def parse_args() -> argparse.Namespace:
         help="Optional initial project mode. If omitted, keep template placeholder.",
     )
     return parser.parse_args()
-
-
-def render_runtime_packets(execplan_path: Path, output_path: Path, skill_root: Path) -> None:
-    subprocess.run(
-        [
-            "python3",
-            str(skill_root / "scripts" / "render_execplan_runtime.py"),
-            "--execplan",
-            str(execplan_path),
-            "--output",
-            str(output_path),
-        ],
-        check=True,
-    )
 
 
 def extract_template_block(reference_path: Path) -> str:
@@ -312,7 +297,7 @@ def main() -> int:
     evidence_path = workspace_root / "context-evidence.json"
     codemap_path = workspace_root / "context-codemap.md"
     freeze_path = workspace_root / "requirements-freeze.md"
-    runtime_packets_path = workspace_root / "execplan-task-packets.json"
+    runtime_input_path = workspace_root / "execplan-runtime-input.json"
 
     context_path.write_text(context_content, encoding="utf-8")
     execplan_path.write_text(execplan_content, encoding="utf-8")
@@ -335,11 +320,6 @@ def main() -> int:
         build_requirements_freeze_content(date_str=date_str, iso_ts=iso_ts),
         encoding="utf-8",
     )
-    render_runtime_packets(
-        execplan_path=execplan_path,
-        output_path=runtime_packets_path,
-        skill_root=skill_root,
-    )
 
     print(
         json.dumps(
@@ -353,8 +333,8 @@ def main() -> int:
                 "context_discovery": str(discovery_path),
                 "context_evidence": str(evidence_path),
                 "context_codemap": str(codemap_path),
-                "execplan_task_packets": str(runtime_packets_path),
                 "requirements_freeze": str(freeze_path),
+                "planned_runtime_input": str(runtime_input_path),
             },
             indent=2,
         )

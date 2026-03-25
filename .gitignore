@@ -1,3 +1,5 @@
 .DS_Store
 .pre-commit-cache/
 __pycache__/
+scripts/deploy-skill-local.sh
+.enaible/

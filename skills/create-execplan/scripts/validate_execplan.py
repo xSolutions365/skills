@@ -1,54 +1,73 @@
-#!/usr/bin/env python3
-"""Validate ExecPlan completeness for create-execplan."""
+"""Validate finalized ExecPlan completeness for create-execplan."""
 
 from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
+
+from execplan_common import (
+    ANCHOR_PATTERN,
+    REQ_ID_PATTERN,
+    TASK_REF_PATTERN,
+    is_na,
+    is_placeholder,
+    lines,
+    normalize_cell,
+    parse_requirements,
+    parse_table,
+    read_section,
+    split_csv_tokens,
+    task_ref,
+)
 
 REQUIRED_HEADINGS = (
     "## Requirements Freeze",
-    "## Success Criteria",
-    "## Verification Strategy",
+    "## Success Criteria (how to prove \"done\")",
+    "## Constraints & Guardrails",
     "## Dependency Preconditions",
     "## Task Table (single source of truth)",
     "## Test Plan",
+    "## Idempotence & Recovery",
+)
+
+FORBIDDEN_HEADINGS = (
+    "## Executor Contract",
+    "## Verification Strategy",
+    "## Plan Overview (phases)",
     "## Quality Gates",
+    "## Artifacts & Notes",
 )
 
 REQUIRED_TOP_METADATA = (
-    "- Runtime Task Packets artifact:",
+    "- Runtime Input artifact:",
 )
 
-TABLE_REQUIRED = (
-    "## Dependency Preconditions",
-    "## Task Table (single source of truth)",
-    "## Test Plan",
-    "## Quality Gates",
-)
-
-ANCHOR_PATTERN = re.compile(r"[^`\s]+:\d+")
-COMMAND_PATTERN = re.compile(r"`[^`]+`")
-VAGUE_TASK_PATTERN = re.compile(
-    r"\b(investigate|review|consider|look at|think about|explore)\b", re.IGNORECASE
-)
-PLACEHOLDER_PATTERN = re.compile(r"<[^>]+>")
-REQ_ID_PATTERN = re.compile(r"^R\d+$")
-SCENARIO_ID_PATTERN = re.compile(r"^S\d+$")
-TASK_REF_PATTERN = re.compile(r"^P\d+-T\d+$")
-TEST_PRIORITIES = {"P0", "P1", "P2"}
-TEST_PLAN_REQUIRED_COLUMNS = (
-    "Scenario ID",
+TASK_HEADERS = [
+    "Status",
+    "Phase #",
+    "Task #",
+    "Type",
     "Req IDs",
+    "File Anchors",
+    "Command",
+    "Expected Output",
+    "Action",
+]
+
+TEST_PLAN_HEADERS = [
+    "Scenario ID",
     "Priority",
     "Given",
     "When",
     "Then",
     "Evidence Command",
     "Task Ref",
-)
+]
+
+TASK_TYPES = {"Code", "Read", "Action", "Test", "Gate", "Human"}
+VALID_STATUS = {"", "@", "X"}
+TEST_PRIORITIES = {"P0", "P1", "P2"}
 MAX_BDD_STEP_LENGTH = 180
 
 
@@ -63,44 +82,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def find_heading_index(lines: list[str], heading_prefix: str) -> int:
-    for idx, line in enumerate(lines):
-        if line.strip().startswith(heading_prefix):
-            return idx
-    return -1
-
-
-def extract_section(lines: list[str], heading_prefix: str) -> list[str]:
-    start = find_heading_index(lines, heading_prefix)
-    if start < 0:
-        return []
-    end = len(lines)
-    for idx in range(start + 1, len(lines)):
-        if lines[idx].startswith("## "):
-            end = idx
+def read_metadata_lines(text: str) -> list[str]:
+    metadata: list[str] = []
+    for line in lines(text):
+        if line.startswith("## "):
             break
-    return lines[start:end]
-
-
-def parse_table_rows(
-    section_lines: list[str],
-) -> tuple[list[str], list[dict[str, str]]]:
-    table_lines = [line for line in section_lines if line.startswith("|")]
-    if len(table_lines) < 3:
-        return [], []
-    headers = [part.strip() for part in table_lines[0].strip().strip("|").split("|")]
-    rows: list[dict[str, str]] = []
-    for line in table_lines[2:]:
-        if not line.strip():
-            continue
-        values = [part.strip() for part in line.strip().strip("|").split("|")]
-        rows.append(dict(zip(headers, values, strict=False)))
-    return headers, rows
-
-
-def value_is_placeholder(value: str) -> bool:
-    stripped = value.strip()
-    return stripped == "" or "<" in stripped or ">" in stripped
+        metadata.append(line)
+    return metadata
 
 
 def validate_required_headings(text: str) -> list[str]:
@@ -111,259 +99,213 @@ def validate_required_headings(text: str) -> list[str]:
     return errors
 
 
-def validate_required_tables(lines: list[str]) -> list[str]:
+def validate_forbidden_headings(text: str) -> list[str]:
     errors: list[str] = []
-    for heading in TABLE_REQUIRED:
-        section = extract_section(lines, heading)
-        headers, rows = parse_table_rows(section)
-        if not headers or not rows:
-            errors.append(f"Missing or empty table for section: {heading}")
-            continue
-        if not any(
-            not any(value_is_placeholder(v) for v in row.values()) for row in rows
-        ):
-            errors.append(f"Section table contains only placeholder rows: {heading}")
+    for heading in FORBIDDEN_HEADINGS:
+        if heading in text:
+            errors.append(f"Legacy heading must not appear: {heading}")
     return errors
 
 
-def validate_top_metadata_placeholders(lines: list[str]) -> list[str]:
+def validate_top_metadata(text: str) -> list[str]:
+    metadata_lines = read_metadata_lines(text)
+    metadata_text = "\n".join(metadata_lines)
     errors: list[str] = []
-    top_slice = lines[:24]
-    for idx, line in enumerate(top_slice, start=1):
-        if PLACEHOLDER_PATTERN.search(line):
-            errors.append(
-                f"Top metadata still contains placeholder at line {idx}: {line.strip()}"
-            )
-        if "<timestamp>" in line:
-            errors.append(
-                f"Top metadata still contains <timestamp> token at line {idx}: {line.strip()}"
-            )
-    return errors
-
-
-def validate_required_top_metadata(lines: list[str]) -> list[str]:
-    errors: list[str] = []
-    top_slice = lines[:24]
-    top_text = "\n".join(top_slice)
     for required_line in REQUIRED_TOP_METADATA:
-        if required_line not in top_text:
+        if required_line not in metadata_text:
             errors.append(
                 f"Top metadata is missing required artifact reference: {required_line}"
             )
-    return errors
-
-
-def validate_task_table(lines: list[str]) -> list[str]:
-    errors: list[str] = []
-    section = extract_section(lines, "## Task Table (single source of truth)")
-    _, rows = parse_table_rows(section)
-    if not rows:
-        return ["Task table is missing rows."]
-
-    for row in rows:
-        description = row.get("Description", "").strip()
-        if value_is_placeholder(description):
-            errors.append("Task row has placeholder or empty description.")
+    if "execplan-task-packets.json" in metadata_text:
+        errors.append("Top metadata must not reference `execplan-task-packets.json`.")
+    for index, line in enumerate(metadata_lines, start=1):
+        if not line.strip():
             continue
-
-        has_anchor = bool(ANCHOR_PATTERN.search(description))
-        has_command = bool(COMMAND_PATTERN.search(description))
-        if not has_anchor and not has_command:
+        if is_placeholder(line):
             errors.append(
-                f"Task description lacks explicit file anchor or command: {description}"
-            )
-
-        if VAGUE_TASK_PATTERN.search(description) and not (has_anchor or has_command):
-            errors.append(
-                f"Task uses vague action without concrete execution cues: {description}"
-            )
-
-    return errors
-
-
-def parse_requirement_ids(lines: list[str]) -> set[str]:
-    requirement_section = extract_section(lines, "## Requirements Freeze")
-    requirement_ids: set[str] = set()
-    for line in requirement_section:
-        match = re.match(r"^\s*-\s*(R\d+)\s*:", line)
-        if match:
-            requirement_ids.add(match.group(1))
-    return requirement_ids
-
-
-def parse_task_refs(lines: list[str]) -> set[str]:
-    task_section = extract_section(lines, "## Task Table (single source of truth)")
-    _, rows = parse_table_rows(task_section)
-    refs: set[str] = set()
-    for row in rows:
-        phase = row.get("Phase #", "").strip()
-        task = row.get("Task #", "").strip()
-        if value_is_placeholder(phase) or value_is_placeholder(task):
-            continue
-        refs.add(f"P{phase}-T{task}")
-    return refs
-
-
-def split_csv_tokens(raw: str) -> list[str]:
-    return [token for token in re.split(r"[\s,]+", raw.strip()) if token]
-
-
-def format_scenario_label(scenario_id: str) -> str:
-    return scenario_id or "<missing>"
-
-
-def validate_test_plan_columns(headers: list[str]) -> list[str]:
-    missing_columns = [
-        name for name in TEST_PLAN_REQUIRED_COLUMNS if name not in headers
-    ]
-    if not missing_columns:
-        return []
-    return [
-        "Test Plan table is missing required column(s): " + ", ".join(missing_columns)
-    ]
-
-
-def validate_test_plan_req_ids(
-    scenario_label: str, req_ids_value: str, requirement_ids: set[str]
-) -> list[str]:
-    errors: list[str] = []
-    req_ids = split_csv_tokens(req_ids_value)
-    if not req_ids:
-        return [f"Test Plan scenario `{scenario_label}` is missing Req IDs."]
-
-    for req_id in req_ids:
-        if not REQ_ID_PATTERN.match(req_id):
-            errors.append(
-                f"Test Plan scenario `{scenario_label}` has invalid Req ID token: {req_id}"
-            )
-            continue
-        if requirement_ids and req_id not in requirement_ids:
-            errors.append(
-                f"Test Plan scenario `{scenario_label}` references unknown requirement ID: {req_id}"
+                f"Top metadata still contains placeholder content at line {index}: {line.strip()}"
             )
     return errors
 
 
-def validate_test_plan_bdd_steps(
-    scenario_label: str, given: str, when: str, then: str
-) -> list[str]:
+def validate_success_criteria(text: str) -> list[str]:
+    section = read_section(text, "## Success Criteria (how to prove \"done\")")
+    bullet_lines = [line.strip() for line in lines(section) if line.strip().startswith("-")]
     errors: list[str] = []
-    for field_name, field_value in (("Given", given), ("When", when), ("Then", then)):
-        if value_is_placeholder(field_value):
-            errors.append(
-                f"Test Plan scenario `{scenario_label}` is missing `{field_name}`."
-            )
-            continue
-        if len(field_value) > MAX_BDD_STEP_LENGTH:
-            errors.append(
-                f"Test Plan scenario `{scenario_label}` `{field_name}` exceeds {MAX_BDD_STEP_LENGTH} characters."
-            )
+    if not bullet_lines:
+        return ["Success Criteria must include checklist bullets and a Non-Goals line."]
+    if "smoke" not in section.lower():
+        errors.append("Success Criteria must include a smoke verification criterion.")
+    if not any(line.startswith("- [ ]") and not is_placeholder(line) for line in bullet_lines):
+        errors.append("Success Criteria must include at least one concrete checklist item.")
+    non_goals_lines = [line for line in bullet_lines if line.startswith("- Non-Goals:")]
+    if not non_goals_lines:
+        errors.append("Success Criteria must include a `- Non-Goals:` line.")
+    elif is_placeholder(non_goals_lines[0]):
+        errors.append("Success Criteria `Non-Goals` must be concrete.")
     return errors
 
 
-def validate_test_plan_evidence_command(
-    scenario_label: str, evidence_cmd: str
-) -> list[str]:
-    if not value_is_placeholder(evidence_cmd) and COMMAND_PATTERN.search(evidence_cmd):
-        return []
-    return [
-        f"Test Plan scenario `{scenario_label}` must include a concrete backticked Evidence Command."
-    ]
-
-
-def validate_test_plan_task_refs(
-    scenario_label: str, task_ref_value: str, task_refs: set[str]
-) -> list[str]:
-    errors: list[str] = []
-    task_refs_for_row = split_csv_tokens(task_ref_value)
-    if not task_refs_for_row:
-        return [f"Test Plan scenario `{scenario_label}` is missing Task Ref mapping."]
-
-    for task_ref in task_refs_for_row:
-        if not TASK_REF_PATTERN.match(task_ref):
-            errors.append(
-                f"Test Plan scenario `{scenario_label}` has invalid Task Ref format: {task_ref}"
-            )
-            continue
-        if task_refs and task_ref not in task_refs:
-            errors.append(
-                f"Test Plan scenario `{scenario_label}` references unknown Task Ref: {task_ref}"
-            )
-    return errors
-
-
-def is_smoke_p0(
-    priority: str, scenario_id: str, given: str, when: str, then: str
-) -> bool:
-    if priority != "P0":
-        return False
-    row_text = " ".join((scenario_id, given, when, then)).lower()
-    return "smoke" in row_text
-
-
-def validate_test_plan(lines: list[str]) -> list[str]:
-    errors: list[str] = []
-    section = extract_section(lines, "## Test Plan")
-    headers, rows = parse_table_rows(section)
+def validate_dependency_preconditions(text: str) -> list[str]:
+    headers, rows = parse_table(read_section(text, "## Dependency Preconditions"))
     if not headers or not rows:
-        return []
+        return ["Missing or empty table for section: ## Dependency Preconditions"]
+    errors: list[str] = []
+    if not any(not all(is_placeholder(value) for value in row.values()) for row in rows):
+        errors.append("Dependency Preconditions table contains only placeholder rows.")
+    return errors
 
-    errors.extend(validate_test_plan_columns(headers))
-    if errors:
-        return errors
 
-    requirement_ids = parse_requirement_ids(lines)
-    if not requirement_ids:
-        errors.append(
-            "Requirements Freeze must define requirement IDs using bullet keys like `- R1:`."
+def validate_task_table(text: str) -> tuple[list[str], dict[str, set[str]]]:
+    section = read_section(text, "## Task Table (single source of truth)")
+    headers, rows = parse_table(section)
+    errors: list[str] = []
+    if headers != TASK_HEADERS:
+        return (
+            ["Task table columns must exactly match: " + ", ".join(TASK_HEADERS)],
+            {},
         )
+    if not rows:
+        return (["Task table is missing rows."], {})
 
-    task_refs = parse_task_refs(lines)
-    if not task_refs:
-        errors.append(
-            "Task Table must include concrete phase/task rows for Test Plan mapping."
-        )
+    requirement_ids = {item["id"] for item in parse_requirements(read_section(text, "## Requirements Freeze"))}
+    task_requirements: dict[str, set[str]] = {}
+    covered_requirements: set[str] = set()
+    seen_task_refs: set[str] = set()
 
-    smoke_p0_rows = 0
     for row in rows:
-        scenario_id = row.get("Scenario ID", "").strip()
-        scenario_label = format_scenario_label(scenario_id)
-        priority = row.get("Priority", "").strip().upper()
-        given = row.get("Given", "").strip()
-        when = row.get("When", "").strip()
-        then = row.get("Then", "").strip()
-        req_ids_value = row.get("Req IDs", "").strip()
+        status = row["Status"].strip()
+        if status not in VALID_STATUS:
+            errors.append(f"Invalid task status value: {status}")
 
-        if value_is_placeholder(scenario_id) or not SCENARIO_ID_PATTERN.match(
-            scenario_id
-        ):
+        try:
+            phase_number = int(row["Phase #"].strip())
+            task_number = int(row["Task #"].strip())
+        except ValueError:
+            errors.append(
+                f"Task row must include numeric `Phase #` and `Task #`: {row}"
+            )
+            continue
+
+        row_task_ref = task_ref(phase_number, task_number)
+        if row_task_ref in seen_task_refs:
+            errors.append(f"Duplicate Task Ref detected: {row_task_ref}")
+        seen_task_refs.add(row_task_ref)
+
+        task_type = row["Type"].strip()
+        if task_type not in TASK_TYPES:
+            errors.append(f"Task `{row_task_ref}` has invalid Type: {task_type}")
+
+        req_ids = split_csv_tokens(row["Req IDs"])
+        if not req_ids:
+            errors.append(f"Task `{row_task_ref}` must include at least one Req ID.")
+        for req_id in req_ids:
+            if not REQ_ID_PATTERN.fullmatch(req_id):
+                errors.append(f"Task `{row_task_ref}` has invalid Req ID token: {req_id}")
+            elif requirement_ids and req_id not in requirement_ids:
+                errors.append(
+                    f"Task `{row_task_ref}` references unknown requirement ID: {req_id}"
+                )
+        covered_requirements.update(req_ids)
+        task_requirements[row_task_ref] = set(req_ids)
+
+        file_anchors = split_csv_tokens(row["File Anchors"])
+        for anchor in file_anchors:
+            if not ANCHOR_PATTERN.fullmatch(anchor):
+                errors.append(f"Task `{row_task_ref}` has invalid file anchor: {anchor}")
+
+        command = normalize_cell(row["Command"])
+        has_command = not is_na(command) and not is_placeholder(command)
+        if not file_anchors and not has_command:
+            errors.append(
+                f"Task `{row_task_ref}` must include at least one concrete file anchor or command."
+            )
+
+        if is_placeholder(row["Expected Output"]):
+            errors.append(f"Task `{row_task_ref}` is missing `Expected Output`.")
+        if is_placeholder(row["Action"]):
+            errors.append(f"Task `{row_task_ref}` is missing `Action`.")
+
+    for requirement_id in sorted(requirement_ids - covered_requirements):
+        errors.append(
+            f"Requirement `{requirement_id}` is not covered by any task row."
+        )
+
+    return errors, task_requirements
+
+
+def validate_test_plan(text: str, task_requirements: dict[str, set[str]]) -> list[str]:
+    section = read_section(text, "## Test Plan")
+    headers, rows = parse_table(section)
+    errors: list[str] = []
+    if headers != TEST_PLAN_HEADERS:
+        return ["Test Plan columns must exactly match: " + ", ".join(TEST_PLAN_HEADERS)]
+    if not rows:
+        return ["Test Plan is missing rows."]
+
+    covered_requirements: set[str] = set()
+    smoke_p0_rows = 0
+
+    for row in rows:
+        scenario_id = row["Scenario ID"].strip()
+        priority = row["Priority"].strip().upper()
+        given = row["Given"].strip()
+        when = row["When"].strip()
+        then = row["Then"].strip()
+        evidence_command = normalize_cell(row["Evidence Command"])
+        task_refs = split_csv_tokens(row["Task Ref"])
+
+        if not scenario_id.startswith("S") or not scenario_id[1:].isdigit():
             errors.append(
                 f"Test Plan scenario must use a concrete `Scenario ID` like `S1`: {scenario_id}"
             )
-
-        errors.extend(
-            validate_test_plan_req_ids(scenario_label, req_ids_value, requirement_ids)
-        )
-
         if priority not in TEST_PRIORITIES:
             errors.append(
-                f"Test Plan scenario `{scenario_label}` has invalid Priority: {priority}"
+                f"Test Plan scenario `{scenario_id or '<missing>'}` has invalid Priority: {priority}"
             )
 
-        errors.extend(validate_test_plan_bdd_steps(scenario_label, given, when, then))
-        errors.extend(
-            validate_test_plan_evidence_command(
-                scenario_label, row.get("Evidence Command", "").strip()
-            )
-        )
-        errors.extend(
-            validate_test_plan_task_refs(
-                scenario_label, row.get("Task Ref", "").strip(), task_refs
-            )
-        )
+        for field_name, field_value in (("Given", given), ("When", when), ("Then", then)):
+            if is_placeholder(field_value):
+                errors.append(
+                    f"Test Plan scenario `{scenario_id or '<missing>'}` is missing `{field_name}`."
+                )
+            elif len(field_value) > MAX_BDD_STEP_LENGTH:
+                errors.append(
+                    f"Test Plan scenario `{scenario_id or '<missing>'}` `{field_name}` exceeds {MAX_BDD_STEP_LENGTH} characters."
+                )
 
-        if is_smoke_p0(priority, scenario_id, given, when, then):
+        if is_na(evidence_command) or is_placeholder(evidence_command):
+            errors.append(
+                f"Test Plan scenario `{scenario_id or '<missing>'}` must include a concrete Evidence Command."
+            )
+
+        if not task_refs:
+            errors.append(
+                f"Test Plan scenario `{scenario_id or '<missing>'}` is missing Task Ref mapping."
+            )
+        for row_task_ref in task_refs:
+            if not TASK_REF_PATTERN.fullmatch(row_task_ref):
+                errors.append(
+                    f"Test Plan scenario `{scenario_id or '<missing>'}` has invalid Task Ref format: {row_task_ref}"
+                )
+                continue
+            if row_task_ref not in task_requirements:
+                errors.append(
+                    f"Test Plan scenario `{scenario_id or '<missing>'}` references unknown Task Ref: {row_task_ref}"
+                )
+                continue
+            covered_requirements.update(task_requirements[row_task_ref])
+
+        if priority == "P0" and "smoke" in " ".join((scenario_id, given, when, then)).lower():
             smoke_p0_rows += 1
+
+    all_requirement_ids = {
+        item["id"] for item in parse_requirements(read_section(text, "## Requirements Freeze"))
+    }
+    for requirement_id in sorted(all_requirement_ids - covered_requirements):
+        errors.append(
+            f"Requirement `{requirement_id}` is not covered by any Test Plan scenario through Task Ref mapping."
+        )
 
     if smoke_p0_rows == 0:
         errors.append(
@@ -373,28 +315,48 @@ def validate_test_plan(lines: list[str]) -> list[str]:
     return errors
 
 
-def validate_smoke_gate(lines: list[str]) -> list[str]:
-    errors: list[str] = []
+def validate_runtime_input(execplan: Path) -> list[str]:
+    runtime_input = execplan.parent / "workspace" / "execplan-runtime-input.json"
+    if not runtime_input.exists():
+        return [
+            f"Missing runtime input artifact: {runtime_input}"
+        ]
 
-    success_section = extract_section(lines, "## Success Criteria")
-    success_text = "\n".join(success_section).lower()
-    if "smoke" not in success_text:
+    try:
+        payload = json.loads(runtime_input.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"Runtime input artifact is not valid JSON: {exc}"]
+
+    errors: list[str] = []
+    required_keys = {
+        "schemaVersion",
+        "generated",
+        "editPolicy",
+        "generatedAt",
+        "sourceExecplan",
+        "requirements",
+        "tasks",
+        "verificationScenarios",
+    }
+    missing = sorted(required_keys - payload.keys())
+    if missing:
         errors.append(
-            "Success Criteria section must include a smoke command criterion."
+            "Runtime input artifact is missing required keys: " + ", ".join(missing)
         )
 
-    quality_section = extract_section(lines, "## Quality Gates")
-    _, rows = parse_table_rows(quality_section)
-    smoke_rows = [row for row in rows if row.get("Gate", "").strip().lower() == "smoke"]
-    if not smoke_rows:
-        errors.append("Quality Gates table must include a Smoke row.")
-    else:
-        for row in smoke_rows:
-            command = row.get("Command", "").strip()
-            if value_is_placeholder(command):
-                errors.append(
-                    "Quality Gates Smoke row must include a concrete command."
-                )
+    if "taskPackets" in payload:
+        errors.append("Runtime input artifact must not use the legacy `taskPackets` key.")
+
+    if not isinstance(payload.get("requirements"), list):
+        errors.append("Runtime input artifact `requirements` must be a list.")
+    if not isinstance(payload.get("tasks"), list):
+        errors.append("Runtime input artifact `tasks` must be a list.")
+    if not isinstance(payload.get("verificationScenarios"), list):
+        errors.append("Runtime input artifact `verificationScenarios` must be a list.")
+
+    for task in payload.get("tasks", []):
+        if "adrThreshold" in task:
+            errors.append("Runtime input tasks must not contain injected `adrThreshold` data.")
 
     return errors
 
@@ -412,16 +374,17 @@ def main() -> int:
     args = parse_args()
     execplan = Path(args.execplan).resolve()
     text = execplan.read_text(encoding="utf-8")
-    lines = text.splitlines()
 
     errors: list[str] = []
     errors.extend(validate_required_headings(text))
-    errors.extend(validate_required_tables(lines))
-    errors.extend(validate_required_top_metadata(lines))
-    errors.extend(validate_top_metadata_placeholders(lines))
-    errors.extend(validate_task_table(lines))
-    errors.extend(validate_test_plan(lines))
-    errors.extend(validate_smoke_gate(lines))
+    errors.extend(validate_forbidden_headings(text))
+    errors.extend(validate_top_metadata(text))
+    errors.extend(validate_success_criteria(text))
+    errors.extend(validate_dependency_preconditions(text))
+    task_errors, task_requirements = validate_task_table(text)
+    errors.extend(task_errors)
+    errors.extend(validate_test_plan(text, task_requirements))
+    errors.extend(validate_runtime_input(execplan))
 
     output_path = (
         Path(args.output).resolve()
@@ -434,6 +397,7 @@ def main() -> int:
         for error in errors:
             print(error)
         return 1
+
     print(f"ExecPlan validation passed: {output_path}")
     return 0
 

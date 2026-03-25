@@ -1,12 +1,12 @@
-# Context Pack template (for low-reasoning executors)
+# Context Pack template (durable execution context)
 
-The Context Pack is a durable, reusable artifact that minimizes repeat discovery. It is initialized once per change request and updated when requirements or evidence change.
+The Context Pack is the durable context artifact. It minimizes repeat discovery and remains the canonical home for repo facts, verification posture, command inventory, traceability, and line-anchored change surface information.
 
 Use it to capture:
 
-- The _minimum repo facts_ required to execute changes safely.
-- A _line-numbered code map_ pointing to exactly where work will happen.
-- Exact commands and expected outputs for checks/tests/quality gates.
+- The minimum repo facts required to execute changes safely.
+- A line-numbered code map that points to the exact change surface.
+- Verification baseline and execution commands without duplicating them into the living ExecPlan.
 
 ## Template
 
@@ -21,7 +21,7 @@ Use it to capture:
 - Workspace root: `<workspace-root>`
 - Related links: <issue/PR/spec URLs or file paths>
 
-## Change Brief (1–3 paragraphs)
+## Change Brief (1-3 paragraphs)
 
 <Restate the user-visible outcome, scope, and constraints in plain language.>
 
@@ -42,23 +42,23 @@ Use it to capture:
 
 ## Guardrails (must-follow)
 
-- Quality gates: <commands, thresholds>
-- Repo rules: <must-follow rule summary>
-- Prohibited actions: <if relevant>
+- Repository rules:
+- Security/privacy constraints:
+- Prohibited actions:
 
 ## Research Scope & Recency Policy
 
 - Online research allowed: <yes|no>
 - Approved source types: <official docs/release notes/repos/etc>
 - Approved domains/APIs: <list>
-- Recency expectation: <e.g., <= 12 months for volatile tooling claims>
-- Exception handling: <how stale/undated sources are justified>
+- Recency expectation: <e.g. <= 12 months for volatile tooling claims>
+- Exception handling: <how stale or undated sources are justified>
 
 ## Evidence Inventory
 
-| Evidence ID | Type          | Source        | Published                      | Retrieved    | Trust rationale |
-| ----------- | ------------- | ------------- | ------------------------------ | ------------ | --------------- |
-| E1          | <source-type> | <url-or-path> | <YYYY-MM-DD or undated:reason> | <YYYY-MM-DD> | <why trusted>   |
+| Evidence ID | Type | Source | Published | Retrieved | Trust rationale |
+| ----------- | ---- | ------ | --------- | --------- | --------------- |
+| E1          | <source-type> | <url-or-path> | <YYYY-MM-DD or undated:reason> | <YYYY-MM-DD> | <why trusted> |
 
 ## Verification Baseline & Strategy
 
@@ -71,15 +71,15 @@ Use it to capture:
 
 ## Established Library Comparison (required for greenfield; optional for brownfield)
 
-| Option        | Maturity signal              | Last release/reference | Compatibility | Reuse decision          | Evidence IDs |
-| ------------- | ---------------------------- | ---------------------- | ------------- | ----------------------- | ------------ |
-| <lib-or-tool> | <stars/adoption/maintenance> | <YYYY-MM-DD>           | <fit summary> | <adopt/reject + reason> | <E1,E2>      |
+| Option | Maturity signal | Last release/reference | Compatibility | Reuse decision | Evidence IDs |
+| ------ | ---------------- | ---------------------- | ------------- | -------------- | ------------ |
+| <lib-or-tool> | <signal> | <YYYY-MM-DD> | <fit summary> | <adopt or reject + reason> | <E1,E2> |
 
 ## Existing Change Surface (required for brownfield; optional for greenfield)
 
-| Area   | File anchor           | Current behavior | Integration concern | Evidence IDs |
-| ------ | --------------------- | ---------------- | ------------------- | ------------ |
-| <area> | `path/to/file.py:123` | <summary>        | <risk/constraint>   | <E3>         |
+| Area | File anchor | Current behavior | Integration concern | Evidence IDs |
+| ---- | ----------- | ---------------- | ------------------- | ------------ |
+| <area> | `path/to/file.py:123` | <summary> | <risk or constraint> | <E3> |
 
 ## Repo Facts (execution-relevant only)
 
@@ -91,35 +91,35 @@ Use it to capture:
 
 ## Dependency Preconditions
 
-| Dependency | Purpose      | Check command | Install command | Source                         | Expected success signal |
-| ---------- | ------------ | ------------- | --------------- | ------------------------------ | ----------------------- |
-| <name>     | <why needed> | `<command>`   | `<command>`     | <registry/repo/package source> | <signal>                |
+| Dependency | Purpose | Check command | Install command | Source | Expected success signal |
+| ---------- | ------- | ------------- | --------------- | ------ | ----------------------- |
+| <name> | <why needed> | `<command>` | `<command>` | <registry/repo/package source> | <signal> |
 
 ## Execution Command Catalog
 
-| Purpose                         | Command     | Expected success signal |
-| ------------------------------- | ----------- | ----------------------- |
-| Install/setup                   | `<command>` | exit 0                  |
-| Dependency check                | `<command>` | dependency present      |
-| Dependency install (if missing) | `<command>` | dependency installed    |
-| Smoke test (mandatory)          | `<command>` | smoke scenario passes   |
-| Run                             | `<command>` | expected startup signal |
-| Tests                           | `<command>` | all targeted tests pass |
-| Quality gate                    | `<command>` | gate passes             |
+| Purpose | Command | Expected success signal |
+| ------- | ------- | ----------------------- |
+| Install/setup | `<command>` | exit 0 |
+| Dependency check | `<command>` | dependency present |
+| Dependency install (if missing) | `<command>` | dependency installed |
+| Smoke test (mandatory) | `<command>` | smoke scenario passes |
+| Run | `<command>` | expected startup signal |
+| Tests | `<command>` | targeted tests pass |
+| Quality gate | `<command>` | gate passes |
 
 ## Code Map (line-numbered)
 
 List only the places the executor must touch. Prefer `path:line` anchors.
 
-| Area | File anchor           | What it contains | Why it matters | Planned change |
-| ---- | --------------------- | ---------------- | -------------- | -------------- |
-| <x>  | `path/to/file.py:123` | <summary>        | <reason>       | <edit intent>  |
+| Area | File anchor | What it contains | Why it matters | Planned change |
+| ---- | ----------- | ---------------- | -------------- | -------------- |
+| <x> | `path/to/file.py:123` | <summary> | <reason> | <edit intent> |
 
 ## Requirement to Evidence Traceability
 
-| Requirement ID | Requirement        | Evidence IDs | Context section(s) | Planned ExecPlan linkage |
-| -------------- | ------------------ | ------------ | ------------------ | ------------------------ |
-| R1             | <requirement text> | <E1,E2>      | <section names>    | <phase/task ref>         |
+| Requirement ID | Requirement | Evidence IDs | Context section(s) | Planned task refs |
+| -------------- | ----------- | ------------ | ------------------ | ----------------- |
+| R1 | <requirement text> | <E1,E2> | <section names> | <P1-T1,P2-T4> |
 
 ## Contracts & Interfaces
 
@@ -131,7 +131,7 @@ Only include what the change touches:
 
 ## Risk Register
 
-| Risk   | Impact   | Mitigation   | Verification command | Evidence IDs |
-| ------ | -------- | ------------ | -------------------- | ------------ |
-| <risk> | <impact> | <mitigation> | `<command>`          | <E4>         |
+| Risk | Impact | Mitigation | Verification command | Evidence IDs |
+| ---- | ------ | ---------- | -------------------- | ------------ |
+| <risk> | <impact> | <mitigation> | `<command>` | <E4> |
 ```

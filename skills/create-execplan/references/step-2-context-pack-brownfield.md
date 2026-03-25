@@ -44,5 +44,5 @@ Objective: map the smallest safe change path in an existing codebase.
 ## Done when
 
 - `Existing Change Surface`, `Code Map`, and `Risk Register` describe a safe, minimal, line-anchored path.
-- Brownfield verification scenario and dependency preconditions are explicit.
+- Brownfield verification scenario and dependency preconditions are explicit in the Context Pack.
 - Integration and verification risks are explicitly covered.

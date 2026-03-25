@@ -26,7 +26,7 @@ Objective: capture deterministic context artifacts that both project modes requi
    - `Risk Register`
 6. Update `workspace/context-codemap.md` with all file anchors from `Code Map (line-numbered)`.
 7. Ensure every requirement has traceability links:
-   - Requirement -> evidence IDs -> expected ExecPlan section/task coverage.
+   - Requirement -> evidence IDs -> expected ExecPlan task coverage.
 8. Capture recency metadata for external sources in `workspace/context-evidence.json`:
    - `published_at`
    - `retrieved_at`
@@ -34,6 +34,9 @@ Objective: capture deterministic context artifacts that both project modes requi
    - `source_type`
 9. Include only evidence that is directly used by requirements or risk decisions.
 10. Ensure `Execution Command Catalog` includes dependency check command(s), dependency install command(s) with source(s), and a mandatory smoke test command with expected success signal.
+11. Keep the placement rules aligned with [information-placement.md](information-placement.md):
+   - Context Pack owns verification posture, command inventory, evidence traceability, code map, and risk register.
+   - ExecPlan owns execution tasks, progress, decisions, findings, and scenario verification coverage.
 
 ## Required online research handling (when permitted)
 

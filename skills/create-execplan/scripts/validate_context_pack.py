@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Validate Context Pack completeness for create-execplan."""
 
 from __future__ import annotations
@@ -113,6 +112,13 @@ def parse_row(line: str) -> list[str]:
     return [part.strip() for part in line.strip().strip("|").split("|")]
 
 
+def strip_code_markers(value: str) -> str:
+    stripped = value.strip()
+    if stripped.startswith("`") and stripped.endswith("`") and len(stripped) >= 2:
+        return stripped[1:-1].strip()
+    return stripped
+
+
 def find_heading_index(lines: list[str], heading: str) -> int:
     for idx, line in enumerate(lines):
         if line.strip() == heading:
@@ -186,7 +192,7 @@ def validate_code_anchors(lines: list[str], mode: str) -> list[str]:
 def validate_anchor_rows(rows: list[dict[str, str]], section_name: str) -> list[str]:
     errors: list[str] = []
     for row in rows:
-        anchor = row.get("File anchor", "")
+        anchor = strip_code_markers(row.get("File anchor", ""))
         if not ANCHOR_PATTERN.match(anchor):
             errors.append(f"Invalid file anchor in {section_name}: {anchor}")
     return errors

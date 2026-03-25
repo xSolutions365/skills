@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "2.0",
+  "generated": true,
+  "editPolicy": "do-not-edit",
+  "generatedAt": "2026-04-01T09:00:00Z",
+  "sourceExecplan": "/fixture/finalized-execplan.md",
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Keep the ExecPlan as the living human document."
+    },
+    {
+      "id": "R2",
+      "text": "Generate a narrow runtime input artifact from explicit task rows."
+    },
+    {
+      "id": "R3",
+      "text": "Remove hardcoded python3 usage from shell-facing invocations."
+    }
+  ],
+  "tasks": [
+    {
+      "taskRef": "P1-T1",
+      "status": "outstanding",
+      "phaseNumber": 1,
+      "taskNumber": 1,
+      "type": "Read",
+      "requirementIds": [
+        "R1"
+      ],
+      "fileAnchors": [
+        "skills/create-execplan/references/information-placement.md:1"
+      ],
+      "command": "",
+      "expectedOutput": "placement rules understood",
+      "action": "Read the canonical information placement rules before editing the plan contract."
+    },
+    {
+      "taskRef": "P2-T2",
+      "status": "outstanding",
+      "phaseNumber": 2,
+      "taskNumber": 2,
+      "type": "Code",
+      "requirementIds": [
+        "R2"
+      ],
+      "fileAnchors": [
+        "skills/create-execplan/scripts/render_execplan_runtime_input.py:1"
+      ],
+      "command": "",
+      "expectedOutput": "runtime input derives from explicit task columns",
+      "action": "Update the renderer to serialize only derived task and scenario fields."
+    },
+    {
+      "taskRef": "P2-T3",
+      "status": "outstanding",
+      "phaseNumber": 2,
+      "taskNumber": 3,
+      "type": "Code",
+      "requirementIds": [
+        "R3"
+      ],
+      "fileAnchors": [
+        "skills/create-execplan/scripts/scaffold_execplan.py:1"
+      ],
+      "command": "",
+      "expectedOutput": "scaffold leaves runtime input ungenerated until finalization",
+      "action": "Update the scaffold flow to stop before runtime-input generation."
+    },
+    {
+      "taskRef": "P3-T4",
+      "status": "outstanding",
+      "phaseNumber": 3,
+      "taskNumber": 4,
+      "type": "Test",
+      "requirementIds": [
+        "R1",
+        "R2",
+        "R3"
+      ],
+      "fileAnchors": [],
+      "command": "bash tests/run_create_execplan_helpers.sh",
+      "expectedOutput": "create-execplan helper checks passed",
+      "action": "Run the resolved-runtime helper smoke checks."
+    }
+  ],
+  "verificationScenarios": [
+    {
+      "scenarioId": "S1",
+      "priority": "P0",
+      "given": "finalized example artifacts exist",
+      "when": "the helper smoke checks run through the resolved runtime",
+      "then": "the create-execplan helper suite passes",
+      "evidenceCommand": "bash tests/run_create_execplan_helpers.sh",
+      "taskRefs": [
+        "P3-T4"
+      ]
+    },
+    {
+      "scenarioId": "S2",
+      "priority": "P1",
+      "given": "the runtime renderer reads the structured task rows",
+      "when": "the helper fixture check rerenders the runtime input",
+      "then": "the runtime artifact contains only derived structure",
+      "evidenceCommand": "bash tests/run_create_execplan_helpers.sh",
+      "taskRefs": [
+        "P2-T2",
+        "P2-T3"
+      ]
+    }
+  ]
+}
