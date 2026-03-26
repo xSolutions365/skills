@@ -120,7 +120,7 @@ def render_context_template(
     rendered = (
         template.replace("<short title>", "Context Pack")
         .replace("<YYYY-MM-DD>", date_str)
-        .replace("<absolute-or-repo-relative-path>", repo_root_value)
+        .replace("<repo-relative-path>", repo_root_value)
         .replace("<path-or-.>", target_path)
         .replace("<artifact-root>", artifact_root_value)
         .replace("<workspace-root>", workspace_root_value)

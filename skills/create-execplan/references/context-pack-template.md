@@ -14,7 +14,7 @@ Use it to capture:
 # Context Pack: <short title>
 
 - Created: <YYYY-MM-DD>
-- Repo root: `<absolute-or-repo-relative-path>`
+- Repo root: `<repo-relative-path>`
 - Target path: `<path-or-.>`
 - Project mode: `<greenfield|brownfield>`
 - Artifact root: `<artifact-root>`
@@ -109,7 +109,7 @@ Use it to capture:
 
 ## Code Map (line-numbered)
 
-List only the places the executor must touch. Prefer `path:line` anchors.
+List only the places the executor must touch. Prefer repo-relative `path:line` anchors for in-repo files.
 
 | Area | File anchor | What it contains | Why it matters | Planned change |
 | ---- | ----------- | ---------------- | -------------- | -------------- |

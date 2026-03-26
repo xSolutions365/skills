@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 from pathlib import Path
 
 from execplan_common import (
@@ -76,13 +77,13 @@ TEST_PLAN_HEADERS = [
     "Task Ref",
 ]
 
-TASK_TYPES = {"Code", "Read", "Action", "Test", "Gate", "Human"}
+TASK_TYPES = {"Code", "Action", "Test", "Gate"}
 VALID_STATUS = {"", "@", "X"}
 TEST_PRIORITIES = {"P0", "P1", "P2"}
 MAX_BDD_STEP_LENGTH = 180
-TASK_LEVEL_EVIDENCE_EXEMPT_TYPES = {"Read", "Human"}
+TASK_LEVEL_EVIDENCE_EXEMPT_TYPES: set[str] = set()
 BROWNFIELD_REQUIRED_EDIT_TARGET_TYPES = {"Code"}
-BROWNFIELD_REQUIRED_CONTEXT_TYPES = {"Read"}
+BROWNFIELD_REQUIRED_CONTEXT_TYPES: set[str] = set()
 BROWNFIELD_REQUIRED_COMMAND_TYPES = {"Action", "Test", "Gate"}
 
 BROWNFIELD_VAGUE_TEXT_PATTERNS = (
@@ -148,6 +149,24 @@ def read_context_pack_mode(execplan: Path) -> str | None:
     if not match:
         return None
     return match.group(1).strip().lower()
+
+
+def discover_project_root(start_path: Path) -> Path:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=start_path,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return start_path.resolve()
+
+    git_root = result.stdout.strip()
+    if not git_root:
+        return start_path.resolve()
+    return Path(git_root).resolve()
 
 
 def extract_metadata_value(line: str) -> tuple[str, str] | None:
@@ -284,12 +303,25 @@ def is_documentation_only_action(action: str) -> bool:
 
 
 def validate_anchor_list(
-    task_ref_value: str, field_name: str, anchors: list[str]
+    task_ref_value: str,
+    field_name: str,
+    anchors: list[str],
+    project_root: Path | None = None,
 ) -> list[str]:
     errors: list[str] = []
     for anchor in anchors:
         if not ANCHOR_PATTERN.fullmatch(anchor):
             errors.append(f"Task `{task_ref_value}` has invalid {field_name}: {anchor}")
+            continue
+        anchor_path = Path(anchor.rsplit(":", 1)[0])
+        if (
+            project_root is not None
+            and anchor_path.is_absolute()
+            and anchor_path.resolve().is_relative_to(project_root.resolve())
+        ):
+            errors.append(
+                f"Task `{task_ref_value}` must use repo-relative in-repo {field_name}s, not absolute paths: {anchor}"
+            )
     return errors
 
 
@@ -322,9 +354,7 @@ def validate_task_scope(
 ) -> list[str]:
     errors: list[str] = []
 
-    if task_type != "Human" and not any(
-        (edit_targets, supporting_context_anchors, allowed_commands)
-    ):
+    if not any((edit_targets, supporting_context_anchors, allowed_commands)):
         errors.append(
             f"Task `{task_ref_value}` must include at least one concrete edit target, supporting context anchor, or allowed command."
         )
@@ -345,6 +375,11 @@ def validate_task_scope(
     if task_type in BROWNFIELD_REQUIRED_COMMAND_TYPES and not allowed_commands:
         errors.append(
             f"Brownfield task `{task_ref_value}` of type {task_type} must include concrete `Allowed Commands`."
+        )
+
+    if task_type not in TASK_TYPES:
+        errors.append(
+            f"Task `{task_ref_value}` uses unsupported runtime task type: {task_type}"
         )
 
     if (
@@ -368,7 +403,7 @@ def validate_task_scope(
 
 
 def validate_task_table(
-    text: str, project_mode: str | None
+    text: str, project_mode: str | None, project_root: Path
 ) -> tuple[list[str], dict[str, set[str]], dict[str, dict[str, object]]]:
     section = read_section(text, "## Task Table (single source of truth)")
     headers, rows = parse_table(section)
@@ -442,12 +477,17 @@ def validate_task_table(
         expected_output = row["Expected Output"].strip()
         action = row["Action"].strip()
 
-        errors.extend(validate_anchor_list(row_task_ref, "edit target", edit_targets))
+        errors.extend(
+            validate_anchor_list(
+                row_task_ref, "edit target", edit_targets, project_root
+            )
+        )
         errors.extend(
             validate_anchor_list(
                 row_task_ref,
                 "supporting context anchor",
                 supporting_context_anchors,
+                project_root,
             )
         )
         errors.extend(
@@ -602,7 +642,9 @@ def validate_test_plan(
     return errors
 
 
-def validate_runtime_input(execplan: Path, project_mode: str | None) -> list[str]:
+def validate_runtime_input(
+    execplan: Path, project_mode: str | None, project_root: Path
+) -> list[str]:
     runtime_input = execplan.parent / "workspace" / "execplan-runtime-input.json"
     if not runtime_input.exists():
         return [f"Missing runtime input artifact: {runtime_input}"]
@@ -630,6 +672,14 @@ def validate_runtime_input(execplan: Path, project_mode: str | None) -> list[str
 
     if payload.get("schemaVersion") != "3.0":
         errors.append("Runtime input artifact `schemaVersion` must be `3.0`.")
+
+    source_execplan = str(payload.get("sourceExecplan", "")).strip()
+    if source_execplan.startswith("/"):
+        source_execplan_path = Path(source_execplan)
+        if source_execplan_path.resolve().is_relative_to(project_root.resolve()):
+            errors.append(
+                "Runtime input artifact `sourceExecplan` must use a repo-relative in-repo path."
+            )
 
     for legacy_key in ("verificationScenarios", "taskPackets"):
         if legacy_key in payload:
@@ -709,12 +759,17 @@ def validate_runtime_input(execplan: Path, project_mode: str | None) -> list[str
         )
         evidence_commands = evidence_commands if isinstance(evidence_commands, list) else []
 
-        errors.extend(validate_anchor_list(task_ref_value, "edit target", edit_targets))
+        errors.extend(
+            validate_anchor_list(
+                task_ref_value, "edit target", edit_targets, project_root
+            )
+        )
         errors.extend(
             validate_anchor_list(
                 task_ref_value,
                 "supporting context anchor",
                 supporting_context_anchors,
+                project_root,
             )
         )
         errors.extend(
@@ -768,6 +823,7 @@ def main() -> int:
     execplan = Path(args.execplan).resolve()
     text = execplan.read_text(encoding="utf-8")
     project_mode = read_context_pack_mode(execplan)
+    project_root = discover_project_root(execplan.parent)
 
     errors: list[str] = []
     errors.extend(validate_required_headings(text))
@@ -775,10 +831,12 @@ def main() -> int:
     errors.extend(validate_top_metadata(text))
     errors.extend(validate_success_criteria(text))
     errors.extend(validate_dependency_preconditions(text))
-    task_errors, task_requirements, task_index = validate_task_table(text, project_mode)
+    task_errors, task_requirements, task_index = validate_task_table(
+        text, project_mode, project_root
+    )
     errors.extend(task_errors)
     errors.extend(validate_test_plan(text, task_requirements, task_index))
-    errors.extend(validate_runtime_input(execplan, project_mode))
+    errors.extend(validate_runtime_input(execplan, project_mode, project_root))
 
     output_path = (
         Path(args.output).resolve()

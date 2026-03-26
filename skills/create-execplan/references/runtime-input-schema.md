@@ -50,6 +50,8 @@ Each task object must contain only derived execution structure:
 - `verificationCommands` are the commands that directly verify the task's primary completion criteria.
 - `evidenceCommands` collect broader run evidence for later review and comparison.
 - `expectedOutput` must describe an observable completion signal and must not be a placeholder.
+- Runtime tasks must be executable packet work; standalone onboarding or human-only rows do not belong in the runtime artifact.
+- In-repo anchors should stay repo-relative so the package can be replayed in a fresh worktree without localization.
 - A brownfield `Code` task that cannot name concrete `editTargets` is under-scoped and should be blocked during planning rather than deferred to execution.
 
 ## Golden example

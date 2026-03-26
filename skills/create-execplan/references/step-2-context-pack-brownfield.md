@@ -28,7 +28,7 @@ Objective: map the smallest safe change path in an existing codebase.
 8. Populate `Dependency Preconditions` for all external libraries/tools needed by the plan.
 9. Carry the exact brownfield edit surface forward into Step 3:
    - planned `Code` tasks must inherit concrete edit targets from `Existing Change Surface` or `Code Map`
-   - planned `Read` tasks must inherit explicit supporting-context anchors
+   - planned runtime tasks must be directly executable without a standalone onboarding row
    - planned `Action`/`Test`/`Gate` tasks must inherit the exact executable command set they need
 
 ## Required analysis depth
@@ -37,7 +37,8 @@ Objective: map the smallest safe change path in an existing codebase.
 - Include migration/order dependencies when changes must happen in sequence.
 - Include explicit rollback/recovery notes for risky steps.
 - Include targeted verification commands for changed surfaces when introducing net-new checks in brownfield-no-verification mode.
-- Keep task-level rows executable from the packet alone: every Code or Read row needs a line anchor, every executable Action/Test/Gate row needs a concrete command, and any row that still needs repo-wide discovery is too vague and must be split.
+- Keep task-level rows executable from the packet alone: every Code row needs concrete edit targets and local supporting anchors, every executable Action/Test/Gate row needs a concrete command, and any row that still needs repo-wide discovery is too vague and must be split.
+- Do not model standalone `Read` or `Human` rows in brownfield plans; fold read-only onboarding into the first executable task's `Supporting Context Anchors` and rely on harness ADR flow for human approvals.
 
 ## Hard rules
 

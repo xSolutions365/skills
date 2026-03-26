@@ -15,6 +15,7 @@ Verify the plan package is self-contained, validator-clean, and ready for handof
 7. Fail the audit if any validator fails, if required confirmation evidence is missing, or if the runtime input is missing or stale.
 8. For brownfield plans, fail the audit if any task row is still under-specified for packet-only execution.
 9. Fail the audit if the runtime artifact still uses legacy packet fields such as `fileAnchors`, `command`, or `verificationScenarios`.
+10. Fail the audit if any runtime row uses unsupported task kinds, standalone onboarding or human-only tasks, or absolute in-repo anchors.
 
 ## Done when
 

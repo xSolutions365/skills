@@ -50,7 +50,7 @@ Status keys:
 
 Task Types:
 
-- Code, Read, Action, Test, Gate, Human
+- Code, Action, Test, Gate
 
 Use `n/a` when `Edit Targets`, `Supporting Context Anchors`, `Allowed Commands`, `Verification Commands`, or `Evidence Commands` does not apply. Every row must:
 
@@ -59,13 +59,13 @@ Use `n/a` when `Edit Targets`, `Supporting Context Anchors`, `Allowed Commands`,
 - list only commands the executor is allowed to run for that task
 - state the expected output or completion signal
 - avoid implicit discovery
+- keep every runtime row directly executable; do not emit standalone onboarding or human-only rows
 
 | Status | Phase # | Task # | Type | Req IDs | Edit Targets | Supporting Context Anchors | Allowed Commands | Verification Commands | Evidence Commands | Expected Output | Action |
 | ------ | ------- | ------ | ---- | ------- | ------------ | -------------------------- | ---------------- | --------------------- | ----------------- | --------------- | ------ |
-|        | 1       | 1      | Read | R1 | `n/a` | `skills/create-execplan/references/information-placement.md:1`,`skills/create-execplan/references/runtime-input-schema.md:1` | `n/a` | `n/a` | `n/a` | placement and packet contract understood | Read the canonical information placement and runtime packet schema before editing helper contracts. |
-|        | 2       | 2      | Code | R2 | `skills/create-execplan/scripts/render_execplan_runtime_input.py:1`,`skills/create-execplan/scripts/validate_execplan.py:1` | `skills/create-execplan/references/runtime-input-schema.md:1`,`skills/create-execplan/references/step-4-finalize-execplan-workflow.md:1` | `n/a` | `bash tests/run_create_execplan_helpers.sh` | `bash tests/run_create_execplan_helpers.sh` | runtime input emits schema 3.0 explicit task packets and validator enforces the same contract | Update the runtime renderer and validator to use explicit task packet fields instead of legacy runtime keys. |
-|        | 2       | 3      | Code | R1,R3 | `skills/create-execplan/scripts/scaffold_execplan.py:1`,`skills/create-execplan/references/execplan-template.md:1`,`skills/create-execplan/examples/finalized-execplan.md:1` | `skills/create-execplan/references/step-0-preflight-workflow.md:1`,`skills/create-execplan/references/step-2-context-pack-brownfield.md:1`,`skills/create-execplan/examples/finalized-context-pack.md:1` | `n/a` | `bash tests/run_create_execplan_helpers.sh` | `bash tests/run_create_execplan_helpers.sh` | scaffolded plan artifacts and examples use repo-relative metadata and packet-ready brownfield task rows | Update scaffolded metadata and golden examples to use repo-relative in-repo paths and explicit packet columns. |
-|        | 3       | 4      | Test | R1,R2,R3 | `n/a` | `tests/run_create_execplan_helpers.sh:1` | `bash tests/run_create_execplan_helpers.sh` | `bash tests/run_create_execplan_helpers.sh` | `bash tests/run_create_execplan_helpers.sh` | create-execplan helper checks passed | Run the resolved-runtime helper smoke checks. |
+|        | 1       | 1      | Code | R1,R2 | `skills/create-execplan/scripts/render_execplan_runtime_input.py:1`,`skills/create-execplan/scripts/validate_execplan.py:1` | `skills/create-execplan/references/information-placement.md:1`,`skills/create-execplan/references/runtime-input-schema.md:1`,`skills/create-execplan/references/step-4-finalize-execplan-workflow.md:1` | `n/a` | `bash tests/run_create_execplan_helpers.sh` | `bash tests/run_create_execplan_helpers.sh` | runtime input emits schema 3.0 explicit task packets and validator enforces the same contract | Update the runtime renderer and validator to use explicit task packet fields and executable-only task semantics. |
+|        | 1       | 2      | Code | R1,R3 | `skills/create-execplan/scripts/scaffold_execplan.py:1`,`skills/create-execplan/references/execplan-template.md:1`,`skills/create-execplan/examples/finalized-execplan.md:1`,`skills/create-execplan/references/context-pack-template.md:1` | `skills/create-execplan/references/step-0-preflight-workflow.md:1`,`skills/create-execplan/references/step-2-context-pack-brownfield.md:1`,`skills/create-execplan/examples/finalized-context-pack.md:1` | `n/a` | `bash tests/run_create_execplan_helpers.sh` | `bash tests/run_create_execplan_helpers.sh` | scaffolded plan artifacts and examples use repo-relative metadata and executable brownfield task rows | Update scaffolded metadata and golden examples to use repo-relative in-repo paths and executable-only packet columns. |
+|        | 2       | 3      | Test | R1,R2,R3 | `n/a` | `tests/run_create_execplan_helpers.sh:1` | `bash tests/run_create_execplan_helpers.sh` | `bash tests/run_create_execplan_helpers.sh` | `bash tests/run_create_execplan_helpers.sh` | create-execplan helper checks passed | Run the resolved-runtime helper smoke checks. |
 
 ## Progress Log (running)
 
@@ -94,9 +94,9 @@ Use scenario-focused BDD coverage for changed behavior and high-risk regressions
 
 | Scenario ID | Priority | Given | When | Then | Evidence Command | Task Ref |
 | ----------- | -------- | ----- | ---- | ---- | ---------------- | -------- |
-| S1 | P0 | finalized example artifacts exist | the helper smoke checks run through the resolved runtime | the create-execplan helper suite passes | `bash tests/run_create_execplan_helpers.sh` | P3-T4 |
-| S2 | P1 | the runtime renderer and validator read the structured task rows | the helper fixture rerenders the runtime input | the runtime artifact contains only derived explicit packet fields | `bash tests/run_create_execplan_helpers.sh` | P2-T2 |
-| S3 | P1 | scaffolded examples and templates use repo-relative metadata | the helper fixture validates the example package | the example ExecPlan stays packet-executable and validator-clean | `bash tests/run_create_execplan_helpers.sh` | P2-T3 |
+| S1 | P0 | finalized example artifacts exist | the helper smoke checks run through the resolved runtime | the create-execplan helper suite passes | `bash tests/run_create_execplan_helpers.sh` | P2-T3 |
+| S2 | P1 | the runtime renderer and validator read the structured task rows | the helper fixture rerenders the runtime input | the runtime artifact contains only derived explicit packet fields | `bash tests/run_create_execplan_helpers.sh` | P1-T1 |
+| S3 | P1 | scaffolded examples and templates use repo-relative metadata | the helper fixture validates the example package | the example ExecPlan stays packet-executable and validator-clean | `bash tests/run_create_execplan_helpers.sh` | P1-T2 |
 
 ## Idempotence & Recovery
 

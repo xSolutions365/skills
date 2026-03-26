@@ -24,28 +24,9 @@
       "status": "outstanding",
       "phaseNumber": 1,
       "taskNumber": 1,
-      "type": "Read",
-      "requirementIds": [
-        "R1"
-      ],
-      "editTargets": [],
-      "supportingContextAnchors": [
-        "skills/create-execplan/references/information-placement.md:1",
-        "skills/create-execplan/references/runtime-input-schema.md:1"
-      ],
-      "allowedCommands": [],
-      "verificationCommands": [],
-      "evidenceCommands": [],
-      "expectedOutput": "placement and packet contract understood",
-      "action": "Read the canonical information placement and runtime packet schema before editing helper contracts."
-    },
-    {
-      "taskRef": "P2-T2",
-      "status": "outstanding",
-      "phaseNumber": 2,
-      "taskNumber": 2,
       "type": "Code",
       "requirementIds": [
+        "R1",
         "R2"
       ],
       "editTargets": [
@@ -53,6 +34,7 @@
         "skills/create-execplan/scripts/validate_execplan.py:1"
       ],
       "supportingContextAnchors": [
+        "skills/create-execplan/references/information-placement.md:1",
         "skills/create-execplan/references/runtime-input-schema.md:1",
         "skills/create-execplan/references/step-4-finalize-execplan-workflow.md:1"
       ],
@@ -64,13 +46,13 @@
         "bash tests/run_create_execplan_helpers.sh"
       ],
       "expectedOutput": "runtime input emits schema 3.0 explicit task packets and validator enforces the same contract",
-      "action": "Update the runtime renderer and validator to use explicit task packet fields instead of legacy runtime keys."
+      "action": "Update the runtime renderer and validator to use explicit task packet fields and executable-only task semantics."
     },
     {
-      "taskRef": "P2-T3",
+      "taskRef": "P1-T2",
       "status": "outstanding",
-      "phaseNumber": 2,
-      "taskNumber": 3,
+      "phaseNumber": 1,
+      "taskNumber": 2,
       "type": "Code",
       "requirementIds": [
         "R1",
@@ -79,7 +61,8 @@
       "editTargets": [
         "skills/create-execplan/scripts/scaffold_execplan.py:1",
         "skills/create-execplan/references/execplan-template.md:1",
-        "skills/create-execplan/examples/finalized-execplan.md:1"
+        "skills/create-execplan/examples/finalized-execplan.md:1",
+        "skills/create-execplan/references/context-pack-template.md:1"
       ],
       "supportingContextAnchors": [
         "skills/create-execplan/references/step-0-preflight-workflow.md:1",
@@ -93,14 +76,14 @@
       "evidenceCommands": [
         "bash tests/run_create_execplan_helpers.sh"
       ],
-      "expectedOutput": "scaffolded plan artifacts and examples use repo-relative metadata and packet-ready brownfield task rows",
-      "action": "Update scaffolded metadata and golden examples to use repo-relative in-repo paths and explicit packet columns."
+      "expectedOutput": "scaffolded plan artifacts and examples use repo-relative metadata and executable brownfield task rows",
+      "action": "Update scaffolded metadata and golden examples to use repo-relative in-repo paths and executable-only packet columns."
     },
     {
-      "taskRef": "P3-T4",
+      "taskRef": "P2-T3",
       "status": "outstanding",
-      "phaseNumber": 3,
-      "taskNumber": 4,
+      "phaseNumber": 2,
+      "taskNumber": 3,
       "type": "Test",
       "requirementIds": [
         "R1",

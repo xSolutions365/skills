@@ -22,13 +22,14 @@ Normalize the approved draft into the canonical living execution document and ge
    - `Evidence Commands`
    - `Expected Output`
    - `Action`
-6. Ensure every non-`Human` task is packet-executable:
+6. Ensure every runtime task is packet-executable:
    - `Code` tasks name concrete `Edit Targets`
-   - `Read` tasks name concrete `Supporting Context Anchors`
    - `Supporting Context Anchors` does not hide edit scope
    - `Allowed Commands` is explicit when shell execution is required
    - `Verification Commands` and `Evidence Commands` are explicit when the task carries its own direct verification or evidence collection
    - the row can be executed from the row plus its listed supporting context anchors without additional discovery
+   - standalone onboarding or human-only rows do not appear in the task table
+   - in-repo anchors remain repo-relative
 7. Ensure dependency preflight rows are complete for required external tools or libraries.
 8. Ensure `Test Plan` remains scenario-focused BDD coverage with executable evidence commands and valid `Task Ref` mappings.
 9. Generate or refresh the machine-readable runtime artifact using the standard runtime contract from [runtime-resolution.md](runtime-resolution.md) and the schema in [runtime-input-schema.md](runtime-input-schema.md).

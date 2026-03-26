@@ -40,6 +40,9 @@ Before implementation starts, mark `E*` checks as `na`.
 - P25: `execplan-validation.json` exists and reports pass.
 - P26: `Test Plan` is scenario-focused BDD coverage with executable evidence commands, valid `Task Ref` mappings, and at least one `P0` smoke scenario.
 - P27: `workspace/execplan-runtime-input.json` exists, was regenerated from the finalized ExecPlan, and remains a derived runtime artifact rather than a second plan.
+- P28: The task table contains only executable runtime task kinds; standalone onboarding or human-only rows are not present.
+- P29: In-repo anchors and artifact references are repo-relative so the package can run in a fresh worktree without manual localization.
+- P30: The runtime packet contract matches the harness verifier/executor contract, including changed-file provenance ownership.
 
 ## Execution Follow-through (during/after implementation)
 
