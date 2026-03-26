@@ -158,6 +158,13 @@ extract_markdown_links() {
   ' "$1"
 }
 
+extract_markdown_path_mentions() {
+  grep -nEo '(\.\.?/|[A-Za-z0-9_-]+/)[A-Za-z0-9_./<>-]+\.md([#?][^[:space:]`)>]*)?' "$1" |
+    while IFS=: read -r line_no target; do
+      printf '%s\t%s\n' "$line_no" "$target"
+    done || true
+}
+
 extract_fenced_lines() {
   awk '
     BEGIN {
@@ -523,7 +530,12 @@ check_stale_markdown() {
       if grep -Fxq "$resolved" "$markdown_list"; then
         printf '%s\t%s\n' "$path" "$resolved" >>"$edges_file"
       fi
-    done < <(extract_markdown_links "$path")
+    done < <(
+      {
+        extract_markdown_links "$path"
+        extract_markdown_path_mentions "$path"
+      } | awk -F '\t' '!seen[$1 FS $2]++'
+    )
   done <"$markdown_list"
 
   printf '%s\n' "$SKILL_MD_ABS" >"$visited_file"
