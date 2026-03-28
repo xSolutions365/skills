@@ -28,9 +28,7 @@ TASK_HEADERS = [
     "Req IDs",
     "Edit Targets",
     "Supporting Context Anchors",
-    "Allowed Commands",
-    "Verification Commands",
-    "Evidence Commands",
+    "Commands",
     "Expected Output",
     "Action",
 ]
@@ -112,9 +110,7 @@ def parse_task_rows(source: str) -> list[dict[str, object]]:
                 "supportingContextAnchors": split_csv_tokens(
                     row["Supporting Context Anchors"]
                 ),
-                "allowedCommands": split_csv_tokens(row["Allowed Commands"]),
-                "verificationCommands": split_csv_tokens(row["Verification Commands"]),
-                "evidenceCommands": split_csv_tokens(row["Evidence Commands"]),
+                "commands": split_csv_tokens(row["Commands"]),
                 "expectedOutput": row["Expected Output"].strip(),
                 "action": row["Action"].strip(),
             }
@@ -134,7 +130,7 @@ def render_runtime_input(
         project_root, execplan_path
     )
     return {
-        "schemaVersion": "3.0",
+        "schemaVersion": "4.0",
         "generated": True,
         "editPolicy": "do-not-edit",
         "generatedAt": generated_value,

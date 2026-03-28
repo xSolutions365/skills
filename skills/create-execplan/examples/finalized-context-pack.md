@@ -10,7 +10,7 @@
 
 ## Change Brief (1-3 paragraphs)
 
-This example package demonstrates the rewritten create-execplan contract. It keeps verification posture and command inventory in the Context Pack, keeps the ExecPlan focused on execution state, and uses a derived runtime input artifact for tooling.
+This example package demonstrates the rewritten create-execplan contract. It keeps shared verification posture in the Context Pack, keeps task-local execution details in the ExecPlan, and uses a derived runtime input artifact for tooling.
 
 ## Requirement Freeze (user-confirmed)
 
@@ -57,12 +57,6 @@ This example package demonstrates the rewritten create-execplan contract. It kee
 - Mandatory smoke gate command: `bash tests/run_create_execplan_helpers.sh`
 - Smoke gate expected success signal: create-execplan helper checks passed
 
-## Established Library Comparison (required for greenfield; optional for brownfield)
-
-| Option | Maturity signal | Last release/reference | Compatibility | Reuse decision | Evidence IDs |
-| ------ | ---------------- | ---------------------- | ------------- | -------------- | ------------ |
-| none | not applicable | undated:repo-reference | brownfield example only | not applicable | E1 |
-
 ## Existing Change Surface (required for brownfield; optional for greenfield)
 
 | Area | File anchor | Current behavior | Integration concern | Evidence IDs |
@@ -83,18 +77,6 @@ This example package demonstrates the rewritten create-execplan contract. It kee
 | ---------- | ------- | ------------- | --------------- | ------ | ----------------------- |
 | none | no external dependencies beyond repo-standard tooling | `n/a` | `n/a` | n/a | n/a |
 
-## Execution Command Catalog
-
-| Purpose | Command | Expected success signal |
-| ------- | ------- | ----------------------- |
-| Install/setup | `n/a` | n/a |
-| Dependency check | `bash skills/create-execplan/scripts/resolve_python.sh` | resolved interpreter path printed |
-| Dependency install (if missing) | `n/a` | n/a |
-| Smoke test (mandatory) | `bash tests/run_create_execplan_helpers.sh` | create-execplan helper checks passed |
-| Run | `bash scripts/run-ci-quality-gates.sh` | quality gates complete |
-| Tests | `bash tests/run_create_execplan_helpers.sh` | helper regression checks pass |
-| Quality gate | `bash scripts/run-ci-quality-gates.sh` | all repo gates pass |
-
 ## Code Map (line-numbered)
 
 List only the places the executor must touch. Prefer `path:line` anchors.
@@ -110,7 +92,7 @@ List only the places the executor must touch. Prefer `path:line` anchors.
 | -------------- | ----------- | ------------ | ------------------ | ----------------- |
 | R1 | Keep the ExecPlan as the living human document. | E1 | Change Brief, Existing Change Surface | P1-T1,P3-T4 |
 | R2 | Generate a narrow runtime input artifact from explicit task packets. | E1,E2 | Existing Change Surface, Code Map | P2-T2,P3-T4 |
-| R3 | Keep scaffolded plan metadata and helper examples repo-relative and packet-executable. | E2 | Execution Command Catalog, Code Map | P2-T3,P3-T4 |
+| R3 | Keep scaffolded plan metadata and helper examples repo-relative and packet-executable. | E2 | Verification Baseline & Strategy, Code Map | P1-T2,P2-T3 |
 
 ## Contracts & Interfaces
 

@@ -45,6 +45,14 @@ def extract_template_block(reference_path: Path) -> str:
     return match.group(1).strip() + "\n"
 
 
+def remove_markdown_section(template: str, heading: str) -> str:
+    pattern = re.compile(
+        rf"\n## {re.escape(heading)}\n.*?(?=\n## |\Z)",
+        flags=re.DOTALL,
+    )
+    return re.sub(pattern, "\n", template)
+
+
 def resolve_timestamp(raw_timestamp: str) -> str:
     if raw_timestamp:
         return raw_timestamp
@@ -114,6 +122,16 @@ def render_context_template(
     confirmation_ts: str,
     project_mode: str,
 ) -> str:
+    if project_mode == "brownfield":
+        template = remove_markdown_section(
+            template,
+            "Established Library Comparison (required for greenfield; optional for brownfield)",
+        )
+    elif project_mode == "greenfield":
+        template = remove_markdown_section(
+            template,
+            "Existing Change Surface (required for brownfield; optional for greenfield)",
+        )
     repo_root_value = render_repo_relative_path(project_root, project_root)
     artifact_root_value = render_repo_relative_path(project_root, artifact_root)
     workspace_root_value = render_repo_relative_path(project_root, workspace_root)

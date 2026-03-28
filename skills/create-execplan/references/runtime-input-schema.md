@@ -12,14 +12,14 @@
 - `requirements`
 - `tasks`
 
-Current canonical schema version: `3.0`.
+Current canonical schema version: `4.0`.
 
 ## Derivation rules
 
 - `requirements` come from `## Requirements Freeze`.
 - `tasks` come from the structured `## Task Table (single source of truth)`.
 - `sourceExecplan` should be repo-relative for in-repo plan packages and absolute only when the source plan is genuinely external.
-- `verificationCommands` and `evidenceCommands` come from the task row itself, not from late inference at harness runtime.
+- `commands` come from the task row itself, not from late inference at harness runtime.
 - Brownfield source plans are expected to be packet-ready before rendering: `Code` rows should already carry concrete edit targets, supporting context should remain read-only navigation, and executable rows should already name the exact command set the harness may run.
 - No plan-level logs, decisions, findings, or standalone verification inventories belong in the runtime artifact.
 - No policy blocks may be injected into the runtime artifact unless they are explicitly authored in the source ExecPlan.
@@ -36,9 +36,7 @@ Each task object must contain only derived execution structure:
 - `requirementIds`
 - `editTargets`
 - `supportingContextAnchors`
-- `allowedCommands`
-- `verificationCommands`
-- `evidenceCommands`
+- `commands`
 - `expectedOutput`
 - `action`
 
@@ -46,15 +44,15 @@ Each task object must contain only derived execution structure:
 
 - `editTargets` are the files the executor is expected to modify for that task.
 - `supportingContextAnchors` are read-only anchors that provide local context and do not imply edit permission.
-- `allowedCommands` are the only executor shell commands permitted for the task.
-- `verificationCommands` are the commands that directly verify the task's primary completion criteria.
-- `evidenceCommands` collect broader run evidence for later review and comparison.
+- `commands` are the only task-local shell commands permitted for the task.
 - `expectedOutput` must describe an observable completion signal and must not be a placeholder.
 - Runtime tasks must be executable packet work; standalone onboarding or human-only rows do not belong in the runtime artifact.
 - In-repo anchors should stay repo-relative so the package can be replayed in a fresh worktree without localization.
 - A brownfield `Code` task that cannot name concrete `editTargets` is under-scoped and should be blocked during planning rather than deferred to execution.
 
-## Golden example
+## Golden examples
 
-- Source ExecPlan: [../examples/finalized-execplan.md](../examples/finalized-execplan.md)
-- Expected runtime input: [../examples/expected-runtime-input.json](../examples/expected-runtime-input.json)
+- Brownfield source ExecPlan: [../examples/finalized-execplan.md](../examples/finalized-execplan.md)
+- Brownfield expected runtime input: [../examples/expected-runtime-input.json](../examples/expected-runtime-input.json)
+- Greenfield source ExecPlan: [../examples/greenfield/finalized-execplan.md](../examples/greenfield/finalized-execplan.md)
+- Greenfield expected runtime input: [../examples/greenfield/expected-runtime-input.json](../examples/greenfield/expected-runtime-input.json)

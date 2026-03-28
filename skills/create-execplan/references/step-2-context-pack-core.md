@@ -21,7 +21,6 @@ Objective: capture deterministic context artifacts that both project modes requi
    - `Verification Baseline & Strategy`
    - `Dependency Preconditions`
    - `Requirement to Evidence Traceability`
-   - `Execution Command Catalog`
    - `Code Map (line-numbered)`
    - `Risk Register`
 6. Update `workspace/context-codemap.md` with all file anchors from `Code Map (line-numbered)`.
@@ -33,10 +32,10 @@ Objective: capture deterministic context artifacts that both project modes requi
    - `trust_rationale`
    - `source_type`
 9. Include only evidence that is directly used by requirements or risk decisions.
-10. Ensure `Execution Command Catalog` includes dependency check command(s), dependency install command(s) with source(s), and a mandatory smoke test command with expected success signal.
+10. Ensure `Verification Baseline & Strategy` includes a mandatory smoke gate command and expected success signal.
 11. Keep the placement rules aligned with [information-placement.md](information-placement.md):
-   - Context Pack owns verification posture, command inventory, evidence traceability, code map, and risk register.
-   - ExecPlan owns execution tasks, progress, decisions, findings, and scenario verification coverage.
+   - Context Pack owns shared verification posture, evidence traceability, code map, and risk register.
+   - ExecPlan owns execution tasks, task-local commands, progress, decisions, findings, and scenario verification coverage.
 
 ## Required online research handling (when permitted)
 
@@ -52,10 +51,9 @@ Objective: capture deterministic context artifacts that both project modes requi
 
 - Do not leave a requirement without at least one evidence ID.
 - Do not include unanchored code-map rows (every row needs `path/to/file:line`).
-- Do not include command rows without expected success signals.
 - Do not proceed when Step 1 freeze confirmation is missing.
 - Do not proceed when Step 1 checkpoint prompt and user approval response evidence are missing.
-- Do not omit the minimum smoke command from `Execution Command Catalog`.
+- Do not omit the minimum smoke command from `Verification Baseline & Strategy`.
 
 ## Done when
 

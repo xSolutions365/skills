@@ -12,8 +12,7 @@ Resolve surfaced blockers before drafting, then iterate on `execplan.md` until t
 4. Run a packet-executability review on every runtime task row before asking for user review:
    - each `Code` task must name concrete `Edit Targets`
    - `Supporting Context Anchors` must remain read-only navigation, not a substitute for edit scope
-   - `Allowed Commands` must be the exact command set the executor may run for that task
-   - `Verification Commands` and `Evidence Commands` must be explicit whenever the task packet itself is responsible for direct verification or review evidence
+   - `Commands` must be the exact task-local command set the executor may run for that task
    - standalone onboarding or human-only rows are not valid runtime tasks; fold context into executable rows and keep approvals in harness ADR flow
    - in-repo anchors must stay repo-relative rather than absolute
    - if a row still relies on vague discovery terms like `relevant`, `canonical`, `appropriate`, `locate`, or `identify`, record a blocker and stop

@@ -12,7 +12,6 @@ REQUIRED_HEADINGS = (
     "## Evidence Inventory",
     "## Verification Baseline & Strategy",
     "## Dependency Preconditions",
-    "## Execution Command Catalog",
     "## Code Map (line-numbered)",
     "## Requirement to Evidence Traceability",
     "## Risk Register",
@@ -21,7 +20,6 @@ REQUIRED_HEADINGS = (
 TABLE_REQUIRED = (
     "## Evidence Inventory",
     "## Dependency Preconditions",
-    "## Execution Command Catalog",
     "## Code Map (line-numbered)",
     "## Requirement to Evidence Traceability",
     "## Risk Register",
@@ -334,29 +332,22 @@ def validate_dependency_preconditions(lines: list[str]) -> list[str]:
     return errors
 
 
-def validate_smoke_command(lines: list[str]) -> list[str]:
+def validate_smoke_baseline(text: str) -> list[str]:
     errors: list[str] = []
-    _, rows = extract_section_table(lines, "## Execution Command Catalog")
-    if not rows:
-        return []
-    for row in rows:
-        purpose = row.get("Purpose", "").strip().lower()
-        if "smoke" not in purpose:
-            continue
-        command = row.get("Command", "").strip()
-        signal = row.get("Expected success signal", "").strip()
-        if value_is_placeholder(command):
-            errors.append(
-                "Smoke command row in Execution Command Catalog is missing a concrete command."
-            )
-        if value_is_placeholder(signal):
-            errors.append(
-                "Smoke command row in Execution Command Catalog is missing an expected success signal."
-            )
-        return errors
-    errors.append(
-        "Execution Command Catalog must include a mandatory smoke command row."
+    command_match = re.search(
+        r"^- Mandatory smoke gate command:\s*(.+)$", text, re.MULTILINE
     )
+    signal_match = re.search(
+        r"^- Smoke gate expected success signal:\s*(.+)$", text, re.MULTILINE
+    )
+    if not command_match or value_is_placeholder(command_match.group(1)):
+        errors.append(
+            "Verification Baseline & Strategy must include a concrete `Mandatory smoke gate command`."
+        )
+    if not signal_match or value_is_placeholder(signal_match.group(1)):
+        errors.append(
+            "Verification Baseline & Strategy must include a concrete `Smoke gate expected success signal`."
+        )
     return errors
 
 
@@ -418,7 +409,7 @@ def main() -> int:
     errors.extend(validate_verification_mode_alignment(text, mode))
     errors.extend(validate_verification_decision_alignment(text))
     errors.extend(validate_dependency_preconditions(lines))
-    errors.extend(validate_smoke_command(lines))
+    errors.extend(validate_smoke_baseline(text))
     errors.extend(validate_workspace_artifact_paths(text))
 
     output_path = (

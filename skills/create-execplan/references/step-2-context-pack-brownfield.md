@@ -24,7 +24,7 @@ Objective: map the smallest safe change path in an existing codebase.
    - If existing verification exists, set scenario `brownfield-existing` and map how current gates are amended for touched scope.
    - If no verification exists and Step 1 user decision approved change-scoped verification, set scenario `brownfield-none` and scope added verification to new changes only.
    - If no verification exists and Step 1 user decision declined change-scoped verification, mark blocked, **STOP**, and @ASK_USER_CONFIRMATION before draft creation.
-7. Ensure `Execution Command Catalog` includes a mandatory smoke command for runtime sanity.
+7. Ensure `Verification Baseline & Strategy` includes a mandatory smoke command for runtime sanity.
 8. Populate `Dependency Preconditions` for all external libraries/tools needed by the plan.
 9. Carry the exact brownfield edit surface forward into Step 3:
    - planned `Code` tasks must inherit concrete edit targets from `Existing Change Surface` or `Code Map`

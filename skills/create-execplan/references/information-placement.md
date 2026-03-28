@@ -5,7 +5,6 @@ The rewrite intentionally gives each artifact one canonical responsibility.
 ## Context Pack owns
 
 - verification baseline and strategy
-- execution command catalog
 - repo facts
 - requirement-to-evidence traceability
 - code map and change surface
@@ -15,6 +14,7 @@ The rewrite intentionally gives each artifact one canonical responsibility.
 
 - living execution status
 - structured task table
+- task-level execution commands
 - progress log
 - decision log
 - execution findings
@@ -25,7 +25,6 @@ The rewrite intentionally gives each artifact one canonical responsibility.
 
 - derived requirement list
 - derived structured tasks
-- derived verification scenarios
 
 ## Checklist and validation artifacts own
 
@@ -41,4 +40,4 @@ The rewritten ExecPlan must not include standalone sections for:
 - `Artifacts & Notes`
 - `Plan Overview`
 
-Those concerns stay in the Context Pack, top metadata, logs, or checklist artifacts instead.
+Those concerns stay in the Context Pack, top metadata, task rows, test scenarios, logs, or checklist artifacts instead.

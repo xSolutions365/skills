@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "3.0",
+  "schemaVersion": "4.0",
   "generated": true,
   "editPolicy": "do-not-edit",
   "generatedAt": "2026-04-01T09:00:00Z",
@@ -31,22 +31,17 @@
       ],
       "editTargets": [
         "skills/create-execplan/scripts/render_execplan_runtime_input.py:1",
-        "skills/create-execplan/scripts/validate_execplan.py:1"
+        "skills/create-execplan/scripts/validate_execplan.py:1",
+        "skills/create-execplan/references/runtime-input-schema.md:1"
       ],
       "supportingContextAnchors": [
         "skills/create-execplan/references/information-placement.md:1",
-        "skills/create-execplan/references/runtime-input-schema.md:1",
-        "skills/create-execplan/references/step-4-finalize-execplan-workflow.md:1"
+        "skills/create-execplan/references/step-4-finalize-execplan-workflow.md:1",
+        "tests/run_create_execplan_helpers.sh:1"
       ],
-      "allowedCommands": [],
-      "verificationCommands": [
-        "bash tests/run_create_execplan_helpers.sh"
-      ],
-      "evidenceCommands": [
-        "bash tests/run_create_execplan_helpers.sh"
-      ],
-      "expectedOutput": "runtime input emits schema 3.0 explicit task packets and validator enforces the same contract",
-      "action": "Update the runtime renderer and validator to use explicit task packet fields and executable-only task semantics."
+      "commands": [],
+      "expectedOutput": "runtime input emits schema 4.0 compact task packets and validator enforces the same contract",
+      "action": "Update the runtime renderer, schema reference, and validator to use the compact packet contract without duplicate verification fields."
     },
     {
       "taskRef": "P1-T2",
@@ -61,23 +56,20 @@
       "editTargets": [
         "skills/create-execplan/scripts/scaffold_execplan.py:1",
         "skills/create-execplan/references/execplan-template.md:1",
+        "skills/create-execplan/references/context-pack-template.md:1",
+        "skills/create-execplan/references/review-checklist.md:1",
+        "skills/create-execplan/references/review-checklist-template.md:1",
         "skills/create-execplan/examples/finalized-execplan.md:1",
-        "skills/create-execplan/references/context-pack-template.md:1"
-      ],
-      "supportingContextAnchors": [
-        "skills/create-execplan/references/step-0-preflight-workflow.md:1",
-        "skills/create-execplan/references/step-2-context-pack-brownfield.md:1",
         "skills/create-execplan/examples/finalized-context-pack.md:1"
       ],
-      "allowedCommands": [],
-      "verificationCommands": [
-        "bash tests/run_create_execplan_helpers.sh"
+      "supportingContextAnchors": [
+        "skills/create-execplan/references/step-2-context-pack-workflow.md:1",
+        "skills/create-execplan/references/step-3-draft-review-workflow.md:1",
+        "skills/create-execplan/references/step-6-checklist-workflow.md:1"
       ],
-      "evidenceCommands": [
-        "bash tests/run_create_execplan_helpers.sh"
-      ],
-      "expectedOutput": "scaffolded plan artifacts and examples use repo-relative metadata and executable brownfield task rows",
-      "action": "Update scaffolded metadata and golden examples to use repo-relative in-repo paths and executable-only packet columns."
+      "commands": [],
+      "expectedOutput": "scaffolded plan artifacts and examples use repo-relative metadata and leaner brownfield handoff sections",
+      "action": "Update the scaffold, templates, checklist, and golden examples to remove brownfield filler and duplicated review noise."
     },
     {
       "taskRef": "P2-T3",
@@ -94,17 +86,11 @@
       "supportingContextAnchors": [
         "tests/run_create_execplan_helpers.sh:1"
       ],
-      "allowedCommands": [
-        "bash tests/run_create_execplan_helpers.sh"
-      ],
-      "verificationCommands": [
-        "bash tests/run_create_execplan_helpers.sh"
-      ],
-      "evidenceCommands": [
+      "commands": [
         "bash tests/run_create_execplan_helpers.sh"
       ],
       "expectedOutput": "create-execplan helper checks passed",
-      "action": "Run the resolved-runtime helper smoke checks."
+      "action": "Run the helper regression checks against the updated examples and scaffolder."
     }
   ]
 }

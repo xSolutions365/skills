@@ -33,5 +33,7 @@ Workspace artifacts:
 
 ## Examples
 
-- Finalized Context Pack example: [../examples/finalized-context-pack.md](../examples/finalized-context-pack.md)
-- Finalized ExecPlan example: [../examples/finalized-execplan.md](../examples/finalized-execplan.md)
+- Brownfield Context Pack example: [../examples/finalized-context-pack.md](../examples/finalized-context-pack.md)
+- Brownfield ExecPlan example: [../examples/finalized-execplan.md](../examples/finalized-execplan.md)
+- Greenfield Context Pack example: [../examples/greenfield/finalized-context-pack.md](../examples/greenfield/finalized-context-pack.md)
+- Greenfield ExecPlan example: [../examples/greenfield/finalized-execplan.md](../examples/greenfield/finalized-execplan.md)

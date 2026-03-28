@@ -60,9 +60,7 @@ TASK_HEADERS = [
     "Req IDs",
     "Edit Targets",
     "Supporting Context Anchors",
-    "Allowed Commands",
-    "Verification Commands",
-    "Evidence Commands",
+    "Commands",
     "Expected Output",
     "Action",
 ]
@@ -81,7 +79,7 @@ TASK_TYPES = {"Code", "Action", "Test", "Gate"}
 VALID_STATUS = {"", "@", "X"}
 TEST_PRIORITIES = {"P0", "P1", "P2"}
 MAX_BDD_STEP_LENGTH = 180
-TASK_LEVEL_EVIDENCE_EXEMPT_TYPES: set[str] = set()
+TEST_PLAN_REQUIRED_TASK_TYPES = {"Test", "Gate"}
 BROWNFIELD_REQUIRED_EDIT_TARGET_TYPES = {"Code"}
 BROWNFIELD_REQUIRED_CONTEXT_TYPES: set[str] = set()
 BROWNFIELD_REQUIRED_COMMAND_TYPES = {"Action", "Test", "Gate"}
@@ -347,16 +345,16 @@ def validate_task_scope(
     task_type: str,
     edit_targets: list[str],
     supporting_context_anchors: list[str],
-    allowed_commands: list[str],
+    commands: list[str],
     action: str,
     expected_output: str,
     brownfield: bool,
 ) -> list[str]:
     errors: list[str] = []
 
-    if not any((edit_targets, supporting_context_anchors, allowed_commands)):
+    if not any((edit_targets, supporting_context_anchors, commands)):
         errors.append(
-            f"Task `{task_ref_value}` must include at least one concrete edit target, supporting context anchor, or allowed command."
+            f"Task `{task_ref_value}` must include at least one concrete edit target, supporting context anchor, or command."
         )
 
     if not brownfield:
@@ -372,9 +370,9 @@ def validate_task_scope(
             f"Brownfield task `{task_ref_value}` of type {task_type} must include concrete `Supporting Context Anchors`."
         )
 
-    if task_type in BROWNFIELD_REQUIRED_COMMAND_TYPES and not allowed_commands:
+    if task_type in BROWNFIELD_REQUIRED_COMMAND_TYPES and not commands:
         errors.append(
-            f"Brownfield task `{task_ref_value}` of type {task_type} must include concrete `Allowed Commands`."
+            f"Brownfield task `{task_ref_value}` of type {task_type} must include concrete `Commands`."
         )
 
     if task_type not in TASK_TYPES:
@@ -471,9 +469,7 @@ def validate_task_table(
 
         edit_targets = split_csv_tokens(row["Edit Targets"])
         supporting_context_anchors = split_csv_tokens(row["Supporting Context Anchors"])
-        allowed_commands = split_csv_tokens(row["Allowed Commands"])
-        verification_commands = split_csv_tokens(row["Verification Commands"])
-        evidence_commands = split_csv_tokens(row["Evidence Commands"])
+        commands = split_csv_tokens(row["Commands"])
         expected_output = row["Expected Output"].strip()
         action = row["Action"].strip()
 
@@ -490,23 +486,7 @@ def validate_task_table(
                 project_root,
             )
         )
-        errors.extend(
-            validate_command_list(row_task_ref, "`Allowed Commands`", allowed_commands)
-        )
-        errors.extend(
-            validate_command_list(
-                row_task_ref,
-                "`Verification Commands`",
-                verification_commands,
-            )
-        )
-        errors.extend(
-            validate_command_list(
-                row_task_ref,
-                "`Evidence Commands`",
-                evidence_commands,
-            )
-        )
+        errors.extend(validate_command_list(row_task_ref, "`Commands`", commands))
 
         if is_placeholder(expected_output):
             errors.append(f"Task `{row_task_ref}` is missing `Expected Output`.")
@@ -519,7 +499,7 @@ def validate_task_table(
                 task_type=task_type,
                 edit_targets=edit_targets,
                 supporting_context_anchors=supporting_context_anchors,
-                allowed_commands=allowed_commands,
+                commands=commands,
                 action=action,
                 expected_output=expected_output,
                 brownfield=brownfield,
@@ -528,9 +508,6 @@ def validate_task_table(
 
         task_index[row_task_ref] = {
             "type": task_type,
-            "has_task_level_evidence": bool(
-                verification_commands or evidence_commands
-            ),
         }
 
     for requirement_id in sorted(requirement_ids - covered_requirements):
@@ -629,14 +606,11 @@ def validate_test_plan(
 
     for row_task_ref, details in task_index.items():
         task_type = str(details["type"])
-        has_task_level_evidence = bool(details["has_task_level_evidence"])
-        if task_type in TASK_LEVEL_EVIDENCE_EXEMPT_TYPES:
-            continue
-        if has_task_level_evidence:
+        if task_type not in TEST_PLAN_REQUIRED_TASK_TYPES:
             continue
         if row_task_ref not in referenced_task_refs:
             errors.append(
-                f"Task `{row_task_ref}` must map to executable evidence through `Verification Commands`, `Evidence Commands`, or a Test Plan scenario."
+                f"Task `{row_task_ref}` of type {task_type} must map to executable evidence through a Test Plan scenario."
             )
 
     return errors
@@ -670,8 +644,8 @@ def validate_runtime_input(
             "Runtime input artifact is missing required keys: " + ", ".join(missing)
         )
 
-    if payload.get("schemaVersion") != "3.0":
-        errors.append("Runtime input artifact `schemaVersion` must be `3.0`.")
+    if payload.get("schemaVersion") != "4.0":
+        errors.append("Runtime input artifact `schemaVersion` must be `4.0`.")
 
     source_execplan = str(payload.get("sourceExecplan", "")).strip()
     if source_execplan.startswith("/"):
@@ -701,9 +675,7 @@ def validate_runtime_input(
         "requirementIds",
         "editTargets",
         "supportingContextAnchors",
-        "allowedCommands",
-        "verificationCommands",
-        "evidenceCommands",
+        "commands",
         "expectedOutput",
         "action",
     }
@@ -720,7 +692,14 @@ def validate_runtime_input(
                 f"Runtime input task `{task_ref_value}` is missing required keys: {', '.join(missing_task_keys)}"
             )
 
-        for legacy_key in ("adrThreshold", "fileAnchors", "command"):
+        for legacy_key in (
+            "adrThreshold",
+            "fileAnchors",
+            "command",
+            "allowedCommands",
+            "verificationCommands",
+            "evidenceCommands",
+        ):
             if legacy_key in task:
                 errors.append(
                     f"Runtime input task `{task_ref_value}` must not contain legacy field `{legacy_key}`."
@@ -729,18 +708,14 @@ def validate_runtime_input(
         task_type = str(task.get("type", "")).strip()
         edit_targets = task.get("editTargets", [])
         supporting_context_anchors = task.get("supportingContextAnchors", [])
-        allowed_commands = task.get("allowedCommands", [])
-        verification_commands = task.get("verificationCommands", [])
-        evidence_commands = task.get("evidenceCommands", [])
+        commands = task.get("commands", [])
         expected_output = str(task.get("expectedOutput", "")).strip()
         action = str(task.get("action", "")).strip()
 
         for field_name, value in (
             ("editTargets", edit_targets),
             ("supportingContextAnchors", supporting_context_anchors),
-            ("allowedCommands", allowed_commands),
-            ("verificationCommands", verification_commands),
-            ("evidenceCommands", evidence_commands),
+            ("commands", commands),
         ):
             if not isinstance(value, list):
                 errors.append(
@@ -753,11 +728,7 @@ def validate_runtime_input(
             if isinstance(supporting_context_anchors, list)
             else []
         )
-        allowed_commands = allowed_commands if isinstance(allowed_commands, list) else []
-        verification_commands = (
-            verification_commands if isinstance(verification_commands, list) else []
-        )
-        evidence_commands = evidence_commands if isinstance(evidence_commands, list) else []
+        commands = commands if isinstance(commands, list) else []
 
         errors.extend(
             validate_anchor_list(
@@ -772,19 +743,7 @@ def validate_runtime_input(
                 project_root,
             )
         )
-        errors.extend(
-            validate_command_list(task_ref_value, "`allowedCommands`", allowed_commands)
-        )
-        errors.extend(
-            validate_command_list(
-                task_ref_value,
-                "`verificationCommands`",
-                verification_commands,
-            )
-        )
-        errors.extend(
-            validate_command_list(task_ref_value, "`evidenceCommands`", evidence_commands)
-        )
+        errors.extend(validate_command_list(task_ref_value, "`commands`", commands))
 
         if is_placeholder(expected_output):
             errors.append(
@@ -799,7 +758,7 @@ def validate_runtime_input(
                 task_type=task_type,
                 edit_targets=edit_targets,
                 supporting_context_anchors=supporting_context_anchors,
-                allowed_commands=allowed_commands,
+                commands=commands,
                 action=action,
                 expected_output=expected_output,
                 brownfield=brownfield,

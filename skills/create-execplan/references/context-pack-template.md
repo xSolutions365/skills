@@ -1,12 +1,12 @@
 # Context Pack template (durable execution context)
 
-The Context Pack is the durable context artifact. It minimizes repeat discovery and remains the canonical home for repo facts, verification posture, command inventory, traceability, and line-anchored change surface information.
+The Context Pack is the durable context artifact. It minimizes repeat discovery and remains the canonical home for repo facts, shared verification posture, traceability, and line-anchored change surface information.
 
 Use it to capture:
 
 - The minimum repo facts required to execute changes safely.
 - A line-numbered code map that points to the exact change surface.
-- Verification baseline and execution commands without duplicating them into the living ExecPlan.
+- Shared verification baseline without duplicating task-local commands into the living ExecPlan.
 
 ## Template
 
@@ -94,18 +94,6 @@ Use it to capture:
 | Dependency | Purpose | Check command | Install command | Source | Expected success signal |
 | ---------- | ------- | ------------- | --------------- | ------ | ----------------------- |
 | <name> | <why needed> | `<command>` | `<command>` | <registry/repo/package source> | <signal> |
-
-## Execution Command Catalog
-
-| Purpose | Command | Expected success signal |
-| ------- | ------- | ----------------------- |
-| Install/setup | `<command>` | exit 0 |
-| Dependency check | `<command>` | dependency present |
-| Dependency install (if missing) | `<command>` | dependency installed |
-| Smoke test (mandatory) | `<command>` | smoke scenario passes |
-| Run | `<command>` | expected startup signal |
-| Tests | `<command>` | targeted tests pass |
-| Quality gate | `<command>` | gate passes |
 
 ## Code Map (line-numbered)
 

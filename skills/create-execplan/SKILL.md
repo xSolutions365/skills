@@ -33,7 +33,7 @@ Use this section for step context only. Keep detailed mechanics in the reference
 
 - **Purpose**: Create the durable context artifact that removes repeat discovery.
 - **When**: Run only after Step 1 confirmation.
-- Complete the shared context requirements, select one project mode, and fill the Context Pack with verification posture and command inventory.
+- Complete the shared context requirements, select one project mode, and fill the Context Pack with verification posture and change-surface evidence.
 - Workflow: [references/step-2-context-pack-workflow.md](references/step-2-context-pack-workflow.md)
 
 ### Step 3: Draft and review the ExecPlan
