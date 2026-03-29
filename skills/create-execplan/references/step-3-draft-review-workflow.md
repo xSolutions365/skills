@@ -7,7 +7,7 @@ Resolve surfaced blockers before drafting, then iterate on `execplan.md` until t
 ## Required actions
 
 1. Build and maintain `<artifact-root>/workspace/draft-review.md`.
-2. Inspect Step 2 outputs and identify newly surfaced questions or blockers that affect planning.
+2. Inspect the assembled Context Pack plus the upstream research/design/structure artifacts and identify newly surfaced questions or blockers that affect planning.
 3. If surfaced blockers exist, record them in `workspace/draft-review.md`, present them to the user, and stop until they are resolved.
 4. Run a packet-executability review on every runtime task row before asking for user review:
    - each `Code` task must name concrete `Edit Targets`
@@ -23,6 +23,7 @@ Resolve surfaced blockers before drafting, then iterate on `execplan.md` until t
 9. For each feedback round:
    - update `execplan.md`
    - update `context-pack.md` and workspace artifacts when context changes
+   - keep `workspace/phase-result.json` aligned to the latest checkpoint state
    - append the round summary, changed files, and timestamp to `workspace/draft-review.md`
 10. Ask for explicit draft approval:
    - `Confirm this draft plan is approved and I should proceed to finalization.`
@@ -33,5 +34,6 @@ Resolve surfaced blockers before drafting, then iterate on `execplan.md` until t
 
 - `workspace/draft-review.md` records pre-draft blocker status and feedback rounds.
 - `execplan.md` reflects the latest approved draft.
+- `workspace/phase-result.json` reflects the latest draft-review checkpoint outcome.
 - Runtime task rows are explicit enough for a packet-only executor to act without repo-wide discovery.
 - Draft approval evidence is recorded before Step 4 begins.

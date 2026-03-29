@@ -1,6 +1,6 @@
 # Runtime Input Schema
 
-`workspace/execplan-runtime-input.json` is the machine-readable companion artifact for tooling. It is generated from the finalized ExecPlan and must stay narrower than the markdown plan while remaining explicit enough for a packet-only executor.
+`workspace/execplan-runtime-input.json` is the machine-readable companion artifact for tooling. It is generated from `execplan.md` and must stay narrower than the markdown plan while remaining explicit enough for a packet-only executor.
 
 ## Top-level fields
 
@@ -50,9 +50,8 @@ Each task object must contain only derived execution structure:
 - In-repo anchors should stay repo-relative so the package can be replayed in a fresh worktree without localization.
 - A brownfield `Code` task that cannot name concrete `editTargets` is under-scoped and should be blocked during planning rather than deferred to execution.
 
-## Golden examples
+## Canonical example
 
-- Brownfield source ExecPlan: [../examples/finalized-execplan.md](../examples/finalized-execplan.md)
-- Brownfield expected runtime input: [../examples/expected-runtime-input.json](../examples/expected-runtime-input.json)
-- Greenfield source ExecPlan: [../examples/greenfield/finalized-execplan.md](../examples/greenfield/finalized-execplan.md)
-- Greenfield expected runtime input: [../examples/greenfield/expected-runtime-input.json](../examples/greenfield/expected-runtime-input.json)
+- Canonical source ExecPlan: [../examples/canonical/execplan.md](../examples/canonical/execplan.md)
+- Canonical runtime input example: [../examples/canonical/workspace/execplan-runtime-input.json](../examples/canonical/workspace/execplan-runtime-input.json)
+- Project-mode differences are documented in [step-2-context-pack-workflow.md](step-2-context-pack-workflow.md).

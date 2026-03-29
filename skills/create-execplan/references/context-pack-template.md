@@ -38,6 +38,12 @@ Use it to capture:
 - Evidence artifact: `<workspace-root>/context-evidence.json`
 - Codemap artifact: `<workspace-root>/context-codemap.md`
 - Requirements freeze artifact: `<workspace-root>/requirements-freeze.md`
+- Phase manifest artifact: `<workspace-root>/phase-manifest.json`
+- Latest phase result artifact: `<workspace-root>/phase-result.json`
+- Research questions artifact: `<workspace-root>/research-questions.md`
+- Research findings artifact: `<workspace-root>/research-findings.md`
+- Design options artifact: `<workspace-root>/design-options.md`
+- Structure outline artifact: `<workspace-root>/structure-outline.md`
 - Notes: <important assumptions or constraints from intake>
 
 ## Guardrails (must-follow)

@@ -2,11 +2,11 @@
 
 ## Objective
 
-Normalize the approved draft into the canonical living execution document and generate the derived runtime input from that finalized structure.
+Normalize the approved draft into the canonical living execution document and generate the derived runtime input from the approved `execplan.md`.
 
 ## Required actions
 
-1. Confirm Step 3 approval is recorded in `workspace/draft-review.md`.
+1. Confirm Step 3 approval is recorded in `workspace/draft-review.md` and the latest checkpoint state has been normalized into `workspace/phase-result.json`.
 2. Finalize `execplan.md` against [execplan-template.md](execplan-template.md).
 3. Keep information placement aligned with [information-placement.md](information-placement.md):
    - ExecPlan owns tasks, task-local commands, progress, decisions, findings, and scenario verification coverage.
@@ -35,7 +35,7 @@ Normalize the approved draft into the canonical living execution document and ge
 
 ## Done when
 
-- `execplan.md` is finalized against the new lean contract.
-- `workspace/execplan-runtime-input.json` is regenerated from the finalized ExecPlan.
+- `execplan.md` is approved against the new lean contract.
+- `workspace/execplan-runtime-input.json` is regenerated from the approved `execplan.md`.
 - Task packets are explicit enough to satisfy a packet-only harness without implicit discovery.
 - The runtime artifact remains derived structure only and does not become a second plan.

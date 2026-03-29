@@ -1,0 +1,197 @@
+{
+  "schemaVersion": "1.0",
+  "selectedRunner": "codex",
+  "artifactRoot": ".plan/create-execplan/demo",
+  "workspaceRoot": ".plan/create-execplan/demo/workspace",
+  "projectRoot": ".",
+  "currentPhase": "handoff-checklist",
+  "lastCompletedPhase": "readiness-audit",
+  "lastUpdated": "2026-03-24T09:30:00Z",
+  "phases": [
+    {
+      "id": "preflight-and-scaffold",
+      "status": "complete",
+      "executionMode": "project_root",
+      "checkpoint": "complete",
+      "allowedInputArtifacts": [],
+      "expectedOutputArtifacts": [
+        "context-pack.md",
+        "execplan.md",
+        "review-checklist.md",
+        "workspace/context-discovery.md",
+        "workspace/context-evidence.json",
+        "workspace/context-codemap.md",
+        "workspace/requirements-freeze.md",
+        "workspace/draft-review.md",
+        "workspace/phase-manifest.json",
+        "workspace/phase-result.json",
+        "workspace/research-questions.md",
+        "workspace/research-findings.md",
+        "workspace/design-options.md",
+        "workspace/structure-outline.md"
+      ]
+    },
+    {
+      "id": "clarification-and-requirements-freeze",
+      "status": "complete",
+      "executionMode": "isolated",
+      "checkpoint": "needs_approval",
+      "allowedInputArtifacts": [
+        "workspace/context-discovery.md",
+        "workspace/context-evidence.json"
+      ],
+      "expectedOutputArtifacts": [
+        "workspace/requirements-freeze.md",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "research-question-planning",
+      "status": "complete",
+      "executionMode": "isolated",
+      "checkpoint": "complete",
+      "allowedInputArtifacts": [
+        "workspace/requirements-freeze.md",
+        "workspace/context-discovery.md"
+      ],
+      "expectedOutputArtifacts": [
+        "workspace/research-questions.md",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "research",
+      "status": "complete",
+      "executionMode": "project_root",
+      "checkpoint": "complete",
+      "allowedInputArtifacts": [
+        "workspace/research-questions.md",
+        "workspace/context-evidence.json",
+        "workspace/context-codemap.md"
+      ],
+      "expectedOutputArtifacts": [
+        "workspace/research-findings.md",
+        "workspace/context-evidence.json",
+        "workspace/context-codemap.md",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "design",
+      "status": "complete",
+      "executionMode": "isolated",
+      "checkpoint": "complete",
+      "allowedInputArtifacts": [
+        "workspace/research-findings.md",
+        "workspace/requirements-freeze.md"
+      ],
+      "expectedOutputArtifacts": [
+        "workspace/design-options.md",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "structure",
+      "status": "complete",
+      "executionMode": "isolated",
+      "checkpoint": "complete",
+      "allowedInputArtifacts": [
+        "workspace/design-options.md",
+        "workspace/research-findings.md",
+        "workspace/requirements-freeze.md"
+      ],
+      "expectedOutputArtifacts": [
+        "workspace/structure-outline.md",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "context-pack-assembly",
+      "status": "complete",
+      "executionMode": "isolated",
+      "checkpoint": "complete",
+      "allowedInputArtifacts": [
+        "workspace/structure-outline.md",
+        "workspace/research-findings.md",
+        "workspace/requirements-freeze.md",
+        "workspace/context-discovery.md",
+        "workspace/context-evidence.json",
+        "workspace/context-codemap.md"
+      ],
+      "expectedOutputArtifacts": [
+        "context-pack.md",
+        "workspace/context-codemap.md",
+        "workspace/context-evidence.json",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "execplan-draft-and-review",
+      "status": "complete",
+      "executionMode": "isolated",
+      "checkpoint": "needs_approval",
+      "allowedInputArtifacts": [
+        "context-pack.md",
+        "workspace/structure-outline.md",
+        "workspace/requirements-freeze.md",
+        "workspace/draft-review.md"
+      ],
+      "expectedOutputArtifacts": [
+        "execplan.md",
+        "workspace/draft-review.md",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "finalization",
+      "status": "complete",
+      "executionMode": "isolated",
+      "checkpoint": "complete",
+      "allowedInputArtifacts": [
+        "context-pack.md",
+        "execplan.md",
+        "workspace/draft-review.md",
+        "workspace/requirements-freeze.md"
+      ],
+      "expectedOutputArtifacts": [
+        "execplan.md",
+        "workspace/execplan-runtime-input.json",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "readiness-audit",
+      "status": "complete",
+      "executionMode": "project_root",
+      "checkpoint": "blocked_on_fail",
+      "allowedInputArtifacts": [
+        "context-pack.md",
+        "execplan.md",
+        "workspace/execplan-runtime-input.json"
+      ],
+      "expectedOutputArtifacts": [
+        "context-pack-validation.json",
+        "execplan-validation.json",
+        "workspace/phase-result.json"
+      ]
+    },
+    {
+      "id": "handoff-checklist",
+      "status": "pending",
+      "executionMode": "isolated",
+      "checkpoint": "complete",
+      "allowedInputArtifacts": [
+        "context-pack.md",
+        "execplan.md",
+        "review-checklist.md",
+        "context-pack-validation.json",
+        "execplan-validation.json",
+        "workspace/execplan-runtime-input.json"
+      ],
+      "expectedOutputArtifacts": [
+        "review-checklist.md",
+        "workspace/phase-result.json"
+      ]
+    }
+  ]
+}

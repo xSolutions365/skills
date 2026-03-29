@@ -10,7 +10,7 @@ Enforce the final review gate before the plan package is handed off.
 2. Record results in `<artifact-root>/review-checklist.md` using [review-checklist-template.md](review-checklist-template.md).
 3. Confirm `context-pack-validation.json` exists and reports `status: pass`.
 4. Confirm `execplan-validation.json` exists and reports `status: pass`.
-5. Confirm `workspace/execplan-runtime-input.json` exists and was regenerated from the finalized ExecPlan.
+5. Confirm `workspace/execplan-runtime-input.json` exists and was regenerated from the approved `execplan.md`.
 6. Confirm Step 1 and Step 3 checkpoint evidence exists in the workspace artifacts.
 7. Resolve every failing `P*` check before handoff.
 

@@ -9,6 +9,8 @@ import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
+from execplan_common import build_phase_manifest, render_repo_relative_path, write_json_file
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scaffold create-execplan artifacts.")
@@ -91,16 +93,6 @@ def resolve_target_path(project_root: Path, working_dir: Path) -> str:
         relative_path = working_dir.resolve().relative_to(project_root)
     except ValueError:
         return working_dir.resolve().as_posix()
-    if str(relative_path) == ".":
-        return "."
-    return relative_path.as_posix()
-
-
-def render_repo_relative_path(project_root: Path, path: Path) -> str:
-    try:
-        relative_path = path.resolve().relative_to(project_root.resolve())
-    except ValueError:
-        return path.resolve().as_posix()
     if str(relative_path) == ".":
         return "."
     return relative_path.as_posix()
@@ -281,6 +273,88 @@ def build_requirements_freeze_content(date_str: str, iso_ts: str) -> str:
     )
 
 
+def build_research_questions_content(date_str: str, iso_ts: str) -> str:
+    return (
+        "# Research Questions\n\n"
+        f"- Created: {date_str}\n"
+        f"- Last updated: {iso_ts}\n\n"
+        "## Objective Research Questions\n\n"
+        "1. \n"
+        "2. \n"
+        "3. \n\n"
+        "## Scope Guardrails\n\n"
+        "- Ask only codebase or approved-source questions tied to the frozen requirements.\n"
+        "- Do not encode a preferred implementation before research completes.\n"
+    )
+
+
+def build_research_findings_content(date_str: str, iso_ts: str) -> str:
+    return (
+        "# Research Findings\n\n"
+        f"- Created: {date_str}\n"
+        f"- Last updated: {iso_ts}\n\n"
+        "## Facts\n\n"
+        "- F1:\n"
+        "- F2:\n\n"
+        "## Assumptions\n\n"
+        "- A1:\n\n"
+        "## Unknowns\n\n"
+        "- U1:\n\n"
+        "## Risks\n\n"
+        "- R1:\n"
+    )
+
+
+def build_design_options_content(date_str: str, iso_ts: str) -> str:
+    return (
+        "# Design Options\n\n"
+        f"- Created: {date_str}\n"
+        f"- Last updated: {iso_ts}\n\n"
+        "## Candidate Approaches\n\n"
+        "### Option 1\n\n"
+        "- Summary:\n"
+        "- Pros:\n"
+        "- Cons:\n\n"
+        "### Option 2\n\n"
+        "- Summary:\n"
+        "- Pros:\n"
+        "- Cons:\n\n"
+        "## Selected Direction\n\n"
+        "- Chosen option:\n"
+        "- Rationale:\n"
+        "- Rejected alternatives:\n"
+    )
+
+
+def build_structure_outline_content(date_str: str, iso_ts: str) -> str:
+    return (
+        "# Structure Outline\n\n"
+        f"- Created: {date_str}\n"
+        f"- Last updated: {iso_ts}\n\n"
+        "## Interfaces\n\n"
+        "- Interface 1:\n\n"
+        "## Boundaries\n\n"
+        "- Boundary 1:\n\n"
+        "## Data Flow\n\n"
+        "- Flow 1:\n"
+    )
+
+
+def build_phase_result_content(iso_ts: str) -> dict[str, object]:
+    return {
+        "phase": "preflight",
+        "status": "complete",
+        "message": "Scaffold created the plan package and initialized phase control artifacts.",
+        "inputArtifacts": [],
+        "outputArtifacts": [
+            "workspace/phase-manifest.json",
+            "workspace/phase-result.json",
+        ],
+        "blockingIssues": [],
+        "updatedAt": iso_ts,
+    }
+
+
 def main() -> int:
     args = parse_args()
     working_dir = Path.cwd()
@@ -333,6 +407,12 @@ def main() -> int:
     evidence_path = workspace_root / "context-evidence.json"
     codemap_path = workspace_root / "context-codemap.md"
     freeze_path = workspace_root / "requirements-freeze.md"
+    research_questions_path = workspace_root / "research-questions.md"
+    research_findings_path = workspace_root / "research-findings.md"
+    design_options_path = workspace_root / "design-options.md"
+    structure_outline_path = workspace_root / "structure-outline.md"
+    phase_manifest_path = workspace_root / "phase-manifest.json"
+    phase_result_path = workspace_root / "phase-result.json"
     runtime_input_path = workspace_root / "execplan-runtime-input.json"
 
     context_path.write_text(context_content, encoding="utf-8")
@@ -356,6 +436,31 @@ def main() -> int:
         build_requirements_freeze_content(date_str=date_str, iso_ts=iso_ts),
         encoding="utf-8",
     )
+    research_questions_path.write_text(
+        build_research_questions_content(date_str=date_str, iso_ts=iso_ts),
+        encoding="utf-8",
+    )
+    research_findings_path.write_text(
+        build_research_findings_content(date_str=date_str, iso_ts=iso_ts),
+        encoding="utf-8",
+    )
+    design_options_path.write_text(
+        build_design_options_content(date_str=date_str, iso_ts=iso_ts),
+        encoding="utf-8",
+    )
+    structure_outline_path.write_text(
+        build_structure_outline_content(date_str=date_str, iso_ts=iso_ts),
+        encoding="utf-8",
+    )
+    write_json_file(
+        phase_manifest_path,
+        build_phase_manifest(
+            artifact_root=artifact_root,
+            runner="codex",
+            created_at=iso_ts,
+        ),
+    )
+    write_json_file(phase_result_path, build_phase_result_content(iso_ts=iso_ts))
 
     print(
         json.dumps(
@@ -370,6 +475,12 @@ def main() -> int:
                 "context_evidence": str(evidence_path),
                 "context_codemap": str(codemap_path),
                 "requirements_freeze": str(freeze_path),
+                "research_questions": str(research_questions_path),
+                "research_findings": str(research_findings_path),
+                "design_options": str(design_options_path),
+                "structure_outline": str(structure_outline_path),
+                "phase_manifest": str(phase_manifest_path),
+                "phase_result": str(phase_result_path),
                 "planned_runtime_input": str(runtime_input_path),
             },
             indent=2,

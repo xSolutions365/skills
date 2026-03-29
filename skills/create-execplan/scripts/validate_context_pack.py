@@ -358,6 +358,12 @@ def validate_workspace_artifact_paths(text: str) -> list[str]:
         "Evidence artifact": "workspace/context-evidence.json",
         "Codemap artifact": "workspace/context-codemap.md",
         "Requirements freeze artifact": "workspace/requirements-freeze.md",
+        "Phase manifest artifact": "workspace/phase-manifest.json",
+        "Latest phase result artifact": "workspace/phase-result.json",
+        "Research questions artifact": "workspace/research-questions.md",
+        "Research findings artifact": "workspace/research-findings.md",
+        "Design options artifact": "workspace/design-options.md",
+        "Structure outline artifact": "workspace/structure-outline.md",
     }
     for label, suffix in expected_paths.items():
         match = re.search(

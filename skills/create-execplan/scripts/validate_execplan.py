@@ -1,4 +1,4 @@
-"""Validate finalized ExecPlan completeness for create-execplan."""
+"""Validate execplan.md completeness for create-execplan."""
 
 from __future__ import annotations
 

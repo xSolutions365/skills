@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
+from datetime import UTC, datetime
+from pathlib import Path
 import re
+import json
 
 HEADING_PATTERN = re.compile(r"^#{1,6}\s+")
 PLACEHOLDER_PATTERN = re.compile(r"<[^>]+>")
@@ -11,6 +15,211 @@ TASK_REF_PATTERN = re.compile(r"^P\d+-T\d+$")
 ANCHOR_PATTERN = re.compile(r"[^`\s]+:\d+$")
 
 NA_VALUES = {"", "n/a", "na", "none", "not applicable"}
+PHASE_RESULT_STATUSES = {
+    "complete",
+    "needs_user_input",
+    "needs_approval",
+    "blocked",
+    "failed",
+}
+
+PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
+    "preflight": {
+        "kind": "deterministic",
+        "description": "Verify scaffolded artifacts exist before phase execution begins.",
+        "allowed_input_artifacts": [
+            "context-pack.md",
+            "execplan.md",
+            "review-checklist.md",
+            "workspace/context-discovery.md",
+            "workspace/context-evidence.json",
+            "workspace/context-codemap.md",
+            "workspace/requirements-freeze.md",
+            "workspace/draft-review.md",
+            "workspace/research-questions.md",
+            "workspace/research-findings.md",
+            "workspace/design-options.md",
+            "workspace/structure-outline.md",
+        ],
+        "expected_output_artifacts": [
+            "workspace/phase-manifest.json",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+    "requirements-freeze": {
+        "kind": "codex",
+        "description": "Capture clarifications and freeze the confirmed requirements.",
+        "allowed_input_artifacts": [
+            "workspace/context-discovery.md",
+            "workspace/context-evidence.json",
+            "workspace/requirements-freeze.md",
+            "execplan.md",
+        ],
+        "expected_output_artifacts": [
+            "workspace/context-discovery.md",
+            "workspace/context-evidence.json",
+            "workspace/requirements-freeze.md",
+            "execplan.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "requirements-freeze-approval",
+    },
+    "research-questions": {
+        "kind": "codex",
+        "description": "Turn the frozen requirements into concrete research questions.",
+        "allowed_input_artifacts": [
+            "workspace/requirements-freeze.md",
+            "workspace/context-discovery.md",
+        ],
+        "expected_output_artifacts": [
+            "workspace/research-questions.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+    "research": {
+        "kind": "codex",
+        "description": "Produce objective research findings from the approved questions.",
+        "allowed_input_artifacts": [
+            "workspace/requirements-freeze.md",
+            "workspace/research-questions.md",
+            "workspace/context-evidence.json",
+            "workspace/context-codemap.md",
+            "workspace/research-findings.md",
+        ],
+        "expected_output_artifacts": [
+            "workspace/context-evidence.json",
+            "workspace/context-codemap.md",
+            "workspace/research-findings.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+    "design": {
+        "kind": "codex",
+        "description": "Evaluate candidate approaches and record the chosen direction.",
+        "allowed_input_artifacts": [
+            "workspace/requirements-freeze.md",
+            "workspace/research-findings.md",
+            "workspace/design-options.md",
+        ],
+        "expected_output_artifacts": [
+            "workspace/design-options.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+    "structure": {
+        "kind": "codex",
+        "description": "Define interfaces, boundaries, and structural outline before planning.",
+        "allowed_input_artifacts": [
+            "workspace/requirements-freeze.md",
+            "workspace/research-findings.md",
+            "workspace/design-options.md",
+            "workspace/structure-outline.md",
+        ],
+        "expected_output_artifacts": [
+            "workspace/structure-outline.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+    "context-pack": {
+        "kind": "codex",
+        "description": "Assemble the durable Context Pack from approved upstream artifacts.",
+        "allowed_input_artifacts": [
+            "workspace/requirements-freeze.md",
+            "workspace/research-findings.md",
+            "workspace/design-options.md",
+            "workspace/structure-outline.md",
+            "workspace/context-discovery.md",
+            "workspace/context-evidence.json",
+            "workspace/context-codemap.md",
+            "context-pack.md",
+        ],
+        "expected_output_artifacts": [
+            "context-pack.md",
+            "workspace/context-evidence.json",
+            "workspace/context-codemap.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+    "execplan-draft": {
+        "kind": "codex",
+        "description": "Draft the ExecPlan from the approved context and structure outputs.",
+        "allowed_input_artifacts": [
+            "workspace/requirements-freeze.md",
+            "workspace/design-options.md",
+            "workspace/structure-outline.md",
+            "context-pack.md",
+            "execplan.md",
+            "workspace/draft-review.md",
+        ],
+        "expected_output_artifacts": [
+            "execplan.md",
+            "workspace/draft-review.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "execplan-draft-approval",
+    },
+    "finalization": {
+        "kind": "codex",
+        "description": "Finalize the approved ExecPlan before readiness audit and handoff.",
+        "allowed_input_artifacts": [
+            "context-pack.md",
+            "execplan.md",
+            "workspace/requirements-freeze.md",
+            "workspace/draft-review.md",
+        ],
+        "expected_output_artifacts": [
+            "execplan.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+    "readiness-audit": {
+        "kind": "deterministic",
+        "description": "Run validators, refresh the derived runtime input, and enforce rubric checks.",
+        "allowed_input_artifacts": [
+            "context-pack.md",
+            "execplan.md",
+            "workspace/requirements-freeze.md",
+            "workspace/draft-review.md",
+            "workspace/research-questions.md",
+            "workspace/research-findings.md",
+            "workspace/design-options.md",
+            "workspace/structure-outline.md",
+        ],
+        "expected_output_artifacts": [
+            "context-pack-validation.json",
+            "execplan-validation.json",
+            "workspace/execplan-runtime-input.json",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+    "handoff-checklist": {
+        "kind": "codex",
+        "description": "Complete the final checklist after readiness audit succeeds.",
+        "allowed_input_artifacts": [
+            "context-pack.md",
+            "execplan.md",
+            "review-checklist.md",
+            "context-pack-validation.json",
+            "execplan-validation.json",
+            "workspace/requirements-freeze.md",
+            "workspace/draft-review.md",
+            "workspace/execplan-runtime-input.json",
+        ],
+        "expected_output_artifacts": [
+            "review-checklist.md",
+            "workspace/phase-result.json",
+        ],
+        "checkpoint": "",
+    },
+}
 
 
 def lines(text: str) -> list[str]:
@@ -117,3 +326,61 @@ def normalize_status(raw: str) -> str:
     if stripped == "X":
         return "complete"
     return "outstanding"
+
+
+def utc_now_iso() -> str:
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+
+
+def build_phase_manifest(
+    artifact_root: Path,
+    runner: str,
+    created_at: str,
+) -> dict[str, object]:
+    workspace_root = artifact_root / "workspace"
+    phases: dict[str, dict[str, object]] = {}
+    for phase_name, definition in PHASE_DEFINITIONS.items():
+        workdir = workspace_root / "phases" / phase_name
+        phases[phase_name] = {
+            "kind": definition["kind"],
+            "description": definition["description"],
+            "status": "pending",
+            "runner": runner if definition["kind"] == "codex" else "deterministic",
+            "workdir": render_repo_relative_path(artifact_root, workdir),
+            "allowedInputArtifacts": deepcopy(definition["allowed_input_artifacts"]),
+            "expectedOutputArtifacts": deepcopy(
+                definition["expected_output_artifacts"]
+            ),
+            "checkpoint": definition["checkpoint"],
+            "lastRunAt": "",
+            "lastResultStatus": "",
+        }
+
+    return {
+        "schemaVersion": "1.0",
+        "createdAt": created_at,
+        "updatedAt": created_at,
+        "selectedRunner": runner,
+        "currentPhase": "preflight",
+        "phaseOrder": list(PHASE_DEFINITIONS.keys()),
+        "phases": phases,
+    }
+
+
+def render_repo_relative_path(project_root: Path, path: Path) -> str:
+    try:
+        relative_path = path.resolve().relative_to(project_root.resolve())
+    except ValueError:
+        return path.resolve().as_posix()
+    if str(relative_path) == ".":
+        return "."
+    return relative_path.as_posix()
+
+
+def read_json_file(path: Path) -> dict[str, object]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def write_json_file(path: Path, payload: dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")

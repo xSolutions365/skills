@@ -8,6 +8,12 @@
 - Runtime Input artifact: `.plan/create-execplan/demo/workspace/execplan-runtime-input.json` (generated after finalization; do not edit)
 - Requirements Freeze artifact: `.plan/create-execplan/demo/workspace/requirements-freeze.md`
 - Draft Review artifact: `.plan/create-execplan/demo/workspace/draft-review.md`
+- Phase Manifest artifact: `.plan/create-execplan/demo/workspace/phase-manifest.json`
+- Phase Result artifact: `.plan/create-execplan/demo/workspace/phase-result.json`
+- Research Questions artifact: `.plan/create-execplan/demo/workspace/research-questions.md`
+- Research Findings artifact: `.plan/create-execplan/demo/workspace/research-findings.md`
+- Design Options artifact: `.plan/create-execplan/demo/workspace/design-options.md`
+- Structure Outline artifact: `.plan/create-execplan/demo/workspace/structure-outline.md`
 - Links: docs/specs/create-execplan-rewrite.md
 
 ## Requirements Freeze
@@ -38,7 +44,7 @@ Deliver a slimmer plan package that keeps the markdown ExecPlan as the human-fac
 
 | Dependency | Purpose | Check command | Install command | Source | Hard-fail behavior |
 | ---------- | ------- | ------------- | --------------- | ------ | ------------------ |
-| none | no external dependencies beyond repo-standard tooling | `n/a` | `n/a` | n/a | continue with repo-standard tooling only |
+| codex cli | run fresh phase invocations | `codex --version` | `n/a` | local tool installation | stop and escalate to user on install failure |
 
 ## Task Table (single source of truth)
 
@@ -63,8 +69,8 @@ Use `n/a` when `Edit Targets`, `Supporting Context Anchors`, or `Commands` does 
 
 | Status | Phase # | Task # | Type | Req IDs | Edit Targets | Supporting Context Anchors | Commands | Expected Output | Action |
 | ------ | ------- | ------ | ---- | ------- | ------------ | -------------------------- | -------- | --------------- | ------ |
-|        | 1       | 1      | Code | R1,R2 | `skills/create-execplan/scripts/render_execplan_runtime_input.py:1`,`skills/create-execplan/scripts/validate_execplan.py:1`,`skills/create-execplan/references/runtime-input-schema.md:1` | `skills/create-execplan/references/information-placement.md:1`,`skills/create-execplan/references/step-4-finalize-execplan-workflow.md:1`,`tests/run_create_execplan_helpers.sh:1` | `n/a` | runtime input emits schema 4.0 compact task packets and validator enforces the same contract | Update the runtime renderer, schema reference, and validator to use the compact packet contract without duplicate verification fields. |
-|        | 1       | 2      | Code | R1,R3 | `skills/create-execplan/scripts/scaffold_execplan.py:1`,`skills/create-execplan/references/execplan-template.md:1`,`skills/create-execplan/references/context-pack-template.md:1`,`skills/create-execplan/references/review-checklist.md:1`,`skills/create-execplan/references/review-checklist-template.md:1`,`skills/create-execplan/examples/finalized-execplan.md:1`,`skills/create-execplan/examples/finalized-context-pack.md:1` | `skills/create-execplan/references/step-2-context-pack-workflow.md:1`,`skills/create-execplan/references/step-3-draft-review-workflow.md:1`,`skills/create-execplan/references/step-6-checklist-workflow.md:1` | `n/a` | scaffolded plan artifacts and examples use repo-relative metadata and leaner brownfield handoff sections | Update the scaffold, templates, checklist, and golden examples to remove brownfield filler and duplicated review noise. |
+|        | 1       | 1      | Code | R1,R3 | `skills/create-execplan/scripts/scaffold_execplan.py:1`,`skills/create-execplan/scripts/run_phase.py:1`,`skills/create-execplan/scripts/run_codex_phase.sh:1` | `skills/create-execplan/references/step-0-preflight-workflow.md:1`,`tests/run_create_execplan_helpers.sh:1` | `n/a` | scaffold and controller create deterministic phase artifacts and fresh-run contracts | Add the phase controller, Codex runner wrapper, and scaffolded workspace contracts. |
+|        | 1       | 2      | Code | R1,R2,R3 | `skills/create-execplan/scripts/validate_plan_rubric.py:1`,`skills/create-execplan/references/artifact-contract.md:1`,`skills/create-execplan/references/execplan-template.md:1`,`skills/create-execplan/references/context-pack-template.md:1` | `skills/create-execplan/references/step-5-readiness-audit-workflow.md:1`,`skills/create-execplan/references/step-6-checklist-workflow.md:1` | `n/a` | rubric validation and references enforce the new upstream planning contract without changing the final handoff package | Add skeptical rubric checks and update docs/templates/examples to the phase model. |
 |        | 2       | 3      | Test | R1,R2,R3 | `n/a` | `tests/run_create_execplan_helpers.sh:1` | `bash tests/run_create_execplan_helpers.sh` | create-execplan helper checks passed | Run the helper regression checks against the updated examples and scaffolder. |
 
 ## Progress Log (running)
@@ -79,8 +85,8 @@ Use `n/a` when `Edit Targets`, `Supporting Context Anchors`, or `Commands` does 
 
 ## Execution Findings
 
-- Finding: duplicated task command fields and checklist audit rows make the handoff package noisy without adding execution value.
-- Evidence: `skills/create-execplan/references/review-checklist.md`
+- Finding: upstream planning quality needs separate validation from the final packet contract.
+- Evidence: `skills/create-execplan/scripts/validate_plan_rubric.py`
 - Decision link: runtime task packets must be explicit enough for a packet-only harness to execute without plan-wide discovery
 - User approval (required if this introduces new discovery scope): not required
 
@@ -94,10 +100,10 @@ Use scenario-focused BDD coverage for changed behavior and high-risk regressions
 
 | Scenario ID | Priority | Given | When | Then | Evidence Command | Task Ref |
 | ----------- | -------- | ----- | ---- | ---- | ---------------- | -------- |
-| S1 | P0 | finalized example artifacts exist | the helper smoke checks run through the resolved runtime | the create-execplan helper suite passes | `bash tests/run_create_execplan_helpers.sh` | P2-T3 |
-| S2 | P1 | the runtime renderer and validator read the structured task rows | the helper fixture rerenders the runtime input | the runtime artifact contains only derived compact packet fields with no duplicate verification arrays | `bash tests/run_create_execplan_helpers.sh` | P1-T1 |
-| S3 | P1 | scaffolded examples and templates use repo-relative metadata | the helper fixture validates the example package | the example Context Pack omits brownfield filler sections and the checklist stays lean | `bash tests/run_create_execplan_helpers.sh` | P1-T2 |
+| S1 | P0 | canonical example artifacts exist | the helper smoke checks run through the resolved runtime | the create-execplan helper suite passes | `bash tests/run_create_execplan_helpers.sh` | P2-T3 |
+| S2 | P1 | a fresh phase invocation is launched through the wrapper | the controller runs an isolated design phase | the phase result and manifest are updated from the runner output | `bash tests/run_create_execplan_helpers.sh` | P1-T1 |
+| S3 | P1 | rubric validation reads the example workspace artifacts | the readiness checks run | missing approvals, missing structure, and vague packet language all fail validation | `bash tests/run_create_execplan_helpers.sh` | P1-T2 |
 
 ## Idempotence & Recovery
 
-Running scaffold with a fresh artifact root is safe. Re-running the renderer replaces only the generated runtime input. If validation fails, update the source markdown and rerender instead of editing the JSON directly.
+Running scaffold with a fresh artifact root is safe. Re-running the controller reruns only the selected phase. Re-running the renderer replaces only the generated runtime input. If validation fails, update the source markdown and rerender instead of editing the JSON directly.

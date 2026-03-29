@@ -3,7 +3,7 @@
   "generated": true,
   "editPolicy": "do-not-edit",
   "generatedAt": "2026-04-01T09:00:00Z",
-  "sourceExecplan": "fixture/finalized-execplan.md",
+  "sourceExecplan": "skills/create-execplan/examples/canonical/execplan.md",
   "requirements": [
     {
       "id": "R1",
@@ -27,21 +27,20 @@
       "type": "Code",
       "requirementIds": [
         "R1",
-        "R2"
+        "R3"
       ],
       "editTargets": [
-        "skills/create-execplan/scripts/render_execplan_runtime_input.py:1",
-        "skills/create-execplan/scripts/validate_execplan.py:1",
-        "skills/create-execplan/references/runtime-input-schema.md:1"
+        "skills/create-execplan/scripts/scaffold_execplan.py:1",
+        "skills/create-execplan/scripts/run_phase.py:1",
+        "skills/create-execplan/scripts/run_codex_phase.sh:1"
       ],
       "supportingContextAnchors": [
-        "skills/create-execplan/references/information-placement.md:1",
-        "skills/create-execplan/references/step-4-finalize-execplan-workflow.md:1",
+        "skills/create-execplan/references/step-0-preflight-workflow.md:1",
         "tests/run_create_execplan_helpers.sh:1"
       ],
       "commands": [],
-      "expectedOutput": "runtime input emits schema 4.0 compact task packets and validator enforces the same contract",
-      "action": "Update the runtime renderer, schema reference, and validator to use the compact packet contract without duplicate verification fields."
+      "expectedOutput": "scaffold and controller create deterministic phase artifacts and fresh-run contracts",
+      "action": "Add the phase controller, Codex runner wrapper, and scaffolded workspace contracts."
     },
     {
       "taskRef": "P1-T2",
@@ -51,25 +50,22 @@
       "type": "Code",
       "requirementIds": [
         "R1",
+        "R2",
         "R3"
       ],
       "editTargets": [
-        "skills/create-execplan/scripts/scaffold_execplan.py:1",
+        "skills/create-execplan/scripts/validate_plan_rubric.py:1",
+        "skills/create-execplan/references/artifact-contract.md:1",
         "skills/create-execplan/references/execplan-template.md:1",
-        "skills/create-execplan/references/context-pack-template.md:1",
-        "skills/create-execplan/references/review-checklist.md:1",
-        "skills/create-execplan/references/review-checklist-template.md:1",
-        "skills/create-execplan/examples/finalized-execplan.md:1",
-        "skills/create-execplan/examples/finalized-context-pack.md:1"
+        "skills/create-execplan/references/context-pack-template.md:1"
       ],
       "supportingContextAnchors": [
-        "skills/create-execplan/references/step-2-context-pack-workflow.md:1",
-        "skills/create-execplan/references/step-3-draft-review-workflow.md:1",
+        "skills/create-execplan/references/step-5-readiness-audit-workflow.md:1",
         "skills/create-execplan/references/step-6-checklist-workflow.md:1"
       ],
       "commands": [],
-      "expectedOutput": "scaffolded plan artifacts and examples use repo-relative metadata and leaner brownfield handoff sections",
-      "action": "Update the scaffold, templates, checklist, and golden examples to remove brownfield filler and duplicated review noise."
+      "expectedOutput": "rubric validation and references enforce the new upstream planning contract without changing the final handoff package",
+      "action": "Add skeptical rubric checks and update docs/templates/examples to the phase model."
     },
     {
       "taskRef": "P2-T3",

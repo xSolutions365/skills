@@ -2,7 +2,7 @@
 
 The `create-execplan` package is an artifact set, not a single markdown file.
 
-Reference baseline: [openai-codex-exec-plans.md](openai-codex-exec-plans.md).
+Reference baseline: this document and the retained workflow references are the canonical artifact contract for the skill.
 
 ## Canonical artifact layout
 
@@ -21,19 +21,27 @@ Workspace artifacts:
 - `workspace/context-codemap.md`
 - `workspace/requirements-freeze.md`
 - `workspace/draft-review.md`
+- `workspace/phase-manifest.json`
+- `workspace/phase-result.json`
+- `workspace/research-questions.md`
+- `workspace/research-findings.md`
+- `workspace/design-options.md`
+- `workspace/structure-outline.md`
 - `workspace/execplan-runtime-input.json` (generated after finalization; do not edit)
 
 ## Rules
 
 - `execplan.md` is the living human document.
 - `context-pack.md` is the durable context artifact.
-- `workspace/execplan-runtime-input.json` is derived from the finalized ExecPlan and must not be user-edited.
+- `workspace/phase-manifest.json` is the deterministic phase-routing contract for fresh-session execution.
+- `workspace/phase-result.json` is the latest normalized checkpoint result surfaced back to the parent agent.
+- `workspace/execplan-runtime-input.json` is derived from `execplan.md` and must not be user-edited.
 - The runtime input artifact is not generated during scaffold.
 - The old artifact name `execplan-task-packets.json` is obsolete and must not appear in the rewritten skill.
 
-## Examples
+## Canonical example
 
-- Brownfield Context Pack example: [../examples/finalized-context-pack.md](../examples/finalized-context-pack.md)
-- Brownfield ExecPlan example: [../examples/finalized-execplan.md](../examples/finalized-execplan.md)
-- Greenfield Context Pack example: [../examples/greenfield/finalized-context-pack.md](../examples/greenfield/finalized-context-pack.md)
-- Greenfield ExecPlan example: [../examples/greenfield/finalized-execplan.md](../examples/greenfield/finalized-execplan.md)
+- Canonical example package index: [../examples/canonical/README.md](../examples/canonical/README.md)
+- Canonical Context Pack example: [../examples/canonical/context-pack.md](../examples/canonical/context-pack.md)
+- Canonical ExecPlan example: [../examples/canonical/execplan.md](../examples/canonical/execplan.md)
+- Project-mode differences are documented in [step-2-context-pack-workflow.md](step-2-context-pack-workflow.md) rather than a second full example package.
