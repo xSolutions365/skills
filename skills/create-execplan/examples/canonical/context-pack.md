@@ -1,4 +1,4 @@
-# Context Pack: Canonical create-execplan package
+# Context Pack: Canonical create-execplan maintenance example
 
 - Created: 2026-03-24
 - Repo root: `.`
@@ -10,7 +10,7 @@
 
 ## Change Brief (1-3 paragraphs)
 
-This example package demonstrates the Codex-first phase orchestration model while preserving the existing handoff package. The intermediate workspace artifacts carry clarification, research, design, and structure decisions forward without leaking raw transcript history.
+This example package demonstrates a maintenance change to `create-execplan` that tightens phase isolation and plan-quality validation while preserving the final handoff package. The intermediate workspace artifacts carry clarification, research, design, and structure decisions forward without leaking raw transcript history.
 
 ## Requirement Freeze (user-confirmed)
 
@@ -52,14 +52,14 @@ This example package demonstrates the Codex-first phase orchestration model whil
 | Evidence ID | Type | Source | Published | Retrieved | Trust rationale |
 | ----------- | ---- | ------ | --------- | --------- | --------------- |
 | E1 | doc | skills/create-execplan/references/artifact-contract.md | undated:repo-reference | 2026-03-24 | canonical artifact contract reference |
-| E2 | code | skills/create-execplan/scripts/run_phase.py | undated:repo-reference | 2026-03-24 | deterministic phase controller reference |
+| E2 | code | skills/create-execplan/scripts/run_phase.py | undated:repo-reference | 2026-03-24 | isolated phase controller reference |
 
 ## Verification Baseline & Strategy
 
 - Verification scenario: `brownfield-existing`
 - Existing verification commands: `bash tests/run_create_execplan_helpers.sh`
 - User decision when verification missing: `n/a-existing`
-- Planned verification scope: validate scaffolded artifacts, runner contract, rubric checks, and runtime-input generation
+- Planned verification scope: validate scaffolded artifacts, isolated phase-runner contracts, rubric checks, and runtime-input generation
 - Mandatory smoke gate command: `bash tests/run_create_execplan_helpers.sh`
 - Smoke gate expected success signal: create-execplan helper checks passed
 

@@ -5,7 +5,7 @@
 
 ## Captured Inputs Playback
 
-- Scope and user-visible outcomes: keep the final handoff package unchanged while introducing deterministic phase orchestration.
+- Scope and user-visible outcomes: keep the final handoff package unchanged while tightening isolated phase execution and plan-quality validation.
 - Constraints and non-goals: preserve packet-only runtime execution and do not reintroduce legacy plan artifacts.
 - User-provided artifacts and starting views: existing create-execplan skill references, helpers, and examples.
 - Assumptions to validate with user: Codex CLI is the only runner in scope for the first iteration.
@@ -27,4 +27,4 @@
 - Confirmation prompt: Confirm the requirements playback in workspace/requirements-freeze.md is final and I should proceed to context analysis.
 - Confirmed by user at: 2026-03-24T09:00:00Z
 - User approval response (verbatim excerpt): requirements confirmed; proceed to context analysis
-- Confirmation note: proceed with Codex-first deterministic phase orchestration
+- Confirmation note: proceed with isolated phase execution and validation updates

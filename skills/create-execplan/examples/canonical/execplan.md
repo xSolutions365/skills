@@ -1,4 +1,4 @@
-# ExecPlan: Canonical create-execplan package
+# ExecPlan: Canonical create-execplan maintenance example
 
 - Status: In Progress
 - Start: 2026-03-24 • Last Updated: 2026-03-24T09:30:00Z
@@ -19,13 +19,13 @@
 ## Requirements Freeze
 
 - R1: Keep the ExecPlan as the living human document.
-- R2: Generate a narrow runtime input artifact from explicit task packets.
+- R2: Preserve a narrow runtime input artifact from explicit task packets.
 - R3: Keep scaffolded plan metadata and helper examples repo-relative and packet-executable.
 - Confirmed by user at: 2026-03-24T09:00:00Z
 
 ## Purpose / Big Picture
 
-Deliver a slimmer plan package that keeps the markdown ExecPlan as the human-facing source of truth while generating a smaller runtime artifact that a packet-only harness can execute safely without duplicating plan-level verification data.
+Strengthen isolated phase execution and plan-quality validation for `create-execplan` while keeping the markdown ExecPlan as the human-facing source of truth and preserving the final handoff package.
 
 ## Success Criteria (how to prove "done")
 
@@ -69,13 +69,13 @@ Use `n/a` when `Edit Targets`, `Supporting Context Anchors`, or `Commands` does 
 
 | Status | Phase # | Task # | Type | Req IDs | Edit Targets | Supporting Context Anchors | Commands | Expected Output | Action |
 | ------ | ------- | ------ | ---- | ------- | ------------ | -------------------------- | -------- | --------------- | ------ |
-|        | 1       | 1      | Code | R1,R3 | `skills/create-execplan/scripts/scaffold_execplan.py:1`,`skills/create-execplan/scripts/run_phase.py:1`,`skills/create-execplan/scripts/run_codex_phase.sh:1` | `skills/create-execplan/references/step-0-preflight-workflow.md:1`,`tests/run_create_execplan_helpers.sh:1` | `n/a` | scaffold and controller create deterministic phase artifacts and fresh-run contracts | Add the phase controller, Codex runner wrapper, and scaffolded workspace contracts. |
-|        | 1       | 2      | Code | R1,R2,R3 | `skills/create-execplan/scripts/validate_plan_rubric.py:1`,`skills/create-execplan/references/artifact-contract.md:1`,`skills/create-execplan/references/execplan-template.md:1`,`skills/create-execplan/references/context-pack-template.md:1` | `skills/create-execplan/references/step-5-readiness-audit-workflow.md:1`,`skills/create-execplan/references/step-6-checklist-workflow.md:1` | `n/a` | rubric validation and references enforce the new upstream planning contract without changing the final handoff package | Add skeptical rubric checks and update docs/templates/examples to the phase model. |
+|        | 1       | 1      | Code | R1,R3 | `skills/create-execplan/scripts/scaffold_execplan.py:1`,`skills/create-execplan/scripts/run_phase.py:1`,`skills/create-execplan/scripts/run_codex_phase.sh:1` | `skills/create-execplan/references/step-0-preflight-workflow.md:1`,`tests/run_create_execplan_helpers.sh:1` | `n/a` | scaffold and controller create deterministic phase artifacts and isolated run contracts | Implement isolated phase-runner contracts and scaffolded workspace artifacts. |
+|        | 1       | 2      | Code | R1,R2,R3 | `skills/create-execplan/scripts/validate_plan_rubric.py:1`,`skills/create-execplan/references/artifact-contract.md:1`,`skills/create-execplan/references/execplan-template.md:1`,`skills/create-execplan/references/context-pack-template.md:1` | `skills/create-execplan/references/step-5-readiness-audit-workflow.md:1`,`skills/create-execplan/references/step-6-checklist-workflow.md:1` | `n/a` | rubric validation and references keep planning quality strict without changing the final handoff package | Add rubric validation and align docs, templates, and examples to the maintained contract. |
 |        | 2       | 3      | Test | R1,R2,R3 | `n/a` | `tests/run_create_execplan_helpers.sh:1` | `bash tests/run_create_execplan_helpers.sh` | create-execplan helper checks passed | Run the helper regression checks against the updated examples and scaffolder. |
 
 ## Progress Log (running)
 
-- (2026-03-24T09:30Z) Draft contract finalized and runtime-input generation moved to post-finalization.
+- (2026-03-24T09:30Z) Draft updated to reflect isolated phase execution and canonical example packaging.
 
 ## Decision Log
 
@@ -85,7 +85,7 @@ Use `n/a` when `Edit Targets`, `Supporting Context Anchors`, or `Commands` does 
 
 ## Execution Findings
 
-- Finding: upstream planning quality needs separate validation from the final packet contract.
+- Finding: plan-quality validation needs to stay separate from runtime packet rendering.
 - Evidence: `skills/create-execplan/scripts/validate_plan_rubric.py`
 - Decision link: runtime task packets must be explicit enough for a packet-only harness to execute without plan-wide discovery
 - User approval (required if this introduces new discovery scope): not required

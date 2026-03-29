@@ -11,7 +11,7 @@
     },
     {
       "id": "R2",
-      "text": "Generate a narrow runtime input artifact from explicit task packets."
+      "text": "Preserve a narrow runtime input artifact from explicit task packets."
     },
     {
       "id": "R3",
@@ -39,8 +39,8 @@
         "tests/run_create_execplan_helpers.sh:1"
       ],
       "commands": [],
-      "expectedOutput": "scaffold and controller create deterministic phase artifacts and fresh-run contracts",
-      "action": "Add the phase controller, Codex runner wrapper, and scaffolded workspace contracts."
+      "expectedOutput": "scaffold and controller create deterministic phase artifacts and isolated run contracts",
+      "action": "Implement isolated phase-runner contracts and scaffolded workspace artifacts."
     },
     {
       "taskRef": "P1-T2",
@@ -64,8 +64,8 @@
         "skills/create-execplan/references/step-6-checklist-workflow.md:1"
       ],
       "commands": [],
-      "expectedOutput": "rubric validation and references enforce the new upstream planning contract without changing the final handoff package",
-      "action": "Add skeptical rubric checks and update docs/templates/examples to the phase model."
+      "expectedOutput": "rubric validation and references keep planning quality strict without changing the final handoff package",
+      "action": "Add rubric validation and align docs, templates, and examples to the maintained contract."
     },
     {
       "taskRef": "P2-T3",
