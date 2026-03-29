@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
   "selectedRunner": "codex",
-  "artifactRoot": ".plan/create-execplan/demo",
-  "workspaceRoot": ".plan/create-execplan/demo/workspace",
+  "artifactRoot": ".plan/create-execplan/canonical",
+  "workspaceRoot": ".plan/create-execplan/canonical/workspace",
   "projectRoot": ".",
   "currentPhase": "handoff-checklist",
   "lastCompletedPhase": "readiness-audit",

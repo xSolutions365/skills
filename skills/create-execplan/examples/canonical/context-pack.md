@@ -1,12 +1,12 @@
-# Context Pack: Demo create-execplan rewrite
+# Context Pack: Canonical create-execplan package
 
 - Created: 2026-03-24
 - Repo root: `.`
 - Target path: `.`
 - Project mode: `brownfield`
-- Artifact root: `.plan/create-execplan/demo`
-- Workspace root: `.plan/create-execplan/demo/workspace`
-- Related links: docs/specs/create-execplan-rewrite.md
+- Artifact root: `.plan/create-execplan/canonical`
+- Workspace root: `.plan/create-execplan/canonical/workspace`
+- Related links: skills/create-execplan/references/artifact-contract.md
 
 ## Change Brief (1-3 paragraphs)
 
@@ -21,16 +21,16 @@ This example package demonstrates the Codex-first phase orchestration model whil
 
 ## Discovery Inputs
 
-- Intake artifact: `.plan/create-execplan/demo/workspace/context-discovery.md`
-- Evidence artifact: `.plan/create-execplan/demo/workspace/context-evidence.json`
-- Codemap artifact: `.plan/create-execplan/demo/workspace/context-codemap.md`
-- Requirements freeze artifact: `.plan/create-execplan/demo/workspace/requirements-freeze.md`
-- Phase manifest artifact: `.plan/create-execplan/demo/workspace/phase-manifest.json`
-- Latest phase result artifact: `.plan/create-execplan/demo/workspace/phase-result.json`
-- Research questions artifact: `.plan/create-execplan/demo/workspace/research-questions.md`
-- Research findings artifact: `.plan/create-execplan/demo/workspace/research-findings.md`
-- Design options artifact: `.plan/create-execplan/demo/workspace/design-options.md`
-- Structure outline artifact: `.plan/create-execplan/demo/workspace/structure-outline.md`
+- Intake artifact: `.plan/create-execplan/canonical/workspace/context-discovery.md`
+- Evidence artifact: `.plan/create-execplan/canonical/workspace/context-evidence.json`
+- Codemap artifact: `.plan/create-execplan/canonical/workspace/context-codemap.md`
+- Requirements freeze artifact: `.plan/create-execplan/canonical/workspace/requirements-freeze.md`
+- Phase manifest artifact: `.plan/create-execplan/canonical/workspace/phase-manifest.json`
+- Latest phase result artifact: `.plan/create-execplan/canonical/workspace/phase-result.json`
+- Research questions artifact: `.plan/create-execplan/canonical/workspace/research-questions.md`
+- Research findings artifact: `.plan/create-execplan/canonical/workspace/research-findings.md`
+- Design options artifact: `.plan/create-execplan/canonical/workspace/design-options.md`
+- Structure outline artifact: `.plan/create-execplan/canonical/workspace/structure-outline.md`
 - Notes: The example package uses repo-local references only.
 
 ## Guardrails (must-follow)

@@ -5,7 +5,7 @@
 
 ## Interfaces
 
-- Interface 1: `run_phase.py --phase research --artifact-root .plan/create-execplan/demo --runner codex`
+- Interface 1: `run_phase.py --phase research --artifact-root .plan/create-execplan/canonical --runner codex`
 
 ## Boundaries
 

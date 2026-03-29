@@ -1,20 +1,20 @@
-# ExecPlan: Demo create-execplan rewrite
+# ExecPlan: Canonical create-execplan package
 
 - Status: In Progress
 - Start: 2026-03-24 • Last Updated: 2026-03-24T09:30:00Z
-- Artifact root: `.plan/create-execplan/demo/`
-- Workspace root: `.plan/create-execplan/demo/workspace/`
-- Context Pack: `.plan/create-execplan/demo/context-pack.md`
-- Runtime Input artifact: `.plan/create-execplan/demo/workspace/execplan-runtime-input.json` (generated after finalization; do not edit)
-- Requirements Freeze artifact: `.plan/create-execplan/demo/workspace/requirements-freeze.md`
-- Draft Review artifact: `.plan/create-execplan/demo/workspace/draft-review.md`
-- Phase Manifest artifact: `.plan/create-execplan/demo/workspace/phase-manifest.json`
-- Phase Result artifact: `.plan/create-execplan/demo/workspace/phase-result.json`
-- Research Questions artifact: `.plan/create-execplan/demo/workspace/research-questions.md`
-- Research Findings artifact: `.plan/create-execplan/demo/workspace/research-findings.md`
-- Design Options artifact: `.plan/create-execplan/demo/workspace/design-options.md`
-- Structure Outline artifact: `.plan/create-execplan/demo/workspace/structure-outline.md`
-- Links: docs/specs/create-execplan-rewrite.md
+- Artifact root: `.plan/create-execplan/canonical/`
+- Workspace root: `.plan/create-execplan/canonical/workspace/`
+- Context Pack: `.plan/create-execplan/canonical/context-pack.md`
+- Runtime Input artifact: `.plan/create-execplan/canonical/workspace/execplan-runtime-input.json` (generated after finalization; do not edit)
+- Requirements Freeze artifact: `.plan/create-execplan/canonical/workspace/requirements-freeze.md`
+- Draft Review artifact: `.plan/create-execplan/canonical/workspace/draft-review.md`
+- Phase Manifest artifact: `.plan/create-execplan/canonical/workspace/phase-manifest.json`
+- Phase Result artifact: `.plan/create-execplan/canonical/workspace/phase-result.json`
+- Research Questions artifact: `.plan/create-execplan/canonical/workspace/research-questions.md`
+- Research Findings artifact: `.plan/create-execplan/canonical/workspace/research-findings.md`
+- Design Options artifact: `.plan/create-execplan/canonical/workspace/design-options.md`
+- Structure Outline artifact: `.plan/create-execplan/canonical/workspace/structure-outline.md`
+- Links: skills/create-execplan/references/artifact-contract.md
 
 ## Requirements Freeze
 

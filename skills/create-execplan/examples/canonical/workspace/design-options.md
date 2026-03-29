@@ -22,4 +22,4 @@
 
 ## Open Decisions
 
-- D1: none for the example fixture
+- D1: none for the canonical example package
