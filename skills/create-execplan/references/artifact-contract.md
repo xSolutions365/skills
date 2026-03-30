@@ -44,4 +44,5 @@ Workspace artifacts:
 - Canonical example package index: [../examples/canonical/README.md](../examples/canonical/README.md)
 - Canonical Context Pack example: [../examples/canonical/context-pack.md](../examples/canonical/context-pack.md)
 - Canonical ExecPlan example: [../examples/canonical/execplan.md](../examples/canonical/execplan.md)
+- Live repro fixture package index: [../examples/live-repro-green/README.md](../examples/live-repro-green/README.md)
 - Project-mode differences are documented in [step-2-context-pack-workflow.md](step-2-context-pack-workflow.md) rather than a second full example package.

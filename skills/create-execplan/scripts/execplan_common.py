@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from copy import deepcopy
 from datetime import UTC, datetime
+from hashlib import sha256
 from pathlib import Path
 import re
 import json
+import tempfile
 
 HEADING_PATTERN = re.compile(r"^#{1,6}\s+")
 PLACEHOLDER_PATTERN = re.compile(r"<[^>]+>")
@@ -332,21 +334,25 @@ def utc_now_iso() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
+def phase_sandbox_workdir(artifact_root: Path, phase_name: str) -> Path:
+    digest = sha256(str(artifact_root.resolve()).encode("utf-8")).hexdigest()[:16]
+    return Path(tempfile.gettempdir()) / "create-execplan-phases" / digest / phase_name
+
+
 def build_phase_manifest(
     artifact_root: Path,
     runner: str,
     created_at: str,
 ) -> dict[str, object]:
-    workspace_root = artifact_root / "workspace"
     phases: dict[str, dict[str, object]] = {}
     for phase_name, definition in PHASE_DEFINITIONS.items():
-        workdir = workspace_root / "phases" / phase_name
+        workdir = phase_sandbox_workdir(artifact_root, phase_name)
         phases[phase_name] = {
             "kind": definition["kind"],
             "description": definition["description"],
             "status": "pending",
             "runner": runner if definition["kind"] == "codex" else "deterministic",
-            "workdir": render_repo_relative_path(artifact_root, workdir),
+            "workdir": str(workdir),
             "allowedInputArtifacts": deepcopy(definition["allowed_input_artifacts"]),
             "expectedOutputArtifacts": deepcopy(
                 definition["expected_output_artifacts"]

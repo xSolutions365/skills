@@ -76,11 +76,23 @@ fi
 
 stdout_target="${STDOUT_FILE:-/dev/stdout}"
 stderr_target="${STDERR_FILE:-/dev/stderr}"
+SOURCE_CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+TMP_CODEX_HOME="$(mktemp -d)"
 
-"$CODEX_BIN" exec \
+cleanup() {
+  rm -rf "$TMP_CODEX_HOME"
+}
+trap cleanup EXIT
+
+if [[ -f "$SOURCE_CODEX_HOME/auth.json" ]]; then
+  cp "$SOURCE_CODEX_HOME/auth.json" "$TMP_CODEX_HOME/auth.json"
+fi
+
+CODEX_HOME="$TMP_CODEX_HOME" "$CODEX_BIN" exec \
   --ephemeral \
   --json \
   --color never \
+  --sandbox workspace-write \
   --skip-git-repo-check \
   -C "$PHASE_WORKDIR" \
   --output-schema "$SCHEMA_FILE" \

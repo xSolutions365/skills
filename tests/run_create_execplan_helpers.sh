@@ -6,6 +6,7 @@ RESOLVER="$ROOT_DIR/skills/create-execplan/scripts/resolve_python.sh"
 PYTHON_CMD="$("$RESOLVER")"
 EXAMPLES_DIR="$ROOT_DIR/skills/create-execplan/examples"
 CANONICAL_EXAMPLES_DIR="$EXAMPLES_DIR/canonical"
+LIVE_REPRO_FIXTURE_DIR="$EXAMPLES_DIR/live-repro-green"
 TMP_DIR="$(mktemp -d)"
 
 cleanup() {
@@ -41,6 +42,9 @@ trap cleanup EXIT
 rg -q '^## Existing Change Surface \(required for brownfield; optional for greenfield\)$' "$TMP_DIR/scaffold/context-pack.md"
 rg -q '"currentPhase": "preflight"' "$TMP_DIR/scaffold/workspace/phase-manifest.json"
 rg -q '^\| Status \| Phase # \| Task # \| Type \| Req IDs \| Edit Targets \| Supporting Context Anchors \| Commands \| Expected Output \| Action \|$' "$TMP_DIR/scaffold/execplan.md"
+rg -q '^- Confirmed by user at: <ISO8601 UTC>$' "$TMP_DIR/scaffold/context-pack.md"
+rg -q '^- Confirmed by user at: <ISO8601 UTC>$' "$TMP_DIR/scaffold/execplan.md"
+rg -q '^  - Date: <YYYY-MM-DD>$' "$TMP_DIR/scaffold/execplan.md"
 
 "$PYTHON_CMD" "$ROOT_DIR/skills/create-execplan/scripts/scaffold_execplan.py" \
   --title "Greenfield Fixture" \
@@ -59,6 +63,7 @@ RESULT_FILE=""
 WORKDIR=""
 PROMPT_CAPTURE=""
 ARGS_CAPTURE=""
+CODEX_HOME_CAPTURE=""
 
 subcommand="$1"
 shift
@@ -89,10 +94,12 @@ done
 
 ARGS_CAPTURE="${WORKDIR}/fake-codex-argv.txt"
 PROMPT_CAPTURE="${WORKDIR}/fake-codex-prompt.txt"
+CODEX_HOME_CAPTURE="${WORKDIR}/fake-codex-codex-home.txt"
 printf '%s\n' "$0 exec --ephemeral --json --color never --skip-git-repo-check -C $WORKDIR -o $RESULT_FILE" > "$ARGS_CAPTURE"
+printf '%s\n' "${CODEX_HOME:-}" > "$CODEX_HOME_CAPTURE"
 cat > "$PROMPT_CAPTURE"
 
-phase_name="$(sed -n 's/.*create-execplan `\([^`]*\)` phase.*/\1/p' "$PROMPT_CAPTURE" | head -n 1)"
+phase_name="$(sed -n 's/.*isolated planning phase `\([^`]*\)`.*/\1/p' "$PROMPT_CAPTURE" | head -n 1)"
 if [[ -z "$phase_name" ]]; then
   phase_name="research"
 fi
@@ -117,7 +124,7 @@ chmod +x "$FAKE_CODEX"
 NONREPO_WORKDIR="$TMP_DIR/nonrepo-phase"
 mkdir -p "$NONREPO_WORKDIR"
 cat > "$TMP_DIR/wrapper-prompt.txt" <<'EOF'
-You are executing the create-execplan `research` phase.
+You are executing the isolated planning phase `research` for an already-scaffolded plan package.
 EOF
 cat > "$TMP_DIR/wrapper-schema.json" <<'EOF'
 {
@@ -135,9 +142,12 @@ EOF
   --stderr-file "$TMP_DIR/wrapper-stderr.log"
 
 rg -q -- '--skip-git-repo-check' "$NONREPO_WORKDIR/fake-codex-argv.txt"
-rg -q 'create-execplan `research` phase' "$NONREPO_WORKDIR/fake-codex-prompt.txt"
+rg -q 'isolated planning phase `research`' "$NONREPO_WORKDIR/fake-codex-prompt.txt"
+! rg -q 'create-execplan' "$NONREPO_WORKDIR/fake-codex-prompt.txt"
 rg -q '"phase":"research"' "$TMP_DIR/wrapper-result.json"
 rg -q 'fake codex diagnostic' "$TMP_DIR/wrapper-stderr.log"
+[[ -s "$NONREPO_WORKDIR/fake-codex-codex-home.txt" ]]
+[[ "$(cat "$NONREPO_WORKDIR/fake-codex-codex-home.txt")" != "$HOME/.codex" ]]
 
 "$PYTHON_CMD" "$ROOT_DIR/skills/create-execplan/scripts/run_phase.py" \
   --phase preflight \
@@ -148,10 +158,38 @@ rg -q 'fake codex diagnostic' "$TMP_DIR/wrapper-stderr.log"
   --artifact-root "$TMP_DIR/scaffold" \
   --codex-bin "$FAKE_CODEX" >/dev/null
 
+RESEARCH_WORKDIR="$("$PYTHON_CMD" - "$TMP_DIR/scaffold/workspace/phase-manifest.json" <<'PY'
+from __future__ import annotations
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(payload["phases"]["research"]["workdir"])
+PY
+)"
+
 rg -q '"phase": "research"' "$TMP_DIR/scaffold/workspace/phase-result.json"
 rg -q '"status": "complete"' "$TMP_DIR/scaffold/workspace/phase-result.json"
 rg -q '"currentPhase": "design"' "$TMP_DIR/scaffold/workspace/phase-manifest.json"
-[[ -f "$TMP_DIR/scaffold/workspace/phases/research/fake-codex-prompt.txt" ]]
+[[ "$RESEARCH_WORKDIR" = /* ]]
+[[ "$RESEARCH_WORKDIR" != "$TMP_DIR/scaffold"* ]]
+[[ -f "$RESEARCH_WORKDIR/fake-codex-prompt.txt" ]]
+rg -q 'do not delegate or use agent-management tools' "$TMP_DIR/scaffold/workspace/phases/research/.codex-phase/prompt.txt"
+rg -q 'do not inspect git state, git history, or ancestor directories' "$TMP_DIR/scaffold/workspace/phases/research/.codex-phase/prompt.txt"
+rg -q 'do not load or invoke any skills' "$TMP_DIR/scaffold/workspace/phases/research/.codex-phase/prompt.txt"
+rg -q '"blockingIssues"' "$TMP_DIR/scaffold/workspace/phases/research/.codex-phase/schema.json"
+"$PYTHON_CMD" - "$TMP_DIR/scaffold/workspace/phases/research/.codex-phase/schema.json" <<'PY'
+from __future__ import annotations
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+required = payload.get("required", [])
+if "blockingIssues" not in required:
+    raise SystemExit("schema.json must require blockingIssues")
+PY
 
 cp -R "$TMP_DIR/scaffold" "$TMP_DIR/scaffold-invalid"
 "$PYTHON_CMD" - "$TMP_DIR/scaffold-invalid/workspace/phase-manifest.json" <<'PY'
@@ -184,6 +222,18 @@ fi
 "$PYTHON_CMD" "$ROOT_DIR/skills/create-execplan/scripts/validate_plan_rubric.py" \
   --artifact-root "$CANONICAL_EXAMPLES_DIR" \
   --output "$TMP_DIR/plan-rubric-validation.json" >/dev/null
+
+"$PYTHON_CMD" "$ROOT_DIR/skills/create-execplan/scripts/validate_context_pack.py" \
+  --context-pack "$LIVE_REPRO_FIXTURE_DIR/context-pack.md" \
+  --output "$TMP_DIR/live-repro-context-pack-validation.json" >/dev/null
+
+"$PYTHON_CMD" "$ROOT_DIR/skills/create-execplan/scripts/validate_execplan.py" \
+  --execplan "$LIVE_REPRO_FIXTURE_DIR/execplan.md" \
+  --output "$TMP_DIR/live-repro-execplan-validation.json" >/dev/null
+
+"$PYTHON_CMD" "$ROOT_DIR/skills/create-execplan/scripts/validate_plan_rubric.py" \
+  --artifact-root "$LIVE_REPRO_FIXTURE_DIR" \
+  --output "$TMP_DIR/live-repro-plan-rubric-validation.json" >/dev/null
 
 "$PYTHON_CMD" "$ROOT_DIR/skills/create-execplan/scripts/render_execplan_runtime_input.py" \
   --execplan "$CANONICAL_EXAMPLES_DIR/execplan.md" \

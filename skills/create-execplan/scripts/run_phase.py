@@ -176,6 +176,7 @@ def build_phase_schema() -> dict[str, object]:
             "message",
             "inputArtifacts",
             "outputArtifacts",
+            "blockingIssues",
         ],
     }
 
@@ -191,7 +192,7 @@ def build_phase_prompt(phase_name: str) -> str:
         if path != "workspace/phase-result.json"
     )
     checkpoint = str(definition["checkpoint"]).strip() or "none"
-    return f"""You are executing the create-execplan `{phase_name}` phase.
+    return f"""You are executing the isolated planning phase `{phase_name}` for an already-scaffolded plan package.
 
 Phase purpose: {definition["description"]}
 Current working directory contains only the staged artifacts for this phase.
@@ -205,7 +206,14 @@ Files you may update for this phase:
 Hard rules:
 - do not rely on any prior conversation or external memory
 - do not read or write files outside the current working directory
+- do not inspect git state, git history, or ancestor directories; only the staged files in the current working directory are relevant
 - do not invent new requirements
+- do not delegate or use agent-management tools (`spawn_agent`, `send_input`, `wait_agent`, `resume_agent`, `close_agent`)
+- do not load or invoke any skills, including planning skills
+- treat missing git metadata as expected rather than a blocker
+- the parent controller handles user interaction and approvals; if approval is required, update only the allowed artifacts and return the matching status
+- if a checkpoint is reached, draft the reviewable artifact updates first, then return the checkpoint status instead of stopping with untouched templates
+- do not leave placeholders in required phase outputs when the staged inputs already provide enough information to replace them with concrete draft content
 - return only a JSON object matching the provided schema
 
 Checkpoint for this phase: {checkpoint}
@@ -219,16 +227,17 @@ Otherwise use `complete`.
 def invoke_codex_phase(
     artifact_root: Path,
     workdir: Path,
+    control_dir: Path,
     phase_name: str,
     codex_bin: str,
 ) -> dict[str, object]:
-    control_dir = workdir / ".codex-phase"
-    control_dir.mkdir(parents=True, exist_ok=True)
-    prompt_path = control_dir / "prompt.txt"
-    schema_path = control_dir / "schema.json"
-    last_message_path = control_dir / "last-message.json"
-    stdout_path = control_dir / "stdout.jsonl"
-    stderr_path = control_dir / "stderr.log"
+    codex_phase_dir = control_dir / ".codex-phase"
+    codex_phase_dir.mkdir(parents=True, exist_ok=True)
+    prompt_path = codex_phase_dir / "prompt.txt"
+    schema_path = codex_phase_dir / "schema.json"
+    last_message_path = codex_phase_dir / "last-message.json"
+    stdout_path = codex_phase_dir / "stdout.jsonl"
+    stderr_path = codex_phase_dir / "stderr.log"
 
     prompt_path.write_text(build_phase_prompt(phase_name), encoding="utf-8")
     schema_path.write_text(json.dumps(build_phase_schema(), indent=2) + "\n", encoding="utf-8")
@@ -319,18 +328,6 @@ def run_readiness_audit(artifact_root: Path) -> dict[str, object]:
     subprocess.run(
         [
             python_cmd,
-            str(script_root / "validate_execplan.py"),
-            "--execplan",
-            str(execplan),
-            "--output",
-            str(execplan_output),
-        ],
-        check=True,
-        cwd=artifact_root,
-    )
-    subprocess.run(
-        [
-            python_cmd,
             str(script_root / "render_execplan_runtime_input.py"),
             "--execplan",
             str(execplan),
@@ -340,6 +337,18 @@ def run_readiness_audit(artifact_root: Path) -> dict[str, object]:
             utc_now_iso(),
             "--source-execplan-value",
             source_execplan_value,
+        ],
+        check=True,
+        cwd=artifact_root,
+    )
+    subprocess.run(
+        [
+            python_cmd,
+            str(script_root / "validate_execplan.py"),
+            "--execplan",
+            str(execplan),
+            "--output",
+            str(execplan_output),
         ],
         check=True,
         cwd=artifact_root,
@@ -460,10 +469,12 @@ def main() -> int:
             payload = run_readiness_audit(artifact_root)
         else:
             workdir = phase_workdir(artifact_root, manifest, args.phase)
+            control_dir = artifact_root / "workspace" / "phases" / args.phase
             stage_phase_workspace(artifact_root, workdir, args.phase)
             payload = invoke_codex_phase(
                 artifact_root=artifact_root,
                 workdir=workdir,
+                control_dir=control_dir,
                 phase_name=args.phase,
                 codex_bin=args.codex_bin,
             )

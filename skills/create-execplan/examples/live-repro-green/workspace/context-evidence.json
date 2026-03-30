@@ -1,0 +1,70 @@
+{
+  "created_at": "2026-03-30T15:52:55.910097Z",
+  "last_updated_at": "2026-03-30T16:47:00Z",
+  "requirements": [
+    {
+      "id": "R1",
+      "summary": "Preserve deterministic create-execplan orchestration and final artifact model."
+    },
+    {
+      "id": "R2",
+      "summary": "Keep each child phase to a single fresh Codex process with no nested planning or child-agent orchestration."
+    },
+    {
+      "id": "R3",
+      "summary": "Validate the isolation rule with repo-local regression checks and a live Codex smoke."
+    }
+  ],
+  "sources": [
+    {
+      "id": "E1",
+      "title": "Phase controller",
+      "type": "local-file",
+      "path": "skills/create-execplan/scripts/run_phase.py",
+      "retrieved_at": "2026-03-30T16:47:00Z",
+      "trust_rationale": "Canonical phase controller and prompt/schema source.",
+      "relevance": ["R1", "R2"]
+    },
+    {
+      "id": "E2",
+      "title": "Codex phase wrapper",
+      "type": "local-file",
+      "path": "skills/create-execplan/scripts/run_codex_phase.sh",
+      "retrieved_at": "2026-03-30T16:47:00Z",
+      "trust_rationale": "Canonical child runtime wrapper.",
+      "relevance": ["R1", "R2"]
+    },
+    {
+      "id": "E3",
+      "title": "Helper regression checks",
+      "type": "local-file",
+      "path": "tests/run_create_execplan_helpers.sh",
+      "retrieved_at": "2026-03-30T16:47:00Z",
+      "trust_rationale": "Regression harness for wrapper and controller behavior.",
+      "relevance": ["R3"]
+    },
+    {
+      "id": "E4",
+      "title": "Live Codex smoke harness",
+      "type": "local-file",
+      "path": "tests/run_create_execplan_live_codex_smoke.sh",
+      "retrieved_at": "2026-03-30T16:47:00Z",
+      "trust_rationale": "Live smoke harness for real codex exec behavior.",
+      "relevance": ["R2", "R3"]
+    },
+    {
+      "id": "E5",
+      "title": "Mock repro findings",
+      "type": "local-file",
+      "path": "skills/create-execplan/examples/live-repro-green/workspace/research-findings.md",
+      "retrieved_at": "2026-03-30T16:47:00Z",
+      "trust_rationale": "Summarized evidence from the end-to-end mock reproduction.",
+      "relevance": ["R1", "R2", "R3"]
+    }
+  ],
+  "notes": [
+    "The first live reproduction failed on invalid_json_schema because blockingIssues was omitted from the schema required list.",
+    "The second live reproduction invoked spawn_agent inside the child requirements-freeze phase before wrapper isolation was added.",
+    "Helper and live smoke checks passed after the controller and wrapper fixes were applied."
+  ]
+}

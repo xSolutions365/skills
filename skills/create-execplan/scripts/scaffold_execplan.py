@@ -111,7 +111,6 @@ def render_context_template(
     artifact_root: Path,
     workspace_root: Path,
     date_str: str,
-    confirmation_ts: str,
     project_mode: str,
 ) -> str:
     if project_mode == "brownfield":
@@ -127,15 +126,17 @@ def render_context_template(
     repo_root_value = render_repo_relative_path(project_root, project_root)
     artifact_root_value = render_repo_relative_path(project_root, artifact_root)
     workspace_root_value = render_repo_relative_path(project_root, workspace_root)
-    rendered = (
-        template.replace("<short title>", "Context Pack")
-        .replace("<YYYY-MM-DD>", date_str)
-        .replace("<repo-relative-path>", repo_root_value)
-        .replace("<path-or-.>", target_path)
-        .replace("<artifact-root>", artifact_root_value)
-        .replace("<workspace-root>", workspace_root_value)
-        .replace("<ISO8601 UTC>", confirmation_ts)
-    )
+    rendered = template
+    line_replacements = {
+        "# Context Pack: <short title>": "# Context Pack: Context Pack",
+        "- Created: <YYYY-MM-DD>": f"- Created: {date_str}",
+        "- Repo root: `<repo-relative-path>`": f"- Repo root: `{repo_root_value}`",
+        "- Target path: `<path-or-.>`": f"- Target path: `{target_path}`",
+        "- Artifact root: `<artifact-root>`": f"- Artifact root: `{artifact_root_value}`",
+        "- Workspace root: `<workspace-root>`": f"- Workspace root: `{workspace_root_value}`",
+    }
+    for placeholder, replacement in line_replacements.items():
+        rendered = rendered.replace(placeholder, replacement)
     if project_mode:
         rendered = rendered.replace("<greenfield|brownfield>", project_mode)
     return rendered
@@ -150,15 +151,21 @@ def render_execplan_template(
     iso_ts: str,
 ) -> str:
     artifact_path = render_repo_relative_path(project_root, artifact_root)
+    rendered = template
+    line_replacements = {
+        "# ExecPlan: <short, action-oriented title>": f"# ExecPlan: {title}",
+        "- Status: <Proposed|In Progress|Blocked|Complete>": "- Status: Proposed",
+        "- Start: <YYYY-MM-DD> • Last Updated: <ISO8601 UTC>": (
+            f"- Start: {date_str} • Last Updated: {iso_ts}"
+        ),
+    }
+    for placeholder, replacement in line_replacements.items():
+        rendered = rendered.replace(placeholder, replacement)
     return (
-        template.replace("<short, action-oriented title>", title)
-        .replace("<YYYY-MM-DD>", date_str)
-        .replace("<ISO8601 UTC>", iso_ts)
-        .replace(
+        rendered.replace(
             ".plan/create-execplan/<timestamp>/",
             artifact_path.rstrip("/") + "/",
-        )
-        .replace(
+        ).replace(
             ".plan/create-execplan/<timestamp>/context-pack.md",
             artifact_path.rstrip("/") + "/context-pack.md",
         )
@@ -387,7 +394,6 @@ def main() -> int:
         artifact_root=artifact_root,
         workspace_root=workspace_root,
         date_str=date_str,
-        confirmation_ts=iso_ts,
         project_mode=args.project_mode,
     )
     execplan_content = render_execplan_template(
