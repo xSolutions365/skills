@@ -61,6 +61,7 @@ PY
 [[ -f "$TMP_DIR/scaffold/workspace/context-discovery.md" ]]
 [[ -f "$TMP_DIR/scaffold/workspace/phase-manifest.json" ]]
 [[ -f "$TMP_DIR/scaffold/workspace/phase-result.json" ]]
+[[ -f "$TMP_DIR/scaffold/workspace/translation-validation.md" ]]
 [[ -f "$TMP_DIR/scaffold/workspace/planning-brief.md" ]]
 [[ -f "$TMP_DIR/scaffold/workspace/research-questions.md" ]]
 [[ -f "$TMP_DIR/scaffold/workspace/research-findings.md" ]]

@@ -18,13 +18,15 @@ Convert the confirmed requirements into one parent-owned planning brief that bec
    - do not spawn worker subagents yet
    - do not let later phases infer project mode or research scope from raw transcript history
    - treat `workspace/planning-brief.md` as the only approved planning contract for upstream phases
-5. Ask for explicit confirmation:
+5. Run the skeptical approval-gate review from [translation-validation-workflow.md](translation-validation-workflow.md) against `workspace/planning-brief.md` before surfacing the brief for user approval.
+6. Ask for explicit confirmation:
    - `Is the planning brief in workspace/planning-brief.md approved as the source of truth for upstream planning phases?`
-6. **STOP** and wait for explicit user confirmation before Step 3.
-7. Record the approval prompt, timestamp, and response excerpt in `workspace/planning-brief.md`.
+7. **STOP** and wait for explicit user confirmation before Step 3.
+8. Record the approval prompt, timestamp, and response excerpt in `workspace/planning-brief.md`.
 
 ## Done when
 
 - `workspace/planning-brief.md` exists and records the approved planning contract.
+- `workspace/translation-validation.md` records a resolved skeptical review for the Step 2 planning brief.
 - Project mode, research policy, and verification posture are frozen before any subagent planning phase begins.
 - Nothing proceeds to Step 3 without the Step 2 approval response.

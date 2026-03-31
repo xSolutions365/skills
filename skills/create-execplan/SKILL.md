@@ -12,6 +12,15 @@ Create a structured plan package that separates durable context, living executio
 - Use this when the change requires a Context Pack plus a living ExecPlan rather than a one-off markdown note.
 - Keep initial brief design parent-owned and iterative, then run phase work through the deterministic controller plus fresh subagent workers once the planning brief is approved.
 - Keep the parent skill-running agent as the only user-facing layer; normalize approvals and checkpoint results into workspace artifacts before launching the next phase.
+- Before any user-facing approval gate, run the skeptical translation-validation check and resolve findings before surfacing the candidate artifact.
+
+## Behavior Rules
+
+- **NEVER** weaken required language into optional, advisory, deferred, or exploratory language unless the source explicitly does so.
+- **NEVER** introduce optionality, fallback paths, or "may/should consider" wording where the user request or supplied artifact defines a required outcome.
+- **ALWAYS** preserve action precision. If the source says `supersede`, `remove`, `fail closed`, `pin`, `verify before activation`, or similar lifecycle or control terms, keep that exact intent rather than replacing it with a looser synonym.
+- **ALWAYS** preserve explicit specificity. If the source names concrete checks, tools, protocols, or artifacts, keep them explicit in the freeze unless the user explicitly approves abstraction.
+- **NEVER** infer a missing decision, soften an ambiguity, or pick between plausible interpretations silently. Ask the user for clarification before freezing requirements.
 
 ## Workflow
 

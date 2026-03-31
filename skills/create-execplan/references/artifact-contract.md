@@ -21,6 +21,7 @@ Workspace artifacts:
 - `workspace/context-codemap.md`
 - `workspace/requirements-freeze.md`
 - `workspace/planning-brief.md`
+- `workspace/translation-validation.md`
 - `workspace/draft-review.md`
 - `workspace/phase-manifest.json`
 - `workspace/phase-result.json`
@@ -39,6 +40,7 @@ Workspace artifacts:
 - `workspace/phase-manifest.json` is the deterministic phase-routing contract for fresh-session execution.
 - `workspace/phase-result.json` is the latest normalized checkpoint result surfaced back to the parent agent.
 - `workspace/planning-brief.md` is the user-approved source of truth for upstream planning subagent phases.
+- `workspace/translation-validation.md` is the skeptical translation-validation log for approval-gated artifacts and must show findings resolved before user approval.
 - `workspace/phases/<phase>/phase-worker-input.json` is the staged worker packet used to launch one fresh worker subagent.
 - `workspace/phases/<phase>/phase-worker-result.json` is the raw per-phase worker handoff captured for audit and validation.
 - `workspace/execplan-runtime-input.json` is derived from `execplan.md` and must not be user-edited.

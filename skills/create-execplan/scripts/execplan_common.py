@@ -37,6 +37,7 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
             "workspace/context-evidence.json",
             "workspace/context-codemap.md",
             "workspace/requirements-freeze.md",
+            "workspace/translation-validation.md",
             "workspace/planning-brief.md",
             "workspace/draft-review.md",
             "workspace/research-questions.md",

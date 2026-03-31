@@ -25,6 +25,7 @@ The fixture complements the canonical example:
 - [context-codemap.md](workspace/context-codemap.md)
 - [context-evidence.json](workspace/context-evidence.json)
 - [requirements-freeze.md](workspace/requirements-freeze.md)
+- [translation-validation.md](workspace/translation-validation.md)
 - [planning-brief.md](workspace/planning-brief.md)
 - [research-questions.md](workspace/research-questions.md)
 - [research-findings.md](workspace/research-findings.md)

@@ -280,6 +280,20 @@ def build_requirements_freeze_content(date_str: str, iso_ts: str) -> str:
     )
 
 
+def build_translation_validation_content(date_str: str, iso_ts: str) -> str:
+    return (
+        "# Translation Validation\n\n"
+        f"- Created: {date_str}\n"
+        f"- Last updated: {iso_ts}\n\n"
+        "Use this log for skeptical approval-gate validation before any Step 1, Step 2, or Step 4 artifact is surfaced to the user.\n\n"
+        "| Step | Candidate Artifact | Authoritative Inputs Reviewed | Verdict | Findings Summary | Resolution Status | Timestamp |\n"
+        "| ---- | ------------------ | ----------------------------- | ------- | ---------------- | ----------------- | --------- |\n"
+        "| Step 1 | `workspace/requirements-freeze.md` | `user request`,`supplied artifacts` |  |  |  |  |\n"
+        "| Step 2 | `workspace/planning-brief.md` | `workspace/requirements-freeze.md`,`workspace/context-discovery.md` |  |  |  |  |\n"
+        "| Step 4 | `execplan.md` | `workspace/planning-brief.md`,`context-pack.md`,`workspace/draft-review.md` |  |  |  |  |\n"
+    )
+
+
 def build_planning_brief_content(date_str: str, iso_ts: str) -> str:
     return (
         "# Planning Brief\n\n"
@@ -445,6 +459,7 @@ def main() -> int:
     evidence_path = workspace_root / "context-evidence.json"
     codemap_path = workspace_root / "context-codemap.md"
     freeze_path = workspace_root / "requirements-freeze.md"
+    translation_validation_path = workspace_root / "translation-validation.md"
     planning_brief_path = workspace_root / "planning-brief.md"
     research_questions_path = workspace_root / "research-questions.md"
     research_findings_path = workspace_root / "research-findings.md"
@@ -473,6 +488,10 @@ def main() -> int:
     )
     freeze_path.write_text(
         build_requirements_freeze_content(date_str=date_str, iso_ts=iso_ts),
+        encoding="utf-8",
+    )
+    translation_validation_path.write_text(
+        build_translation_validation_content(date_str=date_str, iso_ts=iso_ts),
         encoding="utf-8",
     )
     planning_brief_path.write_text(
@@ -517,6 +536,7 @@ def main() -> int:
                 "context_evidence": str(evidence_path),
                 "context_codemap": str(codemap_path),
                 "requirements_freeze": str(freeze_path),
+                "translation_validation": str(translation_validation_path),
                 "planning_brief": str(planning_brief_path),
                 "research_questions": str(research_questions_path),
                 "research_findings": str(research_findings_path),

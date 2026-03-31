@@ -32,6 +32,7 @@ def parse_args() -> argparse.Namespace:
 
 
 REQUIRED_WORKSPACE_ARTIFACTS = (
+    "workspace/translation-validation.md",
     "workspace/planning-brief.md",
     "workspace/phase-manifest.json",
     "workspace/phase-result.json",
@@ -137,6 +138,51 @@ def validate_planning_brief(artifact_root: Path) -> list[str]:
         match = re.search(rf"^{re.escape(label)}\s*(.+)$", text, re.MULTILINE)
         if not match or is_placeholder(match.group(1)):
             errors.append(f"Planning brief is missing concrete content for `{label}`")
+    return errors
+
+
+def validate_translation_validation(artifact_root: Path) -> list[str]:
+    text = (artifact_root / "workspace" / "translation-validation.md").read_text(
+        encoding="utf-8"
+    )
+    headers, rows = parse_table(text)
+    if not headers or not rows:
+        return ["Translation validation log must contain the skeptical review table."]
+
+    errors: list[str] = []
+    required_steps = {"Step 1", "Step 2", "Step 4"}
+    seen_steps: set[str] = set()
+    for row in rows:
+        step = row.get("Step", "").strip()
+        if step not in required_steps:
+            continue
+        seen_steps.add(step)
+        candidate = row.get("Candidate Artifact", "").strip()
+        inputs = row.get("Authoritative Inputs Reviewed", "").strip()
+        verdict = row.get("Verdict", "").strip()
+        findings = row.get("Findings Summary", "").strip()
+        resolution = row.get("Resolution Status", "").strip()
+        timestamp = row.get("Timestamp", "").strip()
+        if any(
+            is_placeholder(value)
+            for value in (candidate, inputs, verdict, findings, resolution, timestamp)
+        ):
+            errors.append(
+                f"Translation validation row for {step} must be fully populated."
+            )
+            continue
+        if verdict != "pass":
+            errors.append(
+                f"Translation validation row for {step} must be resolved to `pass` before approval."
+            )
+        if resolution != "resolved":
+            errors.append(
+                f"Translation validation row for {step} must be marked `resolved` before approval."
+            )
+
+    missing_steps = sorted(required_steps - seen_steps)
+    for step in missing_steps:
+        errors.append(f"Translation validation log is missing required row: {step}")
     return errors
 
 
@@ -262,6 +308,7 @@ def main() -> int:
         errors.extend(validate_manifest_contract(artifact_root))
         errors.extend(validate_latest_phase_result(artifact_root))
         errors.extend(validate_requirements_freeze(artifact_root))
+        errors.extend(validate_translation_validation(artifact_root))
         errors.extend(validate_planning_brief(artifact_root))
         errors.extend(validate_research_findings(artifact_root))
         errors.extend(validate_design_options(artifact_root))
