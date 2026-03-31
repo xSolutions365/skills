@@ -280,6 +280,38 @@ def build_requirements_freeze_content(date_str: str, iso_ts: str) -> str:
     )
 
 
+def build_planning_brief_content(date_str: str, iso_ts: str) -> str:
+    return (
+        "# Planning Brief\n\n"
+        f"- Created: {date_str}\n"
+        f"- Last updated: {iso_ts}\n\n"
+        "## Objective Summary\n\n"
+        "- User-visible outcome:\n"
+        "- In-scope change surface:\n"
+        "- Explicit non-goals:\n\n"
+        "## Source of Truth Inputs\n\n"
+        "- Requirements freeze artifact: `workspace/requirements-freeze.md`\n"
+        "- Context discovery artifact: `workspace/context-discovery.md`\n"
+        "- Source links or seed artifacts:\n\n"
+        "## Planning Decisions\n\n"
+        "- Selected project mode (`greenfield`|`brownfield`):\n"
+        "- Mode rationale:\n"
+        "- Verification scenario to carry into planning:\n"
+        "- Mandatory smoke gate command:\n"
+        "- Online research policy carried forward:\n\n"
+        "## Phase Guidance\n\n"
+        "- Research questions must answer:\n"
+        "- Research must stay within these source boundaries:\n"
+        "- Design options must compare these trade-offs:\n"
+        "- Structure must anchor these edit surfaces or interfaces:\n\n"
+        "## Approval\n\n"
+        "- Approval prompt:\n"
+        "- Approved by user at:\n"
+        "- User approval response (verbatim excerpt):\n"
+        "- Approval note:\n"
+    )
+
+
 def build_research_questions_content(date_str: str, iso_ts: str) -> str:
     return (
         "# Research Questions\n\n"
@@ -413,6 +445,7 @@ def main() -> int:
     evidence_path = workspace_root / "context-evidence.json"
     codemap_path = workspace_root / "context-codemap.md"
     freeze_path = workspace_root / "requirements-freeze.md"
+    planning_brief_path = workspace_root / "planning-brief.md"
     research_questions_path = workspace_root / "research-questions.md"
     research_findings_path = workspace_root / "research-findings.md"
     design_options_path = workspace_root / "design-options.md"
@@ -442,6 +475,10 @@ def main() -> int:
         build_requirements_freeze_content(date_str=date_str, iso_ts=iso_ts),
         encoding="utf-8",
     )
+    planning_brief_path.write_text(
+        build_planning_brief_content(date_str=date_str, iso_ts=iso_ts),
+        encoding="utf-8",
+    )
     research_questions_path.write_text(
         build_research_questions_content(date_str=date_str, iso_ts=iso_ts),
         encoding="utf-8",
@@ -462,7 +499,6 @@ def main() -> int:
         phase_manifest_path,
         build_phase_manifest(
             artifact_root=artifact_root,
-            runner="codex",
             created_at=iso_ts,
         ),
     )
@@ -481,6 +517,7 @@ def main() -> int:
                 "context_evidence": str(evidence_path),
                 "context_codemap": str(codemap_path),
                 "requirements_freeze": str(freeze_path),
+                "planning_brief": str(planning_brief_path),
                 "research_questions": str(research_questions_path),
                 "research_findings": str(research_findings_path),
                 "design_options": str(design_options_path),

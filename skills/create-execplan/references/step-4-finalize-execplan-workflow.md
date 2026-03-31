@@ -1,4 +1,4 @@
-# Step 4 Workflow: Finalize the approved ExecPlan
+# Step 5 Workflow: Finalize the approved ExecPlan
 
 ## Objective
 
@@ -6,7 +6,7 @@ Normalize the approved draft into the canonical living execution document and ge
 
 ## Required actions
 
-1. Confirm Step 3 approval is recorded in `workspace/draft-review.md` and the latest checkpoint state has been normalized into `workspace/phase-result.json`.
+1. Confirm Step 4 approval is recorded in `workspace/draft-review.md` and the latest checkpoint state has been normalized into `workspace/phase-result.json`.
 2. Finalize `execplan.md` against [execplan-template.md](execplan-template.md).
 3. Keep information placement aligned with [information-placement.md](information-placement.md):
    - ExecPlan owns tasks, task-local commands, progress, decisions, findings, and scenario verification coverage.
@@ -30,7 +30,7 @@ Normalize the approved draft into the canonical living execution document and ge
 7. Ensure dependency preflight rows are complete for required external tools or libraries.
 8. Ensure `Test Plan` remains scenario-focused BDD coverage with executable evidence commands and valid `Task Ref` mappings.
 9. Generate or refresh the machine-readable runtime artifact using the standard runtime contract from [runtime-resolution.md](runtime-resolution.md) and the schema in [runtime-input-schema.md](runtime-input-schema.md).
-10. Do not introduce new discovery or new requirements in Step 4. Route blockers back to Step 3 and stop when approval is needed.
+10. Do not introduce new discovery or new requirements in Step 5. Route blockers back to Step 4 and stop when approval is needed.
 11. If a row still needs search, inference, or missing command context, split and tighten it before finalization.
 
 ## Done when

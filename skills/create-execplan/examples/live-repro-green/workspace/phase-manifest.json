@@ -2,11 +2,10 @@
   "schemaVersion": "1.0",
   "createdAt": "2026-03-30T15:52:55.910097Z",
   "updatedAt": "2026-03-30T16:18:49.839843Z",
-  "selectedRunner": "codex",
+  "selectedRunner": "subagent",
   "currentPhase": "handoff-checklist",
   "phaseOrder": [
     "preflight",
-    "requirements-freeze",
     "research-questions",
     "research",
     "design",
@@ -23,7 +22,7 @@
       "description": "Verify scaffolded artifacts exist before phase execution begins.",
       "status": "complete",
       "runner": "deterministic",
-      "workdir": "workspace/phases/preflight",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/preflight",
       "allowedInputArtifacts": [
         "context-pack.md",
         "execplan.md",
@@ -32,6 +31,7 @@
         "workspace/context-evidence.json",
         "workspace/context-codemap.md",
         "workspace/requirements-freeze.md",
+        "workspace/planning-brief.md",
         "workspace/draft-review.md",
         "workspace/research-questions.md",
         "workspace/research-findings.md",
@@ -43,40 +43,18 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "",
-      "lastRunAt": "2026-03-30T15:53:46.846370Z",
-      "lastResultStatus": "complete"
-    },
-    "requirements-freeze": {
-      "kind": "codex",
-      "description": "Capture clarifications and freeze the confirmed requirements.",
-      "status": "complete",
-      "runner": "codex",
-      "workdir": "workspace/phases/requirements-freeze",
-      "allowedInputArtifacts": [
-        "workspace/context-discovery.md",
-        "workspace/context-evidence.json",
-        "workspace/requirements-freeze.md",
-        "execplan.md"
-      ],
-      "expectedOutputArtifacts": [
-        "workspace/context-discovery.md",
-        "workspace/context-evidence.json",
-        "workspace/requirements-freeze.md",
-        "execplan.md",
-        "workspace/phase-result.json"
-      ],
-      "checkpoint": "requirements-freeze-approval",
-      "lastRunAt": "2026-03-30T16:02:49.933197Z",
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
       "lastResultStatus": "complete"
     },
     "research-questions": {
-      "kind": "codex",
+      "kind": "subagent",
       "description": "Turn the frozen requirements into concrete research questions.",
       "status": "complete",
-      "runner": "codex",
-      "workdir": "workspace/phases/research-questions",
+      "runner": "subagent",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/research-questions",
       "allowedInputArtifacts": [
         "workspace/requirements-freeze.md",
+        "workspace/planning-brief.md",
         "workspace/context-discovery.md"
       ],
       "expectedOutputArtifacts": [
@@ -84,17 +62,18 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "",
-      "lastRunAt": "2026-03-30T16:05:08.780839Z",
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
       "lastResultStatus": "complete"
     },
     "research": {
-      "kind": "codex",
+      "kind": "subagent",
       "description": "Produce objective research findings from the approved questions.",
-      "status": "blocked",
-      "runner": "codex",
-      "workdir": "workspace/phases/research",
+      "status": "complete",
+      "runner": "subagent",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/research",
       "allowedInputArtifacts": [
         "workspace/requirements-freeze.md",
+        "workspace/planning-brief.md",
         "workspace/research-questions.md",
         "workspace/context-evidence.json",
         "workspace/context-codemap.md",
@@ -107,17 +86,18 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "",
-      "lastRunAt": "2026-03-30T16:06:19.544703Z",
-      "lastResultStatus": "blocked"
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
+      "lastResultStatus": "complete"
     },
     "design": {
-      "kind": "codex",
+      "kind": "subagent",
       "description": "Evaluate candidate approaches and record the chosen direction.",
-      "status": "blocked",
-      "runner": "codex",
-      "workdir": "workspace/phases/design",
+      "status": "complete",
+      "runner": "subagent",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/design",
       "allowedInputArtifacts": [
         "workspace/requirements-freeze.md",
+        "workspace/planning-brief.md",
         "workspace/research-findings.md",
         "workspace/design-options.md"
       ],
@@ -126,17 +106,18 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "",
-      "lastRunAt": "2026-03-30T16:06:52.095608Z",
-      "lastResultStatus": "blocked"
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
+      "lastResultStatus": "complete"
     },
     "structure": {
-      "kind": "codex",
+      "kind": "subagent",
       "description": "Define interfaces, boundaries, and structural outline before planning.",
-      "status": "blocked",
-      "runner": "codex",
-      "workdir": "workspace/phases/structure",
+      "status": "complete",
+      "runner": "subagent",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/structure",
       "allowedInputArtifacts": [
         "workspace/requirements-freeze.md",
+        "workspace/planning-brief.md",
         "workspace/research-findings.md",
         "workspace/design-options.md",
         "workspace/structure-outline.md"
@@ -146,17 +127,19 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "",
-      "lastRunAt": "2026-03-30T16:07:30.481558Z",
-      "lastResultStatus": "blocked"
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
+      "lastResultStatus": "complete"
     },
     "context-pack": {
-      "kind": "codex",
+      "kind": "subagent",
       "description": "Assemble the durable Context Pack from approved upstream artifacts.",
-      "status": "blocked",
-      "runner": "codex",
-      "workdir": "workspace/phases/context-pack",
+      "status": "complete",
+      "runner": "subagent",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/context-pack",
       "allowedInputArtifacts": [
         "workspace/requirements-freeze.md",
+        "workspace/planning-brief.md",
+        "workspace/research-questions.md",
         "workspace/research-findings.md",
         "workspace/design-options.md",
         "workspace/structure-outline.md",
@@ -172,17 +155,18 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "",
-      "lastRunAt": "2026-03-30T16:09:38.791085Z",
-      "lastResultStatus": "blocked"
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
+      "lastResultStatus": "complete"
     },
     "execplan-draft": {
-      "kind": "codex",
+      "kind": "subagent",
       "description": "Draft the ExecPlan from the approved context and structure outputs.",
-      "status": "pending",
-      "runner": "codex",
-      "workdir": "workspace/phases/execplan-draft",
+      "status": "complete",
+      "runner": "subagent",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/execplan-draft",
       "allowedInputArtifacts": [
         "workspace/requirements-freeze.md",
+        "workspace/planning-brief.md",
         "workspace/design-options.md",
         "workspace/structure-outline.md",
         "context-pack.md",
@@ -195,15 +179,15 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "execplan-draft-approval",
-      "lastRunAt": "",
-      "lastResultStatus": ""
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
+      "lastResultStatus": "complete"
     },
     "finalization": {
-      "kind": "codex",
+      "kind": "subagent",
       "description": "Finalize the approved ExecPlan before readiness audit and handoff.",
-      "status": "pending",
-      "runner": "codex",
-      "workdir": "workspace/phases/finalization",
+      "status": "complete",
+      "runner": "subagent",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/finalization",
       "allowedInputArtifacts": [
         "context-pack.md",
         "execplan.md",
@@ -215,15 +199,15 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "",
-      "lastRunAt": "",
-      "lastResultStatus": ""
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
+      "lastResultStatus": "complete"
     },
     "readiness-audit": {
       "kind": "deterministic",
       "description": "Run validators, refresh the derived runtime input, and enforce rubric checks.",
       "status": "complete",
       "runner": "deterministic",
-      "workdir": "workspace/phases/readiness-audit",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/readiness-audit",
       "allowedInputArtifacts": [
         "context-pack.md",
         "execplan.md",
@@ -241,15 +225,15 @@
         "workspace/phase-result.json"
       ],
       "checkpoint": "",
-      "lastRunAt": "2026-03-30T16:17:51.685816Z",
+      "lastRunAt": "2026-03-30T16:18:49.839843Z",
       "lastResultStatus": "complete"
     },
     "handoff-checklist": {
-      "kind": "codex",
+      "kind": "subagent",
       "description": "Complete the final checklist after readiness audit succeeds.",
       "status": "complete",
-      "runner": "codex",
-      "workdir": "workspace/phases/handoff-checklist",
+      "runner": "subagent",
+      "workdir": "/var/folders/mm/8xs8r41n60bg449p69zmmy3h0000gn/T/create-execplan-phases/5ca17d371aced62e/handoff-checklist",
       "allowedInputArtifacts": [
         "context-pack.md",
         "execplan.md",

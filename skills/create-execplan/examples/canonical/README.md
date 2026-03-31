@@ -13,6 +13,7 @@ This directory is the single full example package for `create-execplan`.
 - [context-discovery.md](workspace/context-discovery.md)
 - [context-codemap.md](workspace/context-codemap.md)
 - [requirements-freeze.md](workspace/requirements-freeze.md)
+- [planning-brief.md](workspace/planning-brief.md)
 - [research-questions.md](workspace/research-questions.md)
 - [research-findings.md](workspace/research-findings.md)
 - [design-options.md](workspace/design-options.md)

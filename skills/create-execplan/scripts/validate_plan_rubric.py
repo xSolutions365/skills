@@ -32,6 +32,7 @@ def parse_args() -> argparse.Namespace:
 
 
 REQUIRED_WORKSPACE_ARTIFACTS = (
+    "workspace/planning-brief.md",
     "workspace/phase-manifest.json",
     "workspace/phase-result.json",
     "workspace/research-questions.md",
@@ -55,35 +56,26 @@ def validate_manifest_contract(artifact_root: Path) -> list[str]:
     phase_order = manifest.get("phaseOrder")
 
     phases = manifest.get("phases")
-    if isinstance(phases, dict):
-        if phase_order != list(PHASE_DEFINITIONS.keys()):
+    if not isinstance(phases, dict):
+        return ["Phase manifest `phases` must be an object keyed by canonical phase name."]
+
+    if phase_order != list(PHASE_DEFINITIONS.keys()):
+        errors.append(
+            "Phase manifest `phaseOrder` drifted from the canonical phase sequence."
+        )
+    for phase_name, definition in PHASE_DEFINITIONS.items():
+        phase_data = phases.get(phase_name)
+        if not isinstance(phase_data, dict):
+            errors.append(f"Phase manifest is missing phase entry: {phase_name}")
+            continue
+        if phase_data.get("allowedInputArtifacts") != definition["allowed_input_artifacts"]:
             errors.append(
-                "Phase manifest `phaseOrder` drifted from the canonical phase sequence."
+                f"Phase manifest `{phase_name}` allowed inputs drifted from the hard-separation contract."
             )
-        for phase_name, definition in PHASE_DEFINITIONS.items():
-            phase_data = phases.get(phase_name)
-            if not isinstance(phase_data, dict):
-                errors.append(f"Phase manifest is missing phase entry: {phase_name}")
-                continue
-            if phase_data.get("allowedInputArtifacts") != definition["allowed_input_artifacts"]:
-                errors.append(
-                    f"Phase manifest `{phase_name}` allowed inputs drifted from the hard-separation contract."
-                )
-            if phase_data.get("expectedOutputArtifacts") != definition["expected_output_artifacts"]:
-                errors.append(
-                    f"Phase manifest `{phase_name}` expected outputs drifted from the canonical contract."
-                )
-        return errors
-
-    if isinstance(phases, list):
-        if not phases:
-            return ["Phase manifest `phases` list must not be empty."]
-        phase_ids = [str(item.get("id", "")) for item in phases if isinstance(item, dict)]
-        if not phase_ids:
-            return ["Phase manifest `phases` list must contain phase objects with `id`."]
-        return errors
-
-    errors.append("Phase manifest `phases` must be an object or a non-empty list.")
+        if phase_data.get("expectedOutputArtifacts") != definition["expected_output_artifacts"]:
+            errors.append(
+                f"Phase manifest `{phase_name}` expected outputs drifted from the canonical contract."
+            )
     return errors
 
 
@@ -121,6 +113,30 @@ def validate_requirements_freeze(artifact_root: Path) -> list[str]:
     ]
     if len(frozen_items) < 1 or any(is_placeholder(line) for line in frozen_items):
         errors.append("Requirements freeze must contain concrete frozen requirements.")
+    return errors
+
+
+def validate_planning_brief(artifact_root: Path) -> list[str]:
+    text = (artifact_root / "workspace" / "planning-brief.md").read_text(
+        encoding="utf-8"
+    )
+    errors: list[str] = []
+    for label in (
+        "- User-visible outcome:",
+        "- In-scope change surface:",
+        "- Explicit non-goals:",
+        "- Selected project mode (`greenfield`|`brownfield`):",
+        "- Mode rationale:",
+        "- Verification scenario to carry into planning:",
+        "- Mandatory smoke gate command:",
+        "- Online research policy carried forward:",
+        "- Approval prompt:",
+        "- Approved by user at:",
+        "- User approval response (verbatim excerpt):",
+    ):
+        match = re.search(rf"^{re.escape(label)}\s*(.+)$", text, re.MULTILINE)
+        if not match or is_placeholder(match.group(1)):
+            errors.append(f"Planning brief is missing concrete content for `{label}`")
     return errors
 
 
@@ -246,6 +262,7 @@ def main() -> int:
         errors.extend(validate_manifest_contract(artifact_root))
         errors.extend(validate_latest_phase_result(artifact_root))
         errors.extend(validate_requirements_freeze(artifact_root))
+        errors.extend(validate_planning_brief(artifact_root))
         errors.extend(validate_research_findings(artifact_root))
         errors.extend(validate_design_options(artifact_root))
         errors.extend(validate_structure_outline(artifact_root))

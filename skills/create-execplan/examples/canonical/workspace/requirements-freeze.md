@@ -8,7 +8,7 @@
 - Scope and user-visible outcomes: keep the final handoff package unchanged while tightening isolated phase execution and plan-quality validation.
 - Constraints and non-goals: preserve packet-only runtime execution and do not reintroduce legacy plan artifacts.
 - User-provided artifacts and starting views: existing create-execplan skill references, helpers, and examples.
-- Assumptions to validate with user: Codex CLI is the only runner in scope for the first iteration.
+- Assumptions to validate with user: parent-managed worker subagents are the only non-deterministic runner in scope for the first iteration.
 
 ## Frozen Requirements
 

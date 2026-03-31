@@ -32,15 +32,15 @@
       "editTargets": [
         "skills/create-execplan/scripts/scaffold_execplan.py:1",
         "skills/create-execplan/scripts/run_phase.py:1",
-        "skills/create-execplan/scripts/run_codex_phase.sh:1"
+        "skills/create-execplan/SKILL.md:1"
       ],
       "supportingContextAnchors": [
         "skills/create-execplan/references/step-0-preflight-workflow.md:1",
         "tests/run_create_execplan_helpers.sh:1"
       ],
       "commands": [],
-      "expectedOutput": "scaffold and controller create deterministic phase artifacts and isolated run contracts",
-      "action": "Implement isolated phase-runner contracts and scaffolded workspace artifacts."
+      "expectedOutput": "scaffold and controller create deterministic phase artifacts and staged worker packets",
+      "action": "Implement the `prepare/apply` controller contract and subagent worker handoff."
     },
     {
       "taskRef": "P1-T2",

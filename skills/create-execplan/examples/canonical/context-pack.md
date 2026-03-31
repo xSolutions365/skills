@@ -25,13 +25,14 @@ This example package demonstrates a maintenance change to `create-execplan` that
 - Evidence artifact: `.plan/create-execplan/canonical/workspace/context-evidence.json`
 - Codemap artifact: `.plan/create-execplan/canonical/workspace/context-codemap.md`
 - Requirements freeze artifact: `.plan/create-execplan/canonical/workspace/requirements-freeze.md`
+- Planning brief artifact: `.plan/create-execplan/canonical/workspace/planning-brief.md`
 - Phase manifest artifact: `.plan/create-execplan/canonical/workspace/phase-manifest.json`
 - Latest phase result artifact: `.plan/create-execplan/canonical/workspace/phase-result.json`
 - Research questions artifact: `.plan/create-execplan/canonical/workspace/research-questions.md`
 - Research findings artifact: `.plan/create-execplan/canonical/workspace/research-findings.md`
 - Design options artifact: `.plan/create-execplan/canonical/workspace/design-options.md`
 - Structure outline artifact: `.plan/create-execplan/canonical/workspace/structure-outline.md`
-- Notes: The example package uses repo-local references only.
+- Notes: The example package uses repo-local references only and treats `workspace/planning-brief.md` as the approved source of truth for upstream planning phases.
 
 ## Guardrails (must-follow)
 
@@ -67,7 +68,7 @@ This example package demonstrates a maintenance change to `create-execplan` that
 
 | Area | File anchor | Current behavior | Integration concern | Evidence IDs |
 | ---- | ----------- | ---------------- | ------------------- | ------------ |
-| phase controller | `skills/create-execplan/scripts/run_phase.py:1` | routes one phase at a time through a fresh runner invocation | must enforce artifact-only handoff for isolated phases | E2 |
+| phase controller | `skills/create-execplan/scripts/run_phase.py:1` | prepares staged worker packets and applies validated phase results | must enforce artifact-only handoff for isolated phases | E2 |
 
 ## Repo Facts (execution-relevant only)
 
@@ -81,7 +82,7 @@ This example package demonstrates a maintenance change to `create-execplan` that
 
 | Dependency | Purpose | Check command | Install command | Source | Expected success signal |
 | ---------- | ------- | ------------- | --------------- | ------ | ----------------------- |
-| codex cli | run fresh phase invocations | `codex --version` | `n/a` | local tool installation | Codex CLI responds |
+| codex app | host parent and worker subagents | `n/a` | `n/a` | Codex desktop/app runtime | subagent tools are available |
 
 ## Code Map (line-numbered)
 
@@ -90,7 +91,7 @@ List only the places the executor must touch. Prefer repo-relative `path:line` a
 | Area | File anchor | What it contains | Why it matters | Planned change |
 | ---- | ----------- | ---------------- | -------------- | -------------- |
 | scaffold | `skills/create-execplan/scripts/scaffold_execplan.py:1` | scaffold logic for final and intermediate artifacts | must create canonical workspace contracts | materialize phase artifacts |
-| controller | `skills/create-execplan/scripts/run_phase.py:1` | phase routing and handoff enforcement | defines fresh-process behavior | enforce phase contracts |
+| controller | `skills/create-execplan/scripts/run_phase.py:1` | phase packet preparation and result application | defines fresh-worker behavior | enforce phase contracts |
 
 ## Requirement to Evidence Traceability
 

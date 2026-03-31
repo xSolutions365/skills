@@ -17,6 +17,7 @@ For brownfield plans, keep every task row packet-ready: `Code` rows need concret
 - Context Pack: `.plan/create-execplan/<timestamp>/context-pack.md`
 - Runtime Input artifact: `.plan/create-execplan/<timestamp>/workspace/execplan-runtime-input.json` (generated after finalization; do not edit)
 - Requirements Freeze artifact: `.plan/create-execplan/<timestamp>/workspace/requirements-freeze.md`
+- Planning Brief artifact: `.plan/create-execplan/<timestamp>/workspace/planning-brief.md`
 - Draft Review artifact: `.plan/create-execplan/<timestamp>/workspace/draft-review.md`
 - Phase Manifest artifact: `.plan/create-execplan/<timestamp>/workspace/phase-manifest.json`
 - Phase Result artifact: `.plan/create-execplan/<timestamp>/workspace/phase-result.json`

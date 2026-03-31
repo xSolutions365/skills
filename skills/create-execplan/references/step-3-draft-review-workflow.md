@@ -1,4 +1,4 @@
-# Step 3 Workflow: Draft and review the ExecPlan
+# Step 4 Workflow: Draft and review the ExecPlan
 
 ## Objective
 
@@ -7,7 +7,7 @@ Resolve surfaced blockers before drafting, then iterate on `execplan.md` until t
 ## Required actions
 
 1. Build and maintain `<artifact-root>/workspace/draft-review.md`.
-2. Inspect the assembled Context Pack plus the upstream research/design/structure artifacts and identify newly surfaced questions or blockers that affect planning.
+2. Inspect the approved planning brief, assembled Context Pack, and the upstream research/design/structure artifacts to identify newly surfaced questions or blockers that affect planning.
 3. If surfaced blockers exist, record them in `workspace/draft-review.md`, present them to the user, and stop until they are resolved.
 4. Run a packet-executability review on every runtime task row before asking for user review:
    - each `Code` task must name concrete `Edit Targets`
@@ -18,6 +18,7 @@ Resolve surfaced blockers before drafting, then iterate on `execplan.md` until t
    - if a row still relies on vague discovery terms like `relevant`, `canonical`, `appropriate`, `locate`, or `identify`, record a blocker and stop
 5. Treat under-scoped brownfield tasks as draft blockers, not execution-time ADRs to be deferred downstream.
 6. Generate an initial `execplan.md` draft using [execplan-template.md](execplan-template.md).
+   - Use the phase packet in `workspace/phases/execplan-draft/phase-worker-input.json` and apply the worker result before surfacing the draft.
 7. Keep section ownership aligned with [information-placement.md](information-placement.md) so the draft stays lean.
 8. Ask the user to review the draft and provide feedback.
 9. For each feedback round:
@@ -27,7 +28,7 @@ Resolve surfaced blockers before drafting, then iterate on `execplan.md` until t
    - append the round summary, changed files, and timestamp to `workspace/draft-review.md`
 10. Ask for explicit draft approval:
    - `Confirm this draft plan is approved and I should proceed to finalization.`
-11. **STOP** and wait for explicit user approval before Step 4.
+11. **STOP** and wait for explicit user approval before Step 5.
 12. Record the approval prompt, timestamp, and response excerpt in `workspace/draft-review.md`.
 
 ## Done when
@@ -36,4 +37,4 @@ Resolve surfaced blockers before drafting, then iterate on `execplan.md` until t
 - `execplan.md` reflects the latest approved draft.
 - `workspace/phase-result.json` reflects the latest draft-review checkpoint outcome.
 - Runtime task rows are explicit enough for a packet-only executor to act without repo-wide discovery.
-- Draft approval evidence is recorded before Step 4 begins.
+- Draft approval evidence is recorded before Step 5 begins.

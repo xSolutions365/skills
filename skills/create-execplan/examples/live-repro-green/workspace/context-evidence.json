@@ -8,11 +8,11 @@
     },
     {
       "id": "R2",
-      "summary": "Keep each child phase to a single fresh Codex process with no nested planning or child-agent orchestration."
+      "summary": "Keep each child phase to a single fresh worker subagent with no nested planning or child-agent orchestration."
     },
     {
       "id": "R3",
-      "summary": "Validate the isolation rule with repo-local regression checks and a live Codex smoke."
+      "summary": "Validate the isolation rule with repo-local regression checks and installed-skill acceptance."
     }
   ],
   "sources": [
@@ -27,11 +27,11 @@
     },
     {
       "id": "E2",
-      "title": "Codex phase wrapper",
+      "title": "Skill parent/worker contract",
       "type": "local-file",
-      "path": "skills/create-execplan/scripts/run_codex_phase.sh",
+      "path": "skills/create-execplan/SKILL.md",
       "retrieved_at": "2026-03-30T16:47:00Z",
-      "trust_rationale": "Canonical child runtime wrapper.",
+      "trust_rationale": "Canonical parent and worker orchestration contract.",
       "relevance": ["R1", "R2"]
     },
     {
@@ -40,16 +40,16 @@
       "type": "local-file",
       "path": "tests/run_create_execplan_helpers.sh",
       "retrieved_at": "2026-03-30T16:47:00Z",
-      "trust_rationale": "Regression harness for wrapper and controller behavior.",
+      "trust_rationale": "Regression harness for prepare/apply and worker packet behavior.",
       "relevance": ["R3"]
     },
     {
       "id": "E4",
-      "title": "Live Codex smoke harness",
+      "title": "Installed-skill manual acceptance",
       "type": "local-file",
-      "path": "tests/run_create_execplan_live_codex_smoke.sh",
+      "path": "skills/create-execplan/references/manual-acceptance.md",
       "retrieved_at": "2026-03-30T16:47:00Z",
-      "trust_rationale": "Live smoke harness for real codex exec behavior.",
+      "trust_rationale": "Installed-skill live acceptance flow.",
       "relevance": ["R2", "R3"]
     },
     {
@@ -64,7 +64,7 @@
   ],
   "notes": [
     "The first live reproduction failed on invalid_json_schema because blockingIssues was omitted from the schema required list.",
-    "The second live reproduction invoked spawn_agent inside the child requirements-freeze phase before wrapper isolation was added.",
-    "Helper and live smoke checks passed after the controller and wrapper fixes were applied."
+    "The second live reproduction invoked spawn_agent inside the child requirements-freeze phase before the parent/worker redesign landed.",
+    "Helper checks passed after the controller refactor and the installed-skill live acceptance flow replaced the subprocess smoke."
   ]
 }

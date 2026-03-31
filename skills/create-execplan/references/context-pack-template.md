@@ -38,6 +38,7 @@ Use it to capture:
 - Evidence artifact: `<workspace-root>/context-evidence.json`
 - Codemap artifact: `<workspace-root>/context-codemap.md`
 - Requirements freeze artifact: `<workspace-root>/requirements-freeze.md`
+- Planning brief artifact: `<workspace-root>/planning-brief.md`
 - Phase manifest artifact: `<workspace-root>/phase-manifest.json`
 - Latest phase result artifact: `<workspace-root>/phase-result.json`
 - Research questions artifact: `<workspace-root>/research-questions.md`

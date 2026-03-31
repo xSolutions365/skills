@@ -12,8 +12,8 @@
 ## Pre-draft Clarifications & Blockers
 
 - Status (`resolved`|`none`|`blocked`): resolved
-- Item 1: confirm the runner boundary is fresh Codex CLI invocation, not subagents
-- Resolution: user approved the fresh CLI process boundary
+- Item 1: confirm the runner boundary is parent-managed worker subagents with parent-only approvals
+- Resolution: user approved the subagent process boundary
 
 ## Initial Draft Generation
 

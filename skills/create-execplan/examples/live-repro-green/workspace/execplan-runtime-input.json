@@ -7,15 +7,15 @@
   "requirements": [
     {
       "id": "R1",
-      "text": "Preserve the deterministic `create-execplan` package flow: scaffold, manifest/result checkpointing, fresh `codex exec` phase runs, finalized `execplan.md`, generated runtime input, readiness audit, and handoff checklist."
+      "text": "Preserve the deterministic `create-execplan` package flow: scaffold, manifest/result checkpointing, staged `prepare/apply` control steps, fresh worker subagents, finalized `execplan.md`, generated runtime input, readiness audit, and handoff checklist."
     },
     {
       "id": "R2",
-      "text": "Ensure a child phase run cannot invoke nested planning or child-agent orchestration; the effective execution boundary must remain one fresh Codex process working only on staged artifacts."
+      "text": "Ensure a child phase run cannot invoke nested planning or child-agent orchestration; the effective execution boundary must remain one fresh worker subagent working only on staged artifacts."
     },
     {
       "id": "R3",
-      "text": "Add or tighten regression coverage so the isolation rule is testable with repo-local checks and a live Codex smoke, and the mock package can reach a green readiness audit."
+      "text": "Add or tighten regression coverage so the isolation rule is testable with repo-local checks and a live installed-skill run, and the mock package can reach a green readiness audit."
     }
   ],
   "tasks": [
@@ -30,17 +30,17 @@
         "R2"
       ],
       "editTargets": [
-        "skills/create-execplan/scripts/run_phase.py:157",
-        "skills/create-execplan/scripts/run_phase.py:184"
+        "skills/create-execplan/scripts/run_phase.py:1",
+        "skills/create-execplan/scripts/execplan_common.py:1",
+        "skills/create-execplan/SKILL.md:1"
       ],
       "supportingContextAnchors": [
-        "skills/create-execplan/SKILL.md:1",
         "skills/create-execplan/references/step-1-intake-freeze-workflow.md:1",
         "skills/create-execplan/references/step-2-context-pack-workflow.md:1"
       ],
       "commands": [],
-      "expectedOutput": "child schema and prompt reject recursive planning behavior and satisfy the current API schema contract",
-      "action": "Update the phase controller so the child response schema is valid and the child prompt enforces an isolated single-process phase boundary."
+      "expectedOutput": "staged worker packets and apply-time validation replace the subprocess wrapper",
+      "action": "Update the controller and skill contract so each non-deterministic phase uses `prepare -> worker -> apply`."
     },
     {
       "taskRef": "P1-T2",
@@ -53,75 +53,59 @@
         "R2"
       ],
       "editTargets": [
-        "skills/create-execplan/scripts/run_codex_phase.sh:79"
+        "skills/create-execplan/references/artifact-contract.md:1",
+        "skills/create-execplan/references/manual-acceptance.md:1"
       ],
       "supportingContextAnchors": [
-        "skills/create-execplan/scripts/run_phase.py:227",
-        "skills/create-execplan/references/runtime-resolution.md:1"
+        "skills/create-execplan/README.md:1",
+        "skills/create-execplan/references/step-0-preflight-workflow.md:1"
       ],
       "commands": [],
-      "expectedOutput": "child runtime launches inside temporary `CODEX_HOME` with writable staged sandbox",
-      "action": "Update the wrapper so child phases do not inherit global Codex home instructions or read-only defaults."
+      "expectedOutput": "docs and audit artifacts describe worker packets and parent-owned approvals",
+      "action": "Update the docs and retained fixture package to the subagent contract."
     },
     {
       "taskRef": "P2-T3",
       "status": "outstanding",
       "phaseNumber": 2,
       "taskNumber": 3,
-      "type": "Code",
+      "type": "Test",
       "requirementIds": [
         "R3"
       ],
       "editTargets": [
-        "tests/run_create_execplan_helpers.sh:56"
+        "tests/run_create_execplan_helpers.sh:1"
       ],
       "supportingContextAnchors": [
-        "skills/create-execplan/scripts/run_phase.py:157",
-        "skills/create-execplan/scripts/run_codex_phase.sh:79"
+        "skills/create-execplan/scripts/run_phase.py:1",
+        "skills/create-execplan/references/manual-acceptance.md:1"
       ],
-      "commands": [],
-      "expectedOutput": "helper regression suite asserts clean `CODEX_HOME`, isolated prompt wording, and schema completeness",
-      "action": "Extend the helper checks to lock in the new wrapper and controller contract."
+      "commands": [
+        "bash tests/run_create_execplan_helpers.sh"
+      ],
+      "expectedOutput": "`create-execplan helper checks passed`",
+      "action": "Run the helper regression suite after the controller refactor."
     },
     {
       "taskRef": "P2-T4",
       "status": "outstanding",
       "phaseNumber": 2,
       "taskNumber": 4,
-      "type": "Test",
+      "type": "Action",
       "requirementIds": [
         "R2",
         "R3"
       ],
       "editTargets": [],
       "supportingContextAnchors": [
-        "tests/run_create_execplan_helpers.sh:1"
+        "skills/create-execplan/references/manual-acceptance.md:1",
+        "skills/create-execplan/examples/live-repro-green/README.md:1"
       ],
       "commands": [
-        "bash tests/run_create_execplan_helpers.sh"
+        "./scripts/deploy-skill-local.sh create-execplan"
       ],
-      "expectedOutput": "`create-execplan helper checks passed`",
-      "action": "Run the helper regression suite after the controller and wrapper changes."
-    },
-    {
-      "taskRef": "P2-T5",
-      "status": "outstanding",
-      "phaseNumber": 2,
-      "taskNumber": 5,
-      "type": "Test",
-      "requirementIds": [
-        "R2",
-        "R3"
-      ],
-      "editTargets": [],
-      "supportingContextAnchors": [
-        "tests/run_create_execplan_live_codex_smoke.sh:1"
-      ],
-      "commands": [
-        "CREATE_EXECPLAN_ENABLE_LIVE_CODEX=1 bash tests/run_create_execplan_live_codex_smoke.sh"
-      ],
-      "expectedOutput": "`create-execplan live Codex smoke passed`",
-      "action": "Run the live smoke to confirm a real child `codex exec` still works after the isolation changes."
+      "expectedOutput": "installed skill deployed locally and ready for the retained-fixture live acceptance flow",
+      "action": "Deploy the updated skill locally before running the retained-fixture live acceptance flow in the Codex app."
     }
   ]
 }

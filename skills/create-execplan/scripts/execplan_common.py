@@ -37,6 +37,7 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
             "workspace/context-evidence.json",
             "workspace/context-codemap.md",
             "workspace/requirements-freeze.md",
+            "workspace/planning-brief.md",
             "workspace/draft-review.md",
             "workspace/research-questions.md",
             "workspace/research-findings.md",
@@ -49,29 +50,12 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
         ],
         "checkpoint": "",
     },
-    "requirements-freeze": {
-        "kind": "codex",
-        "description": "Capture clarifications and freeze the confirmed requirements.",
-        "allowed_input_artifacts": [
-            "workspace/context-discovery.md",
-            "workspace/context-evidence.json",
-            "workspace/requirements-freeze.md",
-            "execplan.md",
-        ],
-        "expected_output_artifacts": [
-            "workspace/context-discovery.md",
-            "workspace/context-evidence.json",
-            "workspace/requirements-freeze.md",
-            "execplan.md",
-            "workspace/phase-result.json",
-        ],
-        "checkpoint": "requirements-freeze-approval",
-    },
     "research-questions": {
-        "kind": "codex",
+        "kind": "subagent",
         "description": "Turn the frozen requirements into concrete research questions.",
         "allowed_input_artifacts": [
             "workspace/requirements-freeze.md",
+            "workspace/planning-brief.md",
             "workspace/context-discovery.md",
         ],
         "expected_output_artifacts": [
@@ -81,10 +65,11 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
         "checkpoint": "",
     },
     "research": {
-        "kind": "codex",
+        "kind": "subagent",
         "description": "Produce objective research findings from the approved questions.",
         "allowed_input_artifacts": [
             "workspace/requirements-freeze.md",
+            "workspace/planning-brief.md",
             "workspace/research-questions.md",
             "workspace/context-evidence.json",
             "workspace/context-codemap.md",
@@ -99,10 +84,11 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
         "checkpoint": "",
     },
     "design": {
-        "kind": "codex",
+        "kind": "subagent",
         "description": "Evaluate candidate approaches and record the chosen direction.",
         "allowed_input_artifacts": [
             "workspace/requirements-freeze.md",
+            "workspace/planning-brief.md",
             "workspace/research-findings.md",
             "workspace/design-options.md",
         ],
@@ -113,10 +99,11 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
         "checkpoint": "",
     },
     "structure": {
-        "kind": "codex",
+        "kind": "subagent",
         "description": "Define interfaces, boundaries, and structural outline before planning.",
         "allowed_input_artifacts": [
             "workspace/requirements-freeze.md",
+            "workspace/planning-brief.md",
             "workspace/research-findings.md",
             "workspace/design-options.md",
             "workspace/structure-outline.md",
@@ -128,10 +115,12 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
         "checkpoint": "",
     },
     "context-pack": {
-        "kind": "codex",
+        "kind": "subagent",
         "description": "Assemble the durable Context Pack from approved upstream artifacts.",
         "allowed_input_artifacts": [
             "workspace/requirements-freeze.md",
+            "workspace/planning-brief.md",
+            "workspace/research-questions.md",
             "workspace/research-findings.md",
             "workspace/design-options.md",
             "workspace/structure-outline.md",
@@ -149,10 +138,11 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
         "checkpoint": "",
     },
     "execplan-draft": {
-        "kind": "codex",
+        "kind": "subagent",
         "description": "Draft the ExecPlan from the approved context and structure outputs.",
         "allowed_input_artifacts": [
             "workspace/requirements-freeze.md",
+            "workspace/planning-brief.md",
             "workspace/design-options.md",
             "workspace/structure-outline.md",
             "context-pack.md",
@@ -167,7 +157,7 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
         "checkpoint": "execplan-draft-approval",
     },
     "finalization": {
-        "kind": "codex",
+        "kind": "subagent",
         "description": "Finalize the approved ExecPlan before readiness audit and handoff.",
         "allowed_input_artifacts": [
             "context-pack.md",
@@ -203,7 +193,7 @@ PHASE_DEFINITIONS: dict[str, dict[str, object]] = {
         "checkpoint": "",
     },
     "handoff-checklist": {
-        "kind": "codex",
+        "kind": "subagent",
         "description": "Complete the final checklist after readiness audit succeeds.",
         "allowed_input_artifacts": [
             "context-pack.md",
@@ -341,17 +331,17 @@ def phase_sandbox_workdir(artifact_root: Path, phase_name: str) -> Path:
 
 def build_phase_manifest(
     artifact_root: Path,
-    runner: str,
     created_at: str,
 ) -> dict[str, object]:
     phases: dict[str, dict[str, object]] = {}
     for phase_name, definition in PHASE_DEFINITIONS.items():
         workdir = phase_sandbox_workdir(artifact_root, phase_name)
+        runner = "deterministic" if definition["kind"] == "deterministic" else "subagent"
         phases[phase_name] = {
             "kind": definition["kind"],
             "description": definition["description"],
             "status": "pending",
-            "runner": runner if definition["kind"] == "codex" else "deterministic",
+            "runner": runner,
             "workdir": str(workdir),
             "allowedInputArtifacts": deepcopy(definition["allowed_input_artifacts"]),
             "expectedOutputArtifacts": deepcopy(
@@ -366,7 +356,7 @@ def build_phase_manifest(
         "schemaVersion": "1.0",
         "createdAt": created_at,
         "updatedAt": created_at,
-        "selectedRunner": runner,
+        "selectedRunner": "subagent",
         "currentPhase": "preflight",
         "phaseOrder": list(PHASE_DEFINITIONS.keys()),
         "phases": phases,

@@ -5,15 +5,15 @@
 
 ## Interfaces
 
-- Interface 1: `run_phase.py --phase research --artifact-root .plan/create-execplan/canonical --runner codex`
+- Interface 1: `run_phase.py prepare --phase research --artifact-root .plan/create-execplan/canonical`
 
 ## Boundaries
 
-- Boundary 1: parent agent owns user interaction and checkpoint recording; fresh runner phases own single-phase reasoning only.
+- Boundary 1: parent agent owns user interaction and checkpoint recording; fresh worker subagents own single-phase reasoning only.
 
 ## Data Flow
 
-- Flow 1: scaffold -> workspace artifacts -> fresh phase run -> structured phase result -> parent checkpoint -> next phase
+- Flow 1: scaffold -> workspace artifacts -> prepare -> worker subagent -> apply -> parent checkpoint -> next phase
 
 ## Planned Slice Order
 

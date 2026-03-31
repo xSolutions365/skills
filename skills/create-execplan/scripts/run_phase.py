@@ -1,4 +1,4 @@
-"""Run one create-execplan phase with deterministic artifact handoff."""
+"""Prepare and apply create-execplan phases with staged worker packets."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import argparse
 import json
 import shutil
 import subprocess
+from hashlib import sha256
 from pathlib import Path
 
 from execplan_common import (
@@ -18,21 +19,35 @@ from execplan_common import (
     write_json_file,
 )
 
+CHECKPOINT_STATUSES = {"needs_approval", "needs_user_input"}
+RESULT_REQUIRED_KEYS = {
+    "phase",
+    "status",
+    "message",
+    "inputArtifacts",
+    "outputArtifacts",
+    "blockingIssues",
+}
+
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run a create-execplan phase.")
-    parser.add_argument("--phase", required=True, choices=tuple(PHASE_DEFINITIONS.keys()))
-    parser.add_argument("--artifact-root", required=True, help="Path to the plan artifact root.")
-    parser.add_argument(
-        "--runner",
-        default="codex",
-        choices=("codex",),
-        help="Runner to use for codex-backed phases.",
-    )
-    parser.add_argument(
-        "--codex-bin",
+    parser = argparse.ArgumentParser(description="Prepare or apply a create-execplan phase.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    for command_name in ("prepare", "apply"):
+        command = subparsers.add_parser(command_name)
+        command.add_argument("--phase", required=True, choices=tuple(PHASE_DEFINITIONS.keys()))
+        command.add_argument(
+            "--artifact-root",
+            required=True,
+            help="Path to the plan artifact root.",
+        )
+
+    apply_command = subparsers.choices["apply"]
+    apply_command.add_argument(
+        "--result-file",
         default="",
-        help="Optional Codex CLI override used by the phase wrapper.",
+        help="Optional phase worker result JSON path. Defaults to the canonical control artifact.",
     )
     return parser.parse_args()
 
@@ -64,6 +79,7 @@ def required_scaffold_artifacts() -> list[str]:
         "workspace/context-evidence.json",
         "workspace/context-codemap.md",
         "workspace/requirements-freeze.md",
+        "workspace/planning-brief.md",
         "workspace/draft-review.md",
         "workspace/research-questions.md",
         "workspace/research-findings.md",
@@ -74,7 +90,7 @@ def required_scaffold_artifacts() -> list[str]:
     ]
 
 
-def ensure_manifest(artifact_root: Path, runner: str) -> Path:
+def ensure_manifest(artifact_root: Path) -> Path:
     manifest_path = artifact_root / "workspace" / "phase-manifest.json"
     if manifest_path.exists():
         return manifest_path
@@ -82,7 +98,6 @@ def ensure_manifest(artifact_root: Path, runner: str) -> Path:
         manifest_path,
         build_phase_manifest(
             artifact_root=artifact_root,
-            runner=runner,
             created_at=utc_now_iso(),
         ),
     )
@@ -110,7 +125,7 @@ def validate_phase_manifest(manifest: dict[str, object], phase_name: str) -> lis
                 f"Phase manifest `{phase_name}` `{key}` drifted from the canonical contract."
             )
 
-    expected_runner = "deterministic" if definition["kind"] == "deterministic" else "codex"
+    expected_runner = "deterministic" if definition["kind"] == "deterministic" else "subagent"
     if phase_data.get("runner") != expected_runner:
         errors.append(f"Phase manifest `{phase_name}` runner must be `{expected_runner}`.")
     return errors
@@ -136,17 +151,40 @@ def phase_workdir(artifact_root: Path, manifest: dict[str, object], phase_name: 
     return (artifact_root / workdir_path).resolve()
 
 
+def phase_control_dir(artifact_root: Path, phase_name: str) -> Path:
+    return artifact_root / "workspace" / "phases" / phase_name
+
+
+def worker_input_path(control_dir: Path) -> Path:
+    return control_dir / "phase-worker-input.json"
+
+
+def worker_result_path(control_dir: Path) -> Path:
+    return control_dir / "phase-worker-result.json"
+
+
+def stage_paths_for_phase(phase_name: str) -> set[str]:
+    return set(PHASE_DEFINITIONS[phase_name]["allowed_input_artifacts"]) | {
+        path
+        for path in PHASE_DEFINITIONS[phase_name]["expected_output_artifacts"]
+        if path != "workspace/phase-result.json"
+    }
+
+
+def writable_paths_for_phase(phase_name: str) -> set[str]:
+    return {
+        path
+        for path in PHASE_DEFINITIONS[phase_name]["expected_output_artifacts"]
+        if path != "workspace/phase-result.json"
+    }
+
+
 def stage_phase_workspace(artifact_root: Path, workdir: Path, phase_name: str) -> None:
     if workdir.exists():
         shutil.rmtree(workdir)
     workdir.mkdir(parents=True, exist_ok=True)
 
-    stage_paths = set(PHASE_DEFINITIONS[phase_name]["allowed_input_artifacts"]) | {
-        path
-        for path in PHASE_DEFINITIONS[phase_name]["expected_output_artifacts"]
-        if path != "workspace/phase-result.json"
-    }
-    for relative_path in sorted(stage_paths):
+    for relative_path in sorted(stage_paths_for_phase(phase_name)):
         source = artifact_root / str(relative_path)
         destination = workdir / str(relative_path)
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -170,14 +208,7 @@ def build_phase_schema() -> dict[str, object]:
             "outputArtifacts": {"type": "array", "items": {"type": "string"}},
             "blockingIssues": {"type": "array", "items": {"type": "string"}},
         },
-        "required": [
-            "phase",
-            "status",
-            "message",
-            "inputArtifacts",
-            "outputArtifacts",
-            "blockingIssues",
-        ],
+        "required": sorted(RESULT_REQUIRED_KEYS),
     }
 
 
@@ -186,101 +217,204 @@ def build_phase_prompt(phase_name: str) -> str:
     allowed_inputs = "\n".join(
         f"- {path}" for path in definition["allowed_input_artifacts"]
     )
-    expected_outputs = "\n".join(
+    writable_outputs = "\n".join(
         f"- {path}"
         for path in definition["expected_output_artifacts"]
         if path != "workspace/phase-result.json"
     )
     checkpoint = str(definition["checkpoint"]).strip() or "none"
-    return f"""You are executing the isolated planning phase `{phase_name}` for an already-scaffolded plan package.
+    return f"""You are the isolated planning worker for phase `{phase_name}` in the `create-execplan` workflow.
 
 Phase purpose: {definition["description"]}
-Current working directory contains only the staged artifacts for this phase.
+The parent orchestrator already staged the only files you may inspect into the current working directory.
 
-Read-only/allowed phase inputs:
+Allowed phase inputs:
 {allowed_inputs}
 
-Files you may update for this phase:
-{expected_outputs}
+Files you may update:
+{writable_outputs}
 
 Hard rules:
-- do not rely on any prior conversation or external memory
-- do not read or write files outside the current working directory
-- do not inspect git state, git history, or ancestor directories; only the staged files in the current working directory are relevant
-- do not invent new requirements
-- do not delegate or use agent-management tools (`spawn_agent`, `send_input`, `wait_agent`, `resume_agent`, `close_agent`)
-- do not load or invoke any skills, including planning skills
-- treat missing git metadata as expected rather than a blocker
-- the parent controller handles user interaction and approvals; if approval is required, update only the allowed artifacts and return the matching status
-- if a checkpoint is reached, draft the reviewable artifact updates first, then return the checkpoint status instead of stopping with untouched templates
-- do not leave placeholders in required phase outputs when the staged inputs already provide enough information to replace them with concrete draft content
-- return only a JSON object matching the provided schema
+- treat this as a fresh context with no prior conversation or memory
+- read and write only inside the current working directory
+- do not inspect the repo root, git history, ancestor directories, or external files
+- do not invent new requirements or widen scope
+- do not load or invoke skills
+- do not ask the user questions directly
+- do not use agent-management tools (`spawn_agent`, `send_input`, `wait_agent`, `resume_agent`, `close_agent`)
+- do not delegate to other agents or subprocess workers
+- update the required phase artifacts before you return a checkpoint status
+- if approval or clarification is needed, return the matching status and let the parent orchestrator handle the conversation
+- return only one JSON object that matches the provided schema
 
 Checkpoint for this phase: {checkpoint}
-If the phase reaches an approval gate, use `needs_approval`.
-If more user clarification is required before valid output exists, use `needs_user_input`.
-If the phase is blocked by inconsistent artifacts or missing evidence, use `blocked`.
-Otherwise use `complete`.
+Use `needs_approval` when the phase reaches an approval gate.
+Use `needs_user_input` when the staged evidence is insufficient and the parent must clarify something.
+Use `blocked` for inconsistent or broken artifacts.
+Use `complete` otherwise.
 """
 
 
-def invoke_codex_phase(
+def hash_file(path: Path) -> str:
+    digest = sha256()
+    with path.open("rb") as handle:
+        while True:
+            chunk = handle.read(65536)
+            if not chunk:
+                break
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def snapshot_workdir(workdir: Path) -> dict[str, str]:
+    snapshot: dict[str, str] = {}
+    for path in sorted(workdir.rglob("*")):
+        if path.is_file():
+            snapshot[path.relative_to(workdir).as_posix()] = hash_file(path)
+    return snapshot
+
+
+def build_phase_worker_input(
     artifact_root: Path,
     workdir: Path,
     control_dir: Path,
     phase_name: str,
-    codex_bin: str,
 ) -> dict[str, object]:
-    codex_phase_dir = control_dir / ".codex-phase"
-    codex_phase_dir.mkdir(parents=True, exist_ok=True)
-    prompt_path = codex_phase_dir / "prompt.txt"
-    schema_path = codex_phase_dir / "schema.json"
-    last_message_path = codex_phase_dir / "last-message.json"
-    stdout_path = codex_phase_dir / "stdout.jsonl"
-    stderr_path = codex_phase_dir / "stderr.log"
+    definition = PHASE_DEFINITIONS[phase_name]
+    staged_artifacts = sorted(stage_paths_for_phase(phase_name))
+    writable_artifacts = sorted(writable_paths_for_phase(phase_name))
+    read_only_artifacts = sorted(set(staged_artifacts) - set(writable_artifacts))
+    return {
+        "schemaVersion": "1.0",
+        "phase": phase_name,
+        "runner": "subagent",
+        "artifactRoot": str(artifact_root),
+        "controlDir": str(control_dir),
+        "phaseWorkdir": str(workdir),
+        "allowedInputArtifacts": list(definition["allowed_input_artifacts"]),
+        "expectedOutputArtifacts": list(definition["expected_output_artifacts"]),
+        "writableArtifacts": writable_artifacts,
+        "readOnlyArtifacts": read_only_artifacts,
+        "checkpoint": definition["checkpoint"],
+        "workerPrompt": build_phase_prompt(phase_name),
+        "resultSchema": build_phase_schema(),
+        "stagedArtifacts": staged_artifacts,
+        "stagedSnapshot": snapshot_workdir(workdir),
+    }
 
-    prompt_path.write_text(build_phase_prompt(phase_name), encoding="utf-8")
-    schema_path.write_text(json.dumps(build_phase_schema(), indent=2) + "\n", encoding="utf-8")
 
-    wrapper = Path(__file__).resolve().parent / "run_codex_phase.sh"
-    command = [
-        str(wrapper),
-        "--workdir",
-        str(workdir),
-        "--prompt-file",
-        str(prompt_path),
-        "--schema-file",
-        str(schema_path),
-        "--result-file",
-        str(last_message_path),
-        "--stdout-file",
-        str(stdout_path),
-        "--stderr-file",
-        str(stderr_path),
-    ]
-    if codex_bin:
-        command.extend(["--codex-bin", codex_bin])
+def ensure_string_list(name: str, payload: object) -> list[str]:
+    if not isinstance(payload, list) or any(not isinstance(item, str) for item in payload):
+        raise ValueError(f"Phase result `{name}` must be an array of strings.")
+    return list(payload)
 
-    subprocess.run(command, check=True, cwd=artifact_root)
-    payload = json.loads(last_message_path.read_text(encoding="utf-8"))
-    if payload.get("phase") != phase_name:
+
+def normalize_result_payload(phase_name: str, raw_payload: dict[str, object]) -> dict[str, object]:
+    if set(raw_payload.keys()) != RESULT_REQUIRED_KEYS:
+        missing = sorted(RESULT_REQUIRED_KEYS - set(raw_payload.keys()))
+        extra = sorted(set(raw_payload.keys()) - RESULT_REQUIRED_KEYS)
+        details: list[str] = []
+        if missing:
+            details.append(f"missing keys: {', '.join(missing)}")
+        if extra:
+            details.append(f"unexpected keys: {', '.join(extra)}")
+        raise ValueError("Phase result payload shape is invalid (" + "; ".join(details) + ").")
+
+    phase_value = raw_payload["phase"]
+    status_value = raw_payload["status"]
+    message_value = raw_payload["message"]
+    if not isinstance(phase_value, str) or phase_value != phase_name:
         raise ValueError(
-            f"Runner returned mismatched phase `{payload.get('phase')}` for `{phase_name}`."
+            f"Phase result must record phase `{phase_name}`, got `{phase_value}`."
         )
-    if payload.get("status") not in PHASE_RESULT_STATUSES:
-        raise ValueError(f"Runner returned invalid phase status: {payload.get('status')}")
-    return payload
+    if not isinstance(status_value, str) or status_value not in PHASE_RESULT_STATUSES:
+        raise ValueError(f"Phase result uses invalid status `{status_value}`.")
+    if not isinstance(message_value, str) or not message_value.strip():
+        raise ValueError("Phase result `message` must be a non-empty string.")
+
+    input_artifacts = ensure_string_list("inputArtifacts", raw_payload["inputArtifacts"])
+    output_artifacts = ensure_string_list("outputArtifacts", raw_payload["outputArtifacts"])
+    blocking_issues = ensure_string_list("blockingIssues", raw_payload["blockingIssues"])
+    if input_artifacts != list(PHASE_DEFINITIONS[phase_name]["allowed_input_artifacts"]):
+        raise ValueError("Phase result `inputArtifacts` drifted from the manifest contract.")
+    if output_artifacts != list(PHASE_DEFINITIONS[phase_name]["expected_output_artifacts"]):
+        raise ValueError("Phase result `outputArtifacts` drifted from the manifest contract.")
+
+    return {
+        "phase": phase_value,
+        "status": status_value,
+        "message": message_value,
+        "inputArtifacts": input_artifacts,
+        "outputArtifacts": output_artifacts,
+        "blockingIssues": blocking_issues,
+    }
 
 
 def sync_phase_outputs(artifact_root: Path, workdir: Path, phase_name: str) -> None:
-    for relative_path in PHASE_DEFINITIONS[phase_name]["expected_output_artifacts"]:
-        if relative_path == "workspace/phase-result.json":
-            continue
-        staged = workdir / str(relative_path)
-        destination = artifact_root / str(relative_path)
+    for relative_path in writable_paths_for_phase(phase_name):
+        staged = workdir / relative_path
+        destination = artifact_root / relative_path
         if staged.exists():
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(staged, destination)
+
+
+def validate_subagent_artifacts(
+    phase_name: str,
+    workdir: Path,
+    worker_input: dict[str, object],
+    payload: dict[str, object],
+) -> None:
+    allowed_control_artifacts = {"phase-worker-input.json", "phase-worker-result.json"}
+    staged_artifacts = set(ensure_string_list("stagedArtifacts", worker_input["stagedArtifacts"]))
+    writable_artifacts = set(ensure_string_list("writableArtifacts", worker_input["writableArtifacts"]))
+    read_only_artifacts = set(ensure_string_list("readOnlyArtifacts", worker_input["readOnlyArtifacts"]))
+    staged_snapshot = worker_input.get("stagedSnapshot")
+    if not isinstance(staged_snapshot, dict) or any(
+        not isinstance(key, str) or not isinstance(value, str)
+        for key, value in staged_snapshot.items()
+    ):
+        raise ValueError("Phase worker input `stagedSnapshot` is invalid.")
+
+    current_snapshot = snapshot_workdir(workdir)
+    current_paths = set(current_snapshot.keys())
+    unexpected_paths = sorted(
+        path
+        for path in (current_paths - staged_artifacts)
+        if path not in allowed_control_artifacts
+    )
+    if unexpected_paths:
+        raise ValueError(
+            "Phase workdir contains unexpected files outside the allowlist: "
+            + ", ".join(unexpected_paths)
+        )
+
+    missing_outputs = sorted(writable_artifacts - current_paths)
+    if missing_outputs:
+        raise ValueError(
+            "Phase workdir is missing required output artifacts: " + ", ".join(missing_outputs)
+        )
+
+    mutated_read_only = sorted(
+        path
+        for path in read_only_artifacts
+        if current_snapshot.get(path) != staged_snapshot.get(path)
+    )
+    if mutated_read_only:
+        raise ValueError(
+            "Phase modified read-only staged artifacts: " + ", ".join(mutated_read_only)
+        )
+
+    if payload["status"] in CHECKPOINT_STATUSES:
+        changed_outputs = sorted(
+            path
+            for path in writable_artifacts
+            if current_snapshot.get(path) != staged_snapshot.get(path)
+        )
+        if not changed_outputs:
+            raise ValueError(
+                "Checkpoint statuses require draft artifact updates before returning control."
+            )
 
 
 def resolve_python_cmd() -> str:
@@ -369,8 +503,8 @@ def run_readiness_audit(artifact_root: Path) -> dict[str, object]:
         "phase": "readiness-audit",
         "status": "complete",
         "message": "Readiness audit completed and validators passed.",
-        "inputArtifacts": PHASE_DEFINITIONS["readiness-audit"]["allowed_input_artifacts"],
-        "outputArtifacts": PHASE_DEFINITIONS["readiness-audit"]["expected_output_artifacts"],
+        "inputArtifacts": list(PHASE_DEFINITIONS["readiness-audit"]["allowed_input_artifacts"]),
+        "outputArtifacts": list(PHASE_DEFINITIONS["readiness-audit"]["expected_output_artifacts"]),
         "blockingIssues": [],
     }
 
@@ -386,16 +520,16 @@ def run_preflight(artifact_root: Path) -> dict[str, object]:
             "phase": "preflight",
             "status": "failed",
             "message": "Scaffolded artifacts are incomplete.",
-            "inputArtifacts": [],
-            "outputArtifacts": ["workspace/phase-manifest.json", "workspace/phase-result.json"],
+            "inputArtifacts": list(PHASE_DEFINITIONS["preflight"]["allowed_input_artifacts"]),
+            "outputArtifacts": list(PHASE_DEFINITIONS["preflight"]["expected_output_artifacts"]),
             "blockingIssues": missing,
         }
     return {
         "phase": "preflight",
         "status": "complete",
         "message": "Preflight confirmed the scaffolded plan package is ready.",
-        "inputArtifacts": [],
-        "outputArtifacts": ["workspace/phase-manifest.json", "workspace/phase-result.json"],
+        "inputArtifacts": list(PHASE_DEFINITIONS["preflight"]["allowed_input_artifacts"]),
+        "outputArtifacts": list(PHASE_DEFINITIONS["preflight"]["expected_output_artifacts"]),
         "blockingIssues": [],
     }
 
@@ -439,72 +573,154 @@ def persist_phase_result(
     write_json_file(manifest_path, manifest)
 
 
+def build_failure_payload(phase_name: str, message: str, blocking_issues: list[str]) -> dict[str, object]:
+    return {
+        "phase": phase_name,
+        "status": "failed",
+        "message": message,
+        "inputArtifacts": list(PHASE_DEFINITIONS[phase_name]["allowed_input_artifacts"]),
+        "outputArtifacts": ["workspace/phase-result.json"],
+        "blockingIssues": blocking_issues,
+    }
+
+
+def prepare_phase(artifact_root: Path, manifest: dict[str, object], phase_name: str) -> dict[str, object]:
+    control_dir = phase_control_dir(artifact_root, phase_name)
+    control_dir.mkdir(parents=True, exist_ok=True)
+    result_path = worker_result_path(control_dir)
+    if result_path.exists():
+        result_path.unlink()
+
+    if PHASE_DEFINITIONS[phase_name]["kind"] == "deterministic":
+        if phase_name == "preflight":
+            payload = run_preflight(artifact_root)
+        elif phase_name == "readiness-audit":
+            payload = run_readiness_audit(artifact_root)
+        else:
+            raise ValueError(f"Unsupported deterministic phase `{phase_name}`.")
+        write_json_file(result_path, payload)
+        return {
+            "phase": phase_name,
+            "runner": "deterministic",
+            "controlDir": str(control_dir),
+            "resultFile": str(result_path),
+            "message": "Deterministic phase prepared and result captured.",
+        }
+
+    workdir = phase_workdir(artifact_root, manifest, phase_name)
+    stage_phase_workspace(artifact_root, workdir, phase_name)
+    payload = build_phase_worker_input(
+        artifact_root=artifact_root,
+        workdir=workdir,
+        control_dir=control_dir,
+        phase_name=phase_name,
+    )
+    write_json_file(worker_input_path(control_dir), payload)
+    return {
+        "phase": phase_name,
+        "runner": "subagent",
+        "controlDir": str(control_dir),
+        "phaseWorkdir": str(workdir),
+        "workerInputFile": str(worker_input_path(control_dir)),
+        "resultFile": str(result_path),
+        "message": "Phase worker packet prepared.",
+    }
+
+
+def apply_phase(
+    artifact_root: Path,
+    manifest_path: Path,
+    manifest: dict[str, object],
+    phase_name: str,
+    result_file_arg: str,
+) -> tuple[dict[str, object], int]:
+    control_dir = phase_control_dir(artifact_root, phase_name)
+    canonical_result_path = worker_result_path(control_dir)
+    if result_file_arg:
+        result_path = Path(result_file_arg).resolve()
+    else:
+        result_path = canonical_result_path
+    if not result_path.exists():
+        raise ValueError(f"Phase worker result file is missing: {result_path}")
+
+    raw_payload = json.loads(result_path.read_text(encoding="utf-8"))
+    if not isinstance(raw_payload, dict):
+        raise ValueError("Phase worker result payload must be a JSON object.")
+    payload = normalize_result_payload(phase_name, raw_payload)
+
+    if result_path != canonical_result_path:
+        canonical_result_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(result_path, canonical_result_path)
+
+    if PHASE_DEFINITIONS[phase_name]["kind"] == "subagent":
+        prepared_input = read_json_file(worker_input_path(control_dir))
+        validate_subagent_artifacts(
+            phase_name=phase_name,
+            workdir=phase_workdir(artifact_root, manifest, phase_name),
+            worker_input=prepared_input,
+            payload=payload,
+        )
+        sync_phase_outputs(
+            artifact_root=artifact_root,
+            workdir=phase_workdir(artifact_root, manifest, phase_name),
+            phase_name=phase_name,
+        )
+
+    persist_phase_result(artifact_root, manifest_path, phase_name, payload)
+    return payload, 0 if payload["status"] != "failed" else 1
+
+
 def main() -> int:
     args = parse_args()
     artifact_root = Path(args.artifact_root).resolve()
-    manifest_path = ensure_manifest(artifact_root, runner=args.runner)
+    manifest_path = ensure_manifest(artifact_root)
     manifest = read_json_file(manifest_path)
 
     errors = validate_phase_manifest(manifest, args.phase)
     if args.phase != "preflight":
         errors.extend(required_inputs_exist(artifact_root, args.phase))
     if errors:
-        payload = {
-            "phase": args.phase,
-            "status": "failed",
-            "message": "Phase contract validation failed before execution.",
-            "inputArtifacts": list(PHASE_DEFINITIONS[args.phase]["allowed_input_artifacts"]),
-            "outputArtifacts": ["workspace/phase-result.json"],
-            "blockingIssues": errors,
-        }
+        payload = build_failure_payload(
+            args.phase,
+            "Phase contract validation failed before execution.",
+            errors,
+        )
         persist_phase_result(artifact_root, manifest_path, args.phase, payload)
         for error in errors:
             print(error)
         return 1
 
     try:
-        if args.phase == "preflight":
-            payload = run_preflight(artifact_root)
-        elif args.phase == "readiness-audit":
-            payload = run_readiness_audit(artifact_root)
-        else:
-            workdir = phase_workdir(artifact_root, manifest, args.phase)
-            control_dir = artifact_root / "workspace" / "phases" / args.phase
-            stage_phase_workspace(artifact_root, workdir, args.phase)
-            payload = invoke_codex_phase(
-                artifact_root=artifact_root,
-                workdir=workdir,
-                control_dir=control_dir,
-                phase_name=args.phase,
-                codex_bin=args.codex_bin,
-            )
-            sync_phase_outputs(artifact_root, workdir, args.phase)
+        if args.command == "prepare":
+            payload = prepare_phase(artifact_root, manifest, args.phase)
+            print(json.dumps(payload, indent=2))
+            return 0
+
+        payload, exit_code = apply_phase(
+            artifact_root=artifact_root,
+            manifest_path=manifest_path,
+            manifest=manifest,
+            phase_name=args.phase,
+            result_file_arg=args.result_file,
+        )
+        print(json.dumps(payload, indent=2))
+        return exit_code
     except subprocess.CalledProcessError as exc:
-        payload = {
-            "phase": args.phase,
-            "status": "failed",
-            "message": "Phase execution failed.",
-            "inputArtifacts": list(PHASE_DEFINITIONS[args.phase]["allowed_input_artifacts"]),
-            "outputArtifacts": ["workspace/phase-result.json"],
-            "blockingIssues": [f"Command failed with exit code {exc.returncode}."],
-        }
+        payload = build_failure_payload(
+            args.phase,
+            "Phase execution failed.",
+            [f"Command failed with exit code {exc.returncode}."],
+        )
         persist_phase_result(artifact_root, manifest_path, args.phase, payload)
         return exc.returncode or 1
-    except (json.JSONDecodeError, ValueError) as exc:
-        payload = {
-            "phase": args.phase,
-            "status": "failed",
-            "message": "Phase runner returned an invalid result payload.",
-            "inputArtifacts": list(PHASE_DEFINITIONS[args.phase]["allowed_input_artifacts"]),
-            "outputArtifacts": ["workspace/phase-result.json"],
-            "blockingIssues": [str(exc)],
-        }
+    except (FileNotFoundError, json.JSONDecodeError, ValueError) as exc:
+        payload = build_failure_payload(
+            args.phase,
+            "Phase result validation failed during apply." if args.command == "apply" else "Phase preparation failed.",
+            [str(exc)],
+        )
         persist_phase_result(artifact_root, manifest_path, args.phase, payload)
         return 1
-
-    persist_phase_result(artifact_root, manifest_path, args.phase, payload)
-    print(json.dumps(payload, indent=2))
-    return 0 if payload["status"] != "failed" else 1
 
 
 if __name__ == "__main__":

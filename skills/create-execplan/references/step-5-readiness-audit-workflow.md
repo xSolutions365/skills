@@ -1,4 +1,4 @@
-# Step 5 Workflow: Run the readiness audit
+# Step 6 Workflow: Run the readiness audit
 
 ## Objective
 

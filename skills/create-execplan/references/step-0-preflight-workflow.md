@@ -12,7 +12,7 @@ Establish deterministic artifact paths under the caller project root, resolve th
 4. Invoke `scripts/scaffold_execplan.py` from the caller project working directory so outputs land under `<project-root>/.plan/create-execplan/<timestamp>/`.
 5. Confirm the scaffolded files match the package layout in [artifact-contract.md](artifact-contract.md), including `workspace/phase-manifest.json`, `workspace/phase-result.json`, and the intermediate research/design/structure artifacts.
 6. Do not generate `workspace/execplan-runtime-input.json` during scaffold.
-7. Treat the scaffolded phase manifest as the canonical contract for later fresh-session phase runs.
+7. Treat the scaffolded phase manifest as the canonical contract for later `prepare/apply` phase runs and staged worker packets.
 
 ## Done when
 

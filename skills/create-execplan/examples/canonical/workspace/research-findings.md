@@ -14,7 +14,7 @@
 
 ## Unknowns
 
-- U1: live Codex CLI invocation details must be validated separately from repo tests.
+- U1: live installed-skill worker behavior must be validated separately from repo tests.
 
 ## Risks
 

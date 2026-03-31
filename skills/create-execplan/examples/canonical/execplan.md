@@ -7,6 +7,7 @@
 - Context Pack: `.plan/create-execplan/canonical/context-pack.md`
 - Runtime Input artifact: `.plan/create-execplan/canonical/workspace/execplan-runtime-input.json` (generated after finalization; do not edit)
 - Requirements Freeze artifact: `.plan/create-execplan/canonical/workspace/requirements-freeze.md`
+- Planning Brief artifact: `.plan/create-execplan/canonical/workspace/planning-brief.md`
 - Draft Review artifact: `.plan/create-execplan/canonical/workspace/draft-review.md`
 - Phase Manifest artifact: `.plan/create-execplan/canonical/workspace/phase-manifest.json`
 - Phase Result artifact: `.plan/create-execplan/canonical/workspace/phase-result.json`
@@ -44,7 +45,7 @@ Strengthen isolated phase execution and plan-quality validation for `create-exec
 
 | Dependency | Purpose | Check command | Install command | Source | Hard-fail behavior |
 | ---------- | ------- | ------------- | --------------- | ------ | ------------------ |
-| codex cli | run fresh phase invocations | `codex --version` | `n/a` | local tool installation | stop and escalate to user on install failure |
+| codex app | host parent and worker subagents | `n/a` | `n/a` | Codex desktop/app runtime | stop and escalate to user if subagent tools are unavailable |
 
 ## Task Table (single source of truth)
 
@@ -69,7 +70,7 @@ Use `n/a` when `Edit Targets`, `Supporting Context Anchors`, or `Commands` does 
 
 | Status | Phase # | Task # | Type | Req IDs | Edit Targets | Supporting Context Anchors | Commands | Expected Output | Action |
 | ------ | ------- | ------ | ---- | ------- | ------------ | -------------------------- | -------- | --------------- | ------ |
-|        | 1       | 1      | Code | R1,R3 | `skills/create-execplan/scripts/scaffold_execplan.py:1`,`skills/create-execplan/scripts/run_phase.py:1`,`skills/create-execplan/scripts/run_codex_phase.sh:1` | `skills/create-execplan/references/step-0-preflight-workflow.md:1`,`tests/run_create_execplan_helpers.sh:1` | `n/a` | scaffold and controller create deterministic phase artifacts and isolated run contracts | Implement isolated phase-runner contracts and scaffolded workspace artifacts. |
+|        | 1       | 1      | Code | R1,R3 | `skills/create-execplan/scripts/scaffold_execplan.py:1`,`skills/create-execplan/scripts/run_phase.py:1`,`skills/create-execplan/SKILL.md:1` | `skills/create-execplan/references/step-0-preflight-workflow.md:1`,`tests/run_create_execplan_helpers.sh:1` | `n/a` | scaffold and controller create deterministic phase artifacts and staged worker packets | Implement the `prepare/apply` controller contract and subagent worker handoff. |
 |        | 1       | 2      | Code | R1,R2,R3 | `skills/create-execplan/scripts/validate_plan_rubric.py:1`,`skills/create-execplan/references/artifact-contract.md:1`,`skills/create-execplan/references/execplan-template.md:1`,`skills/create-execplan/references/context-pack-template.md:1` | `skills/create-execplan/references/step-5-readiness-audit-workflow.md:1`,`skills/create-execplan/references/step-6-checklist-workflow.md:1` | `n/a` | rubric validation and references keep planning quality strict without changing the final handoff package | Add rubric validation and align docs, templates, and examples to the maintained contract. |
 |        | 2       | 3      | Test | R1,R2,R3 | `n/a` | `tests/run_create_execplan_helpers.sh:1` | `bash tests/run_create_execplan_helpers.sh` | create-execplan helper checks passed | Run the helper regression checks against the updated examples and scaffolder. |
 
@@ -101,7 +102,7 @@ Use scenario-focused BDD coverage for changed behavior and high-risk regressions
 | Scenario ID | Priority | Given | When | Then | Evidence Command | Task Ref |
 | ----------- | -------- | ----- | ---- | ---- | ---------------- | -------- |
 | S1 | P0 | canonical example artifacts exist | the helper smoke checks run through the resolved runtime | the create-execplan helper suite passes | `bash tests/run_create_execplan_helpers.sh` | P2-T3 |
-| S2 | P1 | a fresh phase invocation is launched through the wrapper | the controller runs an isolated design phase | the phase result and manifest are updated from the runner output | `bash tests/run_create_execplan_helpers.sh` | P1-T1 |
+| S2 | P1 | a prepared phase packet exists for one worker | the controller applies a valid worker result | the phase result and manifest advance through the staged handoff contract | `bash tests/run_create_execplan_helpers.sh` | P1-T1 |
 | S3 | P1 | rubric validation reads the example workspace artifacts | the readiness checks run | missing approvals, missing structure, and vague packet language all fail validation | `bash tests/run_create_execplan_helpers.sh` | P1-T2 |
 
 ## Idempotence & Recovery
