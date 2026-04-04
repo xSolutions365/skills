@@ -8,12 +8,13 @@ Apply a binary natural-language validation gate to the preview before any file w
 
 1. Evaluate the full preview against [validation-checklist.md](validation-checklist.md).
 2. Record one evidence line for every checklist group:
-   - frontmatter integrity
-   - workflow structure
-   - step integrity
-   - link and path integrity
-   - self-contained constraint
-   - natural-language quality
+  - frontmatter integrity
+  - workflow structure
+  - step integrity
+  - link and path integrity
+  - self-contained constraint
+  - runtime-locality constraint
+  - natural-language quality
 3. Return `PASS` only when every deterministic and natural-language rule passes.
 4. If any rule fails:
    - return `FAIL`

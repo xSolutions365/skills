@@ -3,17 +3,7 @@ name: "create-skill"
 description: "Create or update skills through a deterministic, self-contained template workflow with natural-language validation checkpoints. USE WHEN you need portable skill authoring without repo-specific tooling."
 ---
 
-# Create Skill
-
-Create skill files through a deterministic workflow that is fully self-contained within this skill directory.
-
-- Use this when you need to create or update a skill without relying on repo-local CLIs or scripts.
-- Use this when you need predictable outputs with explicit approval checkpoints.
-- Use this when validation must be performed by an LLM using a written checklist rather than tool-specific lint commands.
-
-## Workflow
-
-Use this section for step context only. Keep detailed mechanics in the referenced workflow files.
+# Workflow
 
 ### Step 0: Preflight local context
 
@@ -64,3 +54,33 @@ Use this section for step context only. Keep detailed mechanics in the reference
 - Write files exactly as approved, then rerun the validation checklist against the written files before handoff.
 - If revalidation fails, return to Step 2, Step 3, or Step 4 instead of handing off partial output.
 - Workflow: [references/step-5-generate-workflow.md](references/step-5-generate-workflow.md)
+
+## Output
+
+Use this section to define one detailed result format. Present the same structure in the terminal and save it to the retained artifact path.
+
+### Result Format
+
+- Present the full structure below in the terminal.
+- Save the same structure to `<target skill root>/generation-summary.md`.
+
+```md
+# RESULT
+
+- Summary: Skill preview or generation completed.
+- Artifacts: <target skill root>/
+
+## Summary
+
+- Skill: <skill_id>
+- Outcome: <previewed|generated>
+
+## Validation
+
+- Status: <PASS|FAIL>
+- Evidence: <key checks and findings>
+
+## Files
+
+- <path>
+```

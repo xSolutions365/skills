@@ -7,10 +7,8 @@ Use this schema as the source-of-truth contract for preview and generation.
 - `skill_id` (string): lowercase letters, digits, and hyphens only; max 64 chars.
 - `description` (string): concise routing sentence for the skill capability; keep under 200 chars and move inventories into the body.
 - `use_when` (string): explicit routing trigger.
-- `title` (string): primary markdown title text.
-- `summary` (string): short overview paragraph.
-- `primary_use_cases` (string[]): at least one deterministic use case.
 - `workflow_steps` (object[]): ordered workflow definitions.
+- `output_contract` (object): retained output location plus deterministic result format.
 - `reference_docs` (object[]): referenced workflow documents.
 
 ## `workflow_steps` entry
@@ -30,6 +28,11 @@ Use this schema as the source-of-truth contract for preview and generation.
 - `required_actions` (string[])
 - `done_when` (string[])
 
+## `output_contract`
+
+- `path` (string): retained summary path, relative to the generated skill root.
+- `format` (string[]): ordered markdown blocks shown under `### Result Format`.
+
 ## Invariants
 
 1. `workflow_steps.step` must be sorted ascending.
@@ -39,6 +42,7 @@ Use this schema as the source-of-truth contract for preview and generation.
 5. Generated `SKILL.md` frontmatter must remain valid YAML after substitution.
 6. `description` must stay to one routing sentence, avoid colon-labelled enumerations or preset catalogues, and reserve detailed capability lists for the markdown body.
 7. All paths must be relative to the generated skill root.
+8. Generated `SKILL.md` bodies must start with `# Workflow` and include `## Output`.
 
 ## Canonical payload skeleton
 
@@ -47,9 +51,6 @@ Use this schema as the source-of-truth contract for preview and generation.
   "skill_id": "example-skill",
   "description": "Create deterministic outputs.",
   "use_when": "you need repeatable generation",
-  "title": "Example Skill",
-  "summary": "Generate skill documents from approved requirements.",
-  "primary_use_cases": ["Create new skills with deterministic structure."],
   "workflow_steps": [
     {
       "step": 0,
@@ -60,6 +61,22 @@ Use this schema as the source-of-truth contract for preview and generation.
       "reference": "references/step-0-preflight-workflow.md"
     }
   ],
+  "output_contract": {
+    "path": "generation-summary.md",
+    "format": [
+      "# RESULT",
+      "- Summary: Skill preview or generation completed.",
+      "- Artifacts: <target skill root>/",
+      "## Summary",
+      "- Skill: <skill_id>",
+      "- Outcome: <previewed|generated>",
+      "## Validation",
+      "- Status: <PASS|FAIL>",
+      "- Evidence: <key checks and findings>",
+      "## Files",
+      "- <path>"
+    ]
+  },
   "reference_docs": [
     {
       "path": "references/step-0-preflight-workflow.md",

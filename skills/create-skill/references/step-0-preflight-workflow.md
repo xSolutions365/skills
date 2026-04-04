@@ -9,6 +9,7 @@ Confirm deterministic local context before requirement capture.
 1. Set working root to the directory that contains `SKILL.md`.
 2. Resolve all paths relative to this root and do not use repo-root assumptions.
 3. Confirm required files exist:
+   - `references/authoring-rules.md`
    - `references/payload-schema.md`
    - `references/validation-checklist.md`
    - `assets/templates/skill-output-template.md`

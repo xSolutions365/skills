@@ -3,14 +3,7 @@ name: "example-structured"
 description: "Run a structured multi-step workflow. USE WHEN you need linked reference documents for a larger skill."
 ---
 
-# Example Structured
-
-This skill demonstrates the repo's structured multi-file lint path.
-
-- Use this when the workflow needs linked references.
-- Use this when the skill has grown beyond a compact single file.
-
-## Workflow
+# Workflow
 
 ### Step 1: Prepare scope
 
@@ -25,3 +18,10 @@ This skill demonstrates the repo's structured multi-file lint path.
 - **When**: Run after Step 1.
 - Complete the work using the confirmed scope.
 - Workflow: [references/step-2-deliver-output.md](references/step-2-deliver-output.md)
+
+## Output
+
+### Result Format
+
+- Report the approved scope and the delivered output path or artifact.
+- Keep the final handoff aligned with the confirmed scope from Step 1.

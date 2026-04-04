@@ -3,32 +3,15 @@ name: "create-execplan"
 description: "Create or update a structured execution-plan package with a living ExecPlan and derived runtime input. USE WHEN create-execplan skill is requested."
 ---
 
-# Create ExecPlan
-
-Create a structured plan package that separates durable context, living execution state, and derived runtime input for tooling.
-
-- Use this when planning must be deterministic, auditable, and updated in place.
-- Use this when the plan will be handed to a lower-reasoning implementer that needs explicit task rows and traceability.
-- Use this when the change requires a Context Pack plus a living ExecPlan rather than a one-off markdown note.
-- Keep initial brief design parent-owned and iterative, then run phase work through the deterministic controller plus fresh subagent workers once the planning brief is approved.
-- Keep the parent skill-running agent as the only user-facing layer; normalize approvals and checkpoint results into workspace artifacts before launching the next phase.
-- Before any user-facing approval gate, run the skeptical translation-validation check and resolve findings before surfacing the candidate artifact.
-
-## Behavior Rules
-
-- **NEVER** weaken required language into optional, advisory, deferred, or exploratory language unless the source explicitly does so.
-- **NEVER** introduce optionality, fallback paths, or "may/should consider" wording where the user request or supplied artifact defines a required outcome.
-- **ALWAYS** preserve action precision. If the source says `supersede`, `remove`, `fail closed`, `pin`, `verify before activation`, or similar lifecycle or control terms, keep that exact intent rather than replacing it with a looser synonym.
-- **ALWAYS** preserve explicit specificity. If the source names concrete checks, tools, protocols, or artifacts, keep them explicit in the freeze unless the user explicitly approves abstraction.
-- **NEVER** infer a missing decision, soften an ambiguity, or pick between plausible interpretations silently. Ask the user for clarification before freezing requirements.
-
-## Workflow
+# Workflow
 
 ### Step 0: Preflight and scaffold
 
 - **Purpose**: Establish the caller project root, resolve the helper runtime, and scaffold authoring artifacts.
 - **When**: Run first.
 - Use the skill-local runtime resolver and scaffold the plan package under the caller project root, including the phase manifest/result files and the intermediate research/design/structure artifacts.
+- Keep the initial brief design parent-owned and iterative, keep the parent skill-running agent as the only user-facing layer, and normalize approvals and checkpoint results into workspace artifacts before launching the next phase.
+- Preserve required language and explicit specificity from the source, do not introduce optionality or fallback wording, and ask for clarification instead of silently inferring missing decisions.
 - Workflow: [references/step-0-preflight-workflow.md](references/step-0-preflight-workflow.md)
 
 ### Step 1: Capture and freeze requirements
@@ -57,6 +40,7 @@ Create a structured plan package that separates durable context, living executio
 - **Purpose**: Turn confirmed context into a reviewable ExecPlan draft and iterate until approval.
 - **When**: Run after Step 3.
 - Resolve surfaced blockers, generate the draft through the worker packet flow, and stop for explicit draft approval before finalization.
+- Before any user-facing approval gate, run the skeptical translation-validation check and resolve findings before surfacing the candidate artifact.
 - Workflow: [references/step-3-draft-review-workflow.md](references/step-3-draft-review-workflow.md)
 
 ### Step 5: Finalize the approved ExecPlan
@@ -79,3 +63,11 @@ Create a structured plan package that separates durable context, living executio
 - **When**: Run only after Step 6 passes.
 - Record checklist results and do not hand off while any required plan gate is failing.
 - Workflow: [references/step-6-checklist-workflow.md](references/step-6-checklist-workflow.md)
+
+## Output
+
+### Result Format
+
+- Write or update the plan package under the caller project root, including the Context Pack, `execplan.md`, generated runtime input, and required phase artifacts.
+- Report the approval state, audit/checklist status, and the created or updated paths needed for handoff.
+- Do not hand off partial artifacts while any required gate is failing.

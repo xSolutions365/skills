@@ -11,11 +11,13 @@ Build one deterministic payload contract that drives preview and generation.
    - `workflow_steps` are sorted and contiguous
    - every `workflow_steps.reference` exists in `reference_docs.path`
    - `skill_id` matches lowercase-hyphen naming rules
+   - `output_contract.path` is relative to the target skill root
+   - `output_contract.format` is ordered and non-empty
    - all generated paths remain relative to the target skill root
 3. Attach a deterministic file plan in this fixed order:
    - `SKILL.md`
    - each reference document sorted by path ascending
-   - each template sorted by path ascending
+    - each template sorted by path ascending
 4. Present payload for user approval with no hidden defaults.
 
 ## Done when

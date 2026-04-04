@@ -358,10 +358,27 @@ check_compact_skill_limits() {
 
 check_skill_structure() {
   local path="$1"
-  local workflow_line steps_file step_count idx line_no step_no next_line expected references
-  if ! grep -Fq "## Workflow" "$path"; then
-    add_issue "$path" 1 "SKILL.md must include a '## Workflow' section."
+  local end_line first_body_line first_body_text workflow_line output_line result_format_line
+  local steps_file step_count idx line_no step_no next_line expected references total_lines last_step_line
+
+  end_line="$(frontmatter_end_line "$path")"
+  first_body_line="$(awk -v end_line="$end_line" 'NR > end_line && NF { print NR; exit }' "$path")"
+  first_body_text="$(awk -v end_line="$end_line" 'NR > end_line && NF { print; exit }' "$path")"
+
+  if [[ -z "$first_body_line" || "$first_body_text" != "# Workflow" ]]; then
+    add_issue "$path" "${first_body_line:-1}" "Structured SKILL.md must begin with a '# Workflow' heading immediately after frontmatter."
     return
+  fi
+  workflow_line="$first_body_line"
+
+  output_line="$(awk '/^## Output$/ { print NR; exit }' "$path")"
+  if [[ -z "$output_line" ]]; then
+    add_issue "$path" "$workflow_line" "SKILL.md must include a '## Output' section."
+  fi
+
+  result_format_line="$(awk '/^### Result Format$/ { print NR; exit }' "$path")"
+  if [[ -z "$result_format_line" ]]; then
+    add_issue "$path" "${output_line:-$workflow_line}" "Output section must include a '### Result Format' heading."
   fi
 
   steps_file="$(mktemp)"
@@ -370,7 +387,6 @@ check_skill_structure() {
 
   step_count="$(wc -l <"$steps_file" | tr -d ' ')"
   if [[ "$step_count" -eq 0 ]]; then
-    workflow_line="$(line_for_text "$path" "## Workflow")"
     add_issue "$path" "$workflow_line" "Workflow section must include numbered '### Step N: ...' headings."
     return
   fi
@@ -402,7 +418,6 @@ check_skill_structure() {
     expected=$((expected + 1))
   done
 
-  local total_lines
   total_lines="$(wc -l <"$path" | tr -d ' ')"
   for ((idx = 0; idx < step_count; idx++)); do
     line_no="${STEP_LINES[idx]}"
@@ -417,6 +432,13 @@ check_skill_structure() {
       add_issue "$path" "$line_no" "Step $step_no must include exactly one reference link to a file under references/."
     fi
   done
+
+  if [[ -n "$output_line" ]]; then
+    last_step_line="${STEP_LINES[$((step_count - 1))]}"
+    if [[ "$output_line" -le "$last_step_line" ]]; then
+      add_issue "$path" "$output_line" "The '## Output' section must appear after all workflow steps."
+    fi
+  fi
 }
 
 check_readme_structure() {

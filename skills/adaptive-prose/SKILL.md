@@ -3,28 +3,14 @@ name: adaptive-prose
 description: Draft or redraft context-bound prose using explicit style presets and judgment-based validation. USE WHEN the user needs stronger prose for a specific audience, or needs existing text redrafted without drifting from the source intent.
 ---
 
-# Adaptive Prose
-
-Draft or redraft prose with an explicit preset, a context-bound writing style, and a human-judged review gate instead of scripted checkers.
-
-- Use this when the task is writing new prose from context, not just outlining.
-- Use this when the task is improving existing prose while preserving meaning or audience fit.
-- Use this when preset selection must be explicit through `--preset` and validated before drafting.
-- Accepted canonical presets and shorthand selectors:
-  - `operator-brief`: `operator`, `brief`
-  - `technical-deep-dive`: `technical`, `deep-dive`
-  - `narrative-explainer`: `narrative`, `explainer`
-  - `executive-decision-brief`: `executive`, `exec`, `exec-summary`
-  - `surgical-redraft`: `surgical`
-  - `voice-shift-redraft`: `voice-shift`
-
-## Workflow
+# Workflow
 
 ### Step 0: Preflight preset, mode, and output target
 
 - **Purpose**: Confirm the selected preset, classify the run as create or redraft, and verify enough input exists to proceed.
 - **When**: Run once at the start of each request.
 - Require a valid `--preset`, identify whether the job is create or redraft, and set `@ARTIFACT_ROOT` plus target output path before any drafting.
+- Treat the accepted canonical presets and shorthand selectors as fixed: `operator-brief` (`operator`, `brief`), `technical-deep-dive` (`technical`, `deep-dive`), `narrative-explainer` (`narrative`, `explainer`), `executive-decision-brief` (`executive`, `exec`, `exec-summary`), `surgical-redraft` (`surgical`), and `voice-shift-redraft` (`voice-shift`).
 - Workflow: [references/step-0-preflight-workflow.md](references/step-0-preflight-workflow.md)
 
 ### Step 1: Load universal and preset guidance
@@ -54,3 +40,11 @@ Draft or redraft prose with an explicit preset, a context-bound writing style, a
 - **When**: Run only after Step 3 passes.
 - Save the final prose to the agreed artifact-root-relative path and note the preset and mode used for the run.
 - Workflow: [references/step-4-finalize-output-workflow.md](references/step-4-finalize-output-workflow.md)
+
+## Output
+
+### Result Format
+
+- Present the approved prose in the terminal unless the user explicitly requested file-only output.
+- Save the same approved prose to the agreed artifact-root-relative path under `@ARTIFACT_ROOT`.
+- Report the selected preset, the create-or-redraft mode, and the written output path.

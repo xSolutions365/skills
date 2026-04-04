@@ -3,17 +3,7 @@ name: "create-project-docs"
 description: "Generate a concise README plus evidence-backed reference docs from repo analysis. USE WHEN you need fast-onboarding docs without burying detail."
 ---
 
-# Create Project Docs
-
-Create a progressive-disclosure documentation set for a target repository by keeping onboarding-critical material in `README.md` and moving deeper detail into focused `docs/references/*.md` files.
-
-- Use this when a repository needs a clearer onboarding path without losing conceptual depth.
-- Use this when an existing README has become overloaded and needs a clean split into entrypoint and reference docs.
-- Use this when documentation must be grounded in repo evidence instead of invented commands, workflows, or examples.
-
-## Workflow
-
-Use this section for step context only. Keep detailed mechanics in the referenced workflow files.
+# Workflow
 
 ### Step 0: Preflight target repo context
 
@@ -79,3 +69,11 @@ Use this section for step context only. Keep detailed mechanics in the reference
 - Write `README.md` and only the justified `docs/references/*.md` files.
 - Report created or updated files, evidence sources used, and any unresolved gaps instead of fabricating content.
 - Workflow: [references/step-7-generation-workflow.md](references/step-7-generation-workflow.md)
+
+## Output
+
+### Result Format
+
+- Write `README.md` and only the justified `docs/references/*.md` files in the target repository.
+- Report the created or updated paths, the evidence sources used, and any unresolved documentation gaps.
+- Do not invent commands, paths, examples, or concepts that were not established by the evidence inventory.
