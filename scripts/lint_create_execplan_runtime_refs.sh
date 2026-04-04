@@ -27,16 +27,23 @@ contract_files=(
   "$ROOT_DIR/tests/run_create_execplan_helpers.sh"
 )
 
+existing_contract_files=()
+for path in "${contract_files[@]}"; do
+  if [[ -f "$path" ]]; then
+    existing_contract_files+=("$path")
+  fi
+done
+
 python_refs="$(
   rg -n \
     "python3[[:space:]]+(-m|[^[:space:]]+\\.py\\b)" \
-    "${contract_files[@]}" || true
+    "${existing_contract_files[@]}" || true
 )"
 
 legacy_refs="$(
   rg -n \
     "execplan-task-packets\\.json|## Verification Strategy|## Quality Gates|## Artifacts & Notes|## Plan Overview \\(phases\\)" \
-    "${contract_files[@]}" || true
+    "${existing_contract_files[@]}" || true
 )"
 
 if [[ -n "$python_refs" ]]; then
