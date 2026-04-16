@@ -52,28 +52,14 @@ check_parity() {
   fi
 }
 
-python_files=(
-  "$ROOT_DIR/skills/create-execplan/scripts/execplan_common.py"
-  "$ROOT_DIR/skills/create-execplan/scripts/render_execplan_runtime_input.py"
-  "$ROOT_DIR/skills/create-execplan/scripts/scaffold_execplan.py"
-  "$ROOT_DIR/skills/create-execplan/scripts/validate_context_pack.py"
-  "$ROOT_DIR/skills/create-execplan/scripts/validate_execplan.py"
-)
-
-PYTHON_RESOLVER="$ROOT_DIR/skills/create-execplan/scripts/resolve_python.sh"
-PYTHON_CMD="$("$PYTHON_RESOLVER")"
-
 if [[ "$FIX_MODE" == "true" ]]; then
   run_step "Update skills badge payload" bash "$ROOT_DIR/scripts/update_skills_badge.sh"
 else
 run_step "Check skills badge payload" bash "$ROOT_DIR/scripts/update_skills_badge.sh" --check
 fi
 run_step "Skill lint" bash "$ROOT_DIR/scripts/lint_skills.sh"
-run_step "Create-execplan runtime lint" bash "$ROOT_DIR/scripts/lint_create_execplan_runtime_refs.sh"
 run_step "Lint integration tests" bash "$ROOT_DIR/tests/run_lint_skills_integration.sh"
-run_step "Create-execplan helper checks" bash "$ROOT_DIR/tests/run_create_execplan_helpers.sh"
-run_step "Shell syntax check" bash -n "$ROOT_DIR/scripts/update_skills_badge.sh" "$ROOT_DIR/scripts/lint_skills.sh" "$ROOT_DIR/scripts/lint_create_execplan_runtime_refs.sh" "$ROOT_DIR/scripts/run-ci-quality-gates.sh" "$ROOT_DIR/tests/run_lint_skills_integration.sh" "$ROOT_DIR/tests/run_create_execplan_helpers.sh" "$ROOT_DIR/skills/create-execplan/scripts/resolve_python.sh"
-run_step "Python syntax check" "$PYTHON_CMD" -B -m py_compile "${python_files[@]}"
+run_step "Shell syntax check" bash -n "$ROOT_DIR/scripts/update_skills_badge.sh" "$ROOT_DIR/scripts/lint_skills.sh" "$ROOT_DIR/scripts/run-ci-quality-gates.sh" "$ROOT_DIR/tests/run_lint_skills_integration.sh"
 run_step "Parity guard" check_parity
 
 if [[ "$FIX_MODE" == "true" ]]; then

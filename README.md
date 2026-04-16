@@ -59,5 +59,4 @@ This repo uses a centralized pre-commit and CI runner at `scripts/run-ci-quality
 
 - `create-skill`
 - `adaptive-prose`
-- `create-execplan`
 - `visual-explainer`
