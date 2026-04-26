@@ -2,6 +2,7 @@
 set -euo pipefail
 
 COMPACT_SKILL_MAX_LINES=500
+BEHAVIOUR_GUIDANCE_MAX_LINES=100
 ISSUES_FILE="$(mktemp)"
 TEMP_FILES=("$ISSUES_FILE")
 
@@ -292,27 +293,59 @@ check_markdown_links() {
 classify_skill_layout() {
   local skill_dir="$1"
   local markdown_list="$2"
+  local first_body_text
+  first_body_text="$(first_body_heading "$skill_dir/SKILL.md")"
+
   if [[ -f "$skill_dir/README.md" ]]; then
-    printf 'structured\n'
+    printf 'multi-step-workflow\n'
     return
   fi
-  if [[ -d "$skill_dir/references" || -d "$skill_dir/scripts" || -d "$skill_dir/assets" ]]; then
-    printf 'structured\n'
+  if [[ -d "$skill_dir/scripts" || -d "$skill_dir/assets" ]]; then
+    printf 'multi-step-workflow\n'
+    return
+  fi
+  if [[ -d "$skill_dir/references" ]]; then
+    if [[ "$first_body_text" == "# Task" ]]; then
+      printf 'simple-task-runbook-index\n'
+    else
+      printf 'multi-step-workflow\n'
+    fi
     return
   fi
   while IFS= read -r path; do
     case "$(basename "$path")" in
       SKILL.md|README.md) ;;
-      *) printf 'structured\n'; return ;;
+      *)
+        if [[ "$first_body_text" == "# Task" ]]; then
+          printf 'simple-task-runbook-index\n'
+        else
+          printf 'multi-step-workflow\n'
+        fi
+        return
+        ;;
     esac
   done <"$markdown_list"
-  printf 'compact\n'
+  if [[ "$first_body_text" == "# Guidance" ]]; then
+    printf 'behaviour-guidance\n'
+  else
+    printf 'simple-task-inline\n'
+  fi
+}
+
+first_body_heading() {
+  local path="$1"
+  local end_line
+  end_line="$(frontmatter_end_line "$path")"
+  if [[ -z "$end_line" ]]; then
+    printf ''
+    return
+  fi
+  awk -v end_line="$end_line" 'NR > end_line && NF { print; exit }' "$path"
 }
 
 check_skill_frontmatter() {
   local skill_dir="$1"
   local path="$2"
-  local require_use_when="$3"
   local first_line end_line raw_name raw_description name description
 
   first_line="$(awk 'NR == 1 { print; exit }' "$path")"
@@ -342,18 +375,58 @@ check_skill_frontmatter() {
 
   if [[ -z "$description" ]]; then
     add_issue "$path" 1 "SKILL.md frontmatter must include 'description'."
-  elif [[ "$require_use_when" == "true" && "$description" != *"USE WHEN"* ]]; then
-    add_issue "$path" 1 "Structured skill description must include an explicit 'USE WHEN ...' clause."
+  elif [[ "$description" != *"USE WHEN"* ]]; then
+    add_issue "$path" 1 "Skill description must include an explicit 'USE WHEN ...' clause."
   fi
 }
 
-check_compact_skill_limits() {
+check_skill_line_limit() {
   local path="$1"
+  local max_lines="$2"
+  local label="$3"
   local line_count
   line_count="$(wc -l <"$path" | tr -d ' ')"
-  if [[ "$line_count" -gt "$COMPACT_SKILL_MAX_LINES" ]]; then
-    add_issue "$path" 1 "Compact SKILL.md must stay at or under $COMPACT_SKILL_MAX_LINES lines; refactor larger skills to the structured create-skill pattern."
+  if [[ "$line_count" -gt "$max_lines" ]]; then
+    add_issue "$path" 1 "$label SKILL.md must stay at or under $max_lines lines."
   fi
+}
+
+check_first_body_heading() {
+  local path="$1"
+  local expected="$2"
+  local label="$3"
+  local end_line first_body_line first_body_text
+
+  end_line="$(frontmatter_end_line "$path")"
+  first_body_line="$(awk -v end_line="$end_line" 'NR > end_line && NF { print NR; exit }' "$path")"
+  first_body_text="$(awk -v end_line="$end_line" 'NR > end_line && NF { print; exit }' "$path")"
+  if [[ -z "$first_body_line" || "$first_body_text" != "$expected" ]]; then
+    add_issue "$path" "${first_body_line:-1}" "$label SKILL.md must begin with a '$expected' heading immediately after frontmatter."
+  fi
+}
+
+check_single_file_route() {
+  local skill_dir="$1"
+  local markdown_list="$2"
+  local label="$3"
+  local path
+  while IFS= read -r path; do
+    [[ "$path" == "$skill_dir/SKILL.md" ]] && continue
+    add_issue "$path" 1 "$label skills must only generate SKILL.md."
+  done <"$markdown_list"
+  [[ ! -d "$skill_dir/references" ]] || add_issue "$skill_dir/references" 1 "$label skills must not include references/."
+  [[ ! -d "$skill_dir/assets" ]] || add_issue "$skill_dir/assets" 1 "$label skills must not include assets/."
+  [[ ! -d "$skill_dir/scripts" ]] || add_issue "$skill_dir/scripts" 1 "$label skills must not include scripts/."
+}
+
+check_simple_runbook_layout() {
+  local skill_dir="$1"
+  local path="$2"
+  check_first_body_heading "$path" "# Task" "Simple task runbook-index"
+  check_skill_line_limit "$path" "$COMPACT_SKILL_MAX_LINES" "Simple task runbook-index"
+  [[ -d "$skill_dir/references" ]] || add_issue "$path" 1 "Simple task runbook-index skills must include references/ runbooks."
+  [[ ! -f "$skill_dir/README.md" ]] || add_issue "$skill_dir/README.md" 1 "Simple task runbook-index skills must not include README.md."
+  [[ ! -d "$skill_dir/assets" ]] || add_issue "$skill_dir/assets" 1 "Simple task runbook-index skills must not include assets/."
 }
 
 check_skill_structure() {
@@ -427,7 +500,7 @@ check_skill_structure() {
     else
       next_line="$total_lines"
     fi
-    references="$(sed -n "${line_no},${next_line}p" "$path" | grep -Eo '\[[^]]+\]\(references/[^)#]+\.md(#[^)]*)?\)' | wc -l | tr -d ' ')"
+    references="$(sed -n "${line_no},${next_line}p" "$path" | { grep -Eo '\[[^]]+\]\(references/[^)#]+\.md(#[^)]*)?\)' || true; } | wc -l | tr -d ' ')"
     if [[ "$references" -ne 1 ]]; then
       add_issue "$path" "$line_no" "Step $step_no must include exactly one reference link to a file under references/."
     fi
@@ -605,19 +678,34 @@ lint_skill_dir() {
   done <"$markdown_list"
 
   layout="$(classify_skill_layout "$skill_dir" "$markdown_list")"
-  if [[ "$layout" == "structured" ]]; then
-    check_skill_frontmatter "$skill_dir" "$skill_md" "true"
-    [[ -f "$readme_md" ]] || add_issue "$readme_md" 1 "Structured skill directory is missing required README.md overview file."
-    check_skill_structure "$skill_md"
-  else
-    check_skill_frontmatter "$skill_dir" "$skill_md" "false"
-    check_compact_skill_limits "$skill_md"
-  fi
+  check_skill_frontmatter "$skill_dir" "$skill_md"
+  case "$layout" in
+    multi-step-workflow)
+      [[ -f "$readme_md" ]] || add_issue "$readme_md" 1 "Multi-step workflow skill directory is missing required README.md overview file."
+      check_skill_structure "$skill_md"
+      ;;
+    behaviour-guidance)
+      check_first_body_heading "$skill_md" "# Guidance" "Behaviour guidance"
+      check_skill_line_limit "$skill_md" "$BEHAVIOUR_GUIDANCE_MAX_LINES" "Behaviour guidance"
+      check_single_file_route "$skill_dir" "$markdown_list" "Behaviour guidance"
+      ;;
+    simple-task-inline)
+      check_first_body_heading "$skill_md" "# Task" "Simple task inline"
+      check_skill_line_limit "$skill_md" "$COMPACT_SKILL_MAX_LINES" "Simple task inline"
+      check_single_file_route "$skill_dir" "$markdown_list" "Simple task inline"
+      ;;
+    simple-task-runbook-index)
+      check_simple_runbook_layout "$skill_dir" "$skill_md"
+      ;;
+    *)
+      add_issue "$skill_md" 1 "Unknown skill layout classification: $layout"
+      ;;
+  esac
 
   check_stale_markdown "$skill_dir" "$markdown_list"
   check_skill_script_references "$skill_md"
 
-  if [[ "$layout" == "structured" && -f "$readme_md" ]]; then
+  if [[ "$layout" == "multi-step-workflow" && -f "$readme_md" ]]; then
     check_readme_structure "$skill_dir" "$readme_md"
   fi
 }

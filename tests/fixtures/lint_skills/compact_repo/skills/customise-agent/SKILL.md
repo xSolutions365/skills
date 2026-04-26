@@ -1,9 +1,9 @@
 ---
 name: customise-agent
-description: Customise this agent to the user's context and preferences. Updates the CLAUDE.md file so the agent reflects your company, role, current project, and communication preferences in every conversation.
+description: Customise this agent to the user's context and preferences. USE WHEN agent context should reflect company, role, project, or communication preferences.
 ---
 
-# Customise Agent
+# Task
 
 This skill helps the user update the CLAUDE.md file that configures the agent for their specific context. It reads the current file, shows what's already set, and offers to update the editable sections.
 
