@@ -1,0 +1,101 @@
+<!--
+  Layout: layout-numbered-cols
+  Theme:  dark or light
+  Acid Bar: no
+  Footer Logo: bottom-right, white logo (image3.png)
+
+  IMPORTANT: Section padding is auto-removed by CSS for this layout.
+
+  Structure: .col-header > h2, then .cols.cols-N > .col children.
+  Each .col MUST contain a .col-num span.
+
+  Column counts: cols-3, cols-4, cols-5
+
+  === VARIANT A: Dark background (all purple) ===
+  Background Color: #24004C (Midnight)
+-->
+<section data-background-color="#24004C">
+  <div class="layout-numbered-cols">
+    <div class="col-header">
+      <h2>Your Title Here</h2>
+    </div>
+    <div class="cols cols-3">
+      <div class="col fragment fade-up">
+        <span class="col-num">01</span>
+        <h3>First</h3>
+        <p>Description of the first item.</p>
+        <ul>
+          <li>Detail one</li>
+          <li>Detail two</li>
+        </ul>
+      </div>
+      <div class="col fragment fade-up">
+        <span class="col-num">02</span>
+        <h3>Second</h3>
+        <p>Description of the second item.</p>
+        <ul>
+          <li>Detail one</li>
+          <li>Detail two</li>
+        </ul>
+      </div>
+      <div class="col fragment fade-up">
+        <span class="col-num">03</span>
+        <h3>Third</h3>
+        <p>Description of the third item.</p>
+        <ul>
+          <li>Detail one</li>
+          <li>Detail two</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <img src="../../assets/images/image3.png" alt="CreateFuture">
+  </div>
+</section>
+
+<!--
+  === VARIANT B: Light header + dark columns ===
+  Background Color: #24004C (matches cols-dark box for fullscreen)
+  Theme: data-theme="light"
+  Add col-header-light class to col-header for gray background.
+-->
+<!--
+<section data-theme="light" data-background-color="#24004C">
+  <div class="layout-numbered-cols">
+    <div class="col-header col-header-light">
+      <h2>Your Title Here</h2>
+    </div>
+    <div class="cols cols-5 cols-dark">
+      <div class="col">
+        <span class="col-num">01</span>
+        <h3>First</h3>
+        <p>Description.</p>
+      </div>
+      <div class="col">
+        <span class="col-num">02</span>
+        <h3>Second</h3>
+        <p>Description.</p>
+      </div>
+      <div class="col">
+        <span class="col-num">03</span>
+        <h3>Third</h3>
+        <p>Description.</p>
+      </div>
+      <div class="col">
+        <span class="col-num">04</span>
+        <h3>Fourth</h3>
+        <p>Description.</p>
+      </div>
+      <div class="col">
+        <span class="col-num">05</span>
+        <h3>Fifth</h3>
+        <p>Description.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <img src="../../assets/images/image3.png" alt="CreateFuture">
+  </div>
+</section>
+-->
