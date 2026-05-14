@@ -21,41 +21,32 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 	- turn this into slides
 	- make a presentation from this
 - Accept input as pasted text, markdown, or screenshot description.
-- If input is short, expand it into a minimum 5-slide structure automatically.
-- Install dependencies in `cf-slide-generator` when needed (`npm install`) so build tools and `node_modules` are available there.
-- If the target `presentations` output folder does not exist, create it automatically.
+- Derive a short `<name>` slug from the content (e.g. company name or topic).
+- If input is short, expand it into a richer paragraph automatically before writing.
 - Workflow: [references/step-0-preflight.md](references/step-0-preflight.md)
 
-### Step 1: Map content to CreateFuture snippets
+### Step 1: Write content file
 
-- Select layouts from `skills/skills/slide-generator/snippets`.
-- Prefer these defaults:
-	- `cover.html` for title and opening slide
-	- `section-divider.html` for transitions
-	- `two-col.html` for comparisons or split content
-	- `quote.html` for a standout message
-	- `end.html` for the closing slide
-- Use `split-image.html`, `centered.html`, or `top-bottom.html` when the content calls for those patterns.
+- Write the (optionally expanded) content to `skills/skills/slide-generator/examples/<name>.md`.
+- Create the `examples/` directory if it does not exist.
 - Workflow: [references/step-1-configure.md](references/step-1-configure.md)
 
 ### Step 2: Generate HTML slides
 
-- Use the CreateFuture template and snippet system from `cf-slide-generator`.
-- Reference snippet files from `skills/skills/slide-generator/snippets` when building slide sections.
-- Build from `cf-slide-generator/presentations/<name>/index.html`.
-- Write standalone output to `skills/skills/slide-generator/presentations/<name>-dist`.
-- Create `skills/skills/slide-generator/presentations` automatically if missing.
-- If output folder already exists, use a versioned name such as `<name>-dist-v2`.
-- Default command flow:
-	- `cd /Users/nehaprakash/Documents/Projects/cf-slide-generator && npm install`
-	- `mkdir -p ../skills/skills/slide-generator/presentations`
-	- `npx cf-slides new <name>`
-	- `out="../skills/skills/slide-generator/presentations/<name>-dist" && if [ -d "$out" ]; then i=2; while [ -d "${out}-v${i}" ]; do i=$((i+1)); done; out="${out}-v${i}"; fi && node bin/cli.js build presentations/<name>/index.html "$out" && open "$out/index.html"`
+- Run a **single command** from `skills/skills/slide-generator`:
+  ```
+  cd /Users/nehaprakash/Documents/Projects/skills/skills/slide-generator && node scripts/generate-cf-deck.mjs --title "<Title>" --content-file examples/<name>.md
+  ```
+- The script handles versioning automatically — no extra commands needed.
+- After generation, open the output file:
+  ```
+  open presentations/<name>-dist/index.html
+  ```
 - Workflow: [references/step-2-generate.md](references/step-2-generate.md)
 
 ### Step 3: Validate and report
 
-- Confirm output exists in `skills/skills/slide-generator/presentations/`.
+- Confirm the `OUTPUT_HTML` path printed by the script exists.
 - Return the final path to the user.
 - Include a concise summary of chosen snippet layouts.
 - Workflow: [references/step-3-validate.md](references/step-3-validate.md)
