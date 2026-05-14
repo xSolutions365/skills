@@ -4,3 +4,5 @@ __pycache__/
 scripts/deploy-skill-local.sh
 .enaible/
 .omx/
+skills/slide-generator/examples/
+skills/slide-generator/presentations/

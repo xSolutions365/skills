@@ -33,10 +33,11 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 
 ### Step 2: Generate HTML slides
 
-- Run a **single command** from `skills/skills/slide-generator`:
+- Run a **single command** from the `skills/skills/slide-generator` directory (use the workspace-relative path):
   ```
-  cd /Users/nehaprakash/Documents/Projects/skills/skills/slide-generator && node scripts/generate-cf-deck.mjs --title "<Title>" --content-file examples/<name>.md
+  node scripts/generate-cf-deck.mjs --title "<Title>" --content-file examples/<name>.md
   ```
+- Resolve the working directory relative to the workspace root — do **not** hardcode absolute user paths.
 - The script handles versioning automatically — no extra commands needed.
 - After generation, open the output file:
   ```
