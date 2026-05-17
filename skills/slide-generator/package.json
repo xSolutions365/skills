@@ -7,7 +7,6 @@
   "scripts": {
     "build:deck": "node scripts/generate-cf-deck.mjs"
   },
-  "dependencies": {},
   "files": [
     "assets/",
     "snippets/",
@@ -16,6 +15,11 @@
     "README.md",
     "SKILL.md"
   ],
-  "keywords": ["slides", "presentation", "createfuture", "skill"],
+  "keywords": [
+    "slides",
+    "presentation",
+    "createfuture",
+    "skill"
+  ],
   "license": "UNLICENSED"
 }

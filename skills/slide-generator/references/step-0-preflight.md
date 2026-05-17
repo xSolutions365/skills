@@ -18,15 +18,14 @@
 - [ ] User provided content (text, markdown, or screenshot description)
 - [ ] Content has enough material for at least 3 slides
 - [ ] Node.js is available
-- [ ] CreateFuture slide tooling is available in `cf-slide-generator`
-- [ ] Run `npm install` in `cf-slide-generator` to ensure `node_modules/` is available there
-- [ ] If `skills/skills/slide-generator/presentations` is missing, create it automatically
+- [ ] Do not run npm install and do not create `node_modules/`
+- [ ] If `skills/slide-generator/presentations` is missing, create it automatically
 - [ ] Confirm target output filenames do not overwrite existing files
 
 ## Output convention
 
 - Input markdown: `examples/<name>.md`
-- Generated slides: `skills/skills/slide-generator/presentations/<name>-dist/index.html`
+- Generated slides: `skills/slide-generator/presentations/<name>/index.html`
 
 ## When to stop and ask follow-up
 

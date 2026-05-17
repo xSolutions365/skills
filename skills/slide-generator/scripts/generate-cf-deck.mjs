@@ -73,19 +73,12 @@ function buildList(items) {
   return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("\n        ");
 }
 
-function ensureDir(dirPath) {
-  fs.mkdirSync(dirPath, { recursive: true });
+function stripLogoImage(html) {
+  return html.replace(/\s*<img\s+class="logo"[^>]*>\s*/g, "\n");
 }
 
-function nextOutputDir(baseDir) {
-  if (!fs.existsSync(baseDir)) {
-    return baseDir;
-  }
-  let i = 2;
-  while (fs.existsSync(`${baseDir}-v${i}`)) {
-    i += 1;
-  }
-  return `${baseDir}-v${i}`;
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
 }
 
 function loadSnippet(name) {
@@ -119,6 +112,7 @@ function assembleDeck({ title, rawContent }) {
   cover = replaceTagContent(cover, "p", "eyebrow", "CreateFuture Themed Deck");
   cover = replaceFirstTag(cover, "h1", escapeHtml(title));
   cover = replaceTagContent(cover, "p", "author", "Generated from local skill workflow");
+  cover = stripLogoImage(cover);
 
   let section = loadSnippet("section-divider");
   section = replaceFirstTag(section, "h2", "Overview");
@@ -146,6 +140,7 @@ function assembleDeck({ title, rawContent }) {
 
   let end = loadSnippet("end");
   end = replaceFirstTag(end, "h2", "Thank You");
+  end = stripLogoImage(end);
 
   return [cover, section, twoCol, quoteSlide, end].join("\n\n");
 }
@@ -411,8 +406,8 @@ function main() {
 
   ensureDir(presentationsDir);
 
-  const outputBase = path.join(presentationsDir, `${slug}-dist`);
-  const outputDir = nextOutputDir(outputBase);
+  const outputBase = path.join(presentationsDir, slug);
+  const outputDir = outputBase;
   ensureDir(outputDir);
 
   const sections = assembleDeck({ title, rawContent });

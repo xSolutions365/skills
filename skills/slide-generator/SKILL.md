@@ -33,23 +33,24 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 
 ### Step 2: Generate HTML slides
 
-- Run a **single command** from the `skills/skills/slide-generator` directory (use the workspace-relative path):
+- Run exactly these two commands from the `skills/skills/slide-generator` directory — no compound commands, no pwd/ls, no extra steps:
   ```
   node scripts/generate-cf-deck.mjs --title "<Title>" --content-file examples/<name>.md
   ```
-- Resolve the working directory relative to the workspace root — do **not** hardcode absolute user paths.
-- The script handles versioning automatically — no extra commands needed.
-- After generation, open the output file:
+  Then:
   ```
-  open presentations/<name>-dist/index.html
+  open presentations/<name>/index.html
   ```
+- Do NOT run pwd, ls, or any diagnostic commands before or after.
 - Workflow: [references/step-2-generate.md](references/step-2-generate.md)
 
 ### Step 3: Validate and report
 
-- Confirm the `OUTPUT_HTML` path printed by the script exists.
-- Return the final path to the user.
-- Include a concise summary of chosen snippet layouts.
+- After the script prints `OUTPUT_HTML=...`, reply with one line only:
+  ```
+  Slides ready: presentations/<name>/index.html
+  ```
+- Do not narrate steps, do not explain what was done, do not list layouts.
 - Workflow: [references/step-3-validate.md](references/step-3-validate.md)
 
 ## Output
@@ -60,5 +61,3 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 	- output file path in `skills/skills/slide-generator/presentations/`
 	- generation status (success or failure)
 
-
-```

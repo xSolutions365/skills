@@ -13,6 +13,4 @@ Converts pasted content, markdown text, or screenshot descriptions into HTML pre
 ## Example prompts
 
 - "Create slides based on this: *(paste content)*"
-- "Turn this into a presentation."
-- "Make slides from this content."
 
