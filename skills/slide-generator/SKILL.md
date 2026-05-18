@@ -5,15 +5,6 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 
 # Workflow
 
-## Execution mode
-
-- Run end-to-end automatically when this skill is selected.
-- Do not ask step-by-step setup questions.
-- Do not ask for command approval when input content is present; execute the default flow directly.
-- Use defaults for title, layout mapping, and output naming when not specified.
-- Default output root: `skills/skills/slide-generator/presentations`.
-- Ask follow-up questions only when source content is missing.
-
 ### Step 0: Detect trigger and collect input
 
 - Trigger on prompts like:
@@ -22,7 +13,11 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 	- make a presentation from this
 - Accept input as pasted text, markdown, or screenshot description.
 - Derive a short `<name>` slug from the content (e.g. company name or topic).
-- If input is short, expand it into a richer paragraph automatically before writing.
+- Check input meets the minimum threshold: at least 5 distinct points or ~100 words covering a clear topic. If it falls short, ask the user:
+  > To generate your slides, share one of:
+  > - 5–10 key points you want covered, or
+  > - A short paragraph (~100+ words) on the topic, or
+  > - Your audience + goal + duration (e.g. "senior devs, deep dive, 20 minutes")
 - Workflow: [references/step-0-preflight.md](references/step-0-preflight.md)
 
 ### Step 1: Write content file

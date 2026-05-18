@@ -58,16 +58,6 @@ function replaceFirstTag(html, tag, value) {
   return html.replace(re, `<${tag}>${value}</${tag}>`);
 }
 
-function replaceFirstNthTag(html, tag, n, value) {
-  let idx = 0;
-  return html.replace(new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`, "g"), (m) => {
-    idx += 1;
-    if (idx === n) {
-      return `<${tag}>${value}</${tag}>`;
-    }
-    return m;
-  });
-}
 
 function buildList(items) {
   return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("\n        ");
@@ -85,51 +75,96 @@ function loadSnippet(name) {
   return fs.readFileSync(path.join(snippetsDir, `${name}.html`), "utf8");
 }
 
-function assembleDeck({ title, rawContent }) {
-  const lines = rawContent
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
+function parseMarkdownSections(rawContent) {
+  const sections = [];
+  let current = null;
+  for (const raw of rawContent.split(/\r?\n/)) {
+    const line = raw.trim();
+    const h2 = line.match(/^##\s+(.+)/);
+    const bulletText = line.match(/^(?:[-*+]|\d+[.)])\s+(.+)/);
+    if (h2) {
+      if (current) sections.push(current);
+      current = { heading: h2[1].trim(), bullets: [], body: [] };
+    } else if (current && bulletText) {
+      current.bullets.push(bulletText[1].trim());
+    } else if (current && line && !line.startsWith("#")) {
+      current.body.push(line);
+    }
+  }
+  if (current) sections.push(current);
+  return sections;
+}
 
-  const bodyText = lines.join(" ");
-  const sentences = sentenceSplit(bodyText);
-  const summary = sentences[0] || `${title} overview`;
+function makeCenteredSlide(heading, body) {
+  return `<section data-background-color="#0A0019">
+  <h2>${escapeHtml(heading)}</h2>
+  <p>${escapeHtml(body)}</p>
+  <div class="slide-footer">
+    <img src="../../assets/images/image3.png" alt="CreateFuture">
+  </div>
+</section>`;
+}
+
+function makeBulletSlide(heading, bullets, body) {
+  const intro = body ? `\n  <p>${escapeHtml(body)}</p>` : "";
+  if (bullets.length <= 5) {
+    return `<section data-background-color="#0A0019">
+  <h2>${escapeHtml(heading)}</h2>${intro}
+  <ul>
+    ${buildList(bullets)}
+  </ul>
+  <div class="slide-footer">
+    <img src="../../assets/images/image3.png" alt="CreateFuture">
+  </div>
+</section>`;
+  }
+  const mid = Math.ceil(bullets.length / 2);
+  return `<section data-background-color="#0A0019">
+  <h2>${escapeHtml(heading)}</h2>${intro}
+  <div class="layout-two-col">
+    <div><ul>\n        ${buildList(bullets.slice(0, mid))}\n      </ul></div>
+    <div><ul>\n        ${buildList(bullets.slice(mid))}\n      </ul></div>
+  </div>
+  <div class="slide-footer">
+    <img src="../../assets/images/image3.png" alt="CreateFuture">
+  </div>
+</section>`;
+}
+
+function assembleDeck({ title, rawContent }) {
+  const mdSections = parseMarkdownSections(rawContent);
+
+  const allText = mdSections.length
+    ? mdSections.flatMap((s) => [...s.body, ...s.bullets]).join(" ")
+    : rawContent.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).join(" ");
+  const sentences = sentenceSplit(allText);
   const quote =
     sentences.find((s) => /inspir|empower|skills|thrive|learn|grow/i.test(s)) ||
     sentences[0] ||
     `${title} helps teams move from learning to outcomes.`;
 
-  const bullets = (sentences.length ? sentences : [bodyText || `${title} value`])
-    .map((s) => s.replace(/[.!?]+$/, ""))
-    .filter(Boolean);
-
-  const leftBullets = bullets.slice(0, 3);
-  const rightBullets = bullets.slice(3, 6);
-  while (leftBullets.length < 3) leftBullets.push("Clear value proposition");
-  while (rightBullets.length < 3) rightBullets.push("Actionable next steps");
-
   let cover = loadSnippet("cover");
-  cover = replaceTagContent(cover, "p", "eyebrow", "CreateFuture Themed Deck");
+  cover = cover.replace(/<p\s+class="eyebrow">[\s\S]*?<\/p>/, "");
+  cover = cover.replace(/<p\s+class="author">[\s\S]*?<\/p>/, "");
   cover = replaceFirstTag(cover, "h1", escapeHtml(title));
-  cover = replaceTagContent(cover, "p", "author", "Generated from local skill workflow");
   cover = stripLogoImage(cover);
 
-  let section = loadSnippet("section-divider");
-  section = replaceFirstTag(section, "h2", "Overview");
-  section = replaceFirstTag(section, "p", escapeHtml(summary));
-
-  let twoCol = loadSnippet("two-col");
-  twoCol = replaceFirstTag(twoCol, "h2", `${escapeHtml(title)}: Key Points`);
-  twoCol = replaceFirstNthTag(twoCol, "h3", 1, "What It Is");
-  twoCol = replaceFirstNthTag(twoCol, "h3", 2, "Why It Matters");
-  twoCol = twoCol.replace(
-    /<ul>[\s\S]*?<\/ul>/,
-    `<ul>\n        ${buildList(leftBullets)}\n      </ul>`
-  );
-  twoCol = twoCol.replace(
-    /<ul>[\s\S]*?<\/ul>/,
-    `<ul>\n        ${buildList(rightBullets)}\n      </ul>`
-  );
+  let contentSlides;
+  if (mdSections.length === 0) {
+    const bullets = sentences.map((s) => s.replace(/[.!?]+$/, "")).filter(Boolean);
+    const summary = sentences[0] || `${title} overview`;
+    let overview = loadSnippet("section-divider");
+    overview = replaceFirstTag(overview, "h2", "Overview");
+    overview = replaceFirstTag(overview, "p", escapeHtml(summary));
+    contentSlides = [overview, makeBulletSlide(title, bullets.slice(0, 10), "")];
+  } else {
+    contentSlides = mdSections.map((sec) => {
+      const body = sec.body.join(" ");
+      return sec.bullets.length > 0
+        ? makeBulletSlide(sec.heading, sec.bullets, body)
+        : makeCenteredSlide(sec.heading, body);
+    });
+  }
 
   let quoteSlide = loadSnippet("quote");
   quoteSlide = quoteSlide.replace(
@@ -142,7 +177,7 @@ function assembleDeck({ title, rawContent }) {
   end = replaceFirstTag(end, "h2", "Thank You");
   end = stripLogoImage(end);
 
-  return [cover, section, twoCol, quoteSlide, end].join("\n\n");
+  return [cover, ...contentSlides, quoteSlide, end].join("\n\n");
 }
 
 function wrapHtml(title, sections) {

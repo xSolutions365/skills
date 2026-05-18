@@ -16,7 +16,7 @@
 ## Checklist
 
 - [ ] User provided content (text, markdown, or screenshot description)
-- [ ] Content has enough material for at least 3 slides
+- [ ] Content meets minimum threshold: at least 5 distinct points or ~100 words on a clear topic
 - [ ] Node.js is available
 - [ ] Do not run npm install and do not create `node_modules/`
 - [ ] If `skills/slide-generator/presentations` is missing, create it automatically
