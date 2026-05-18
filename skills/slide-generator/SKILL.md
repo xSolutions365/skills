@@ -17,15 +17,15 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 
 ### Step 1: Write content file
 
-- Write the (optionally expanded) content to `skills/skills/slide-generator/examples/<name>.md`.
-- Create the `examples/` directory if it does not exist.
+- Write the content to `skills/examples/<name>.md` (at repo root, outside the lint scan path).
+- Create the `skills/examples/` directory if it does not exist.
 - Workflow: [references/step-1-configure.md](references/step-1-configure.md)
 
 ### Step 2: Generate HTML slides
 
 - Run exactly these two commands from the `skills/skills/slide-generator` directory — no compound commands, no pwd/ls, no extra steps:
   ```
-  node scripts/generate-cf-deck.mjs --title "<Title>" --content-file examples/<name>.md
+  node scripts/generate-cf-deck.mjs --title "<Title>" --content-file ../../examples/<name>.md
   ```
   Then:
   ```

@@ -29,11 +29,11 @@ Optional snippet choices:
 
 Write draft source content to:
 
-`examples/<name>.md`
+`skills/examples/<name>.md`
 
 If that file already exists, do not overwrite it. Use a new name such as:
 
-`examples/<name>-v2.md`
+`skills/examples/<name>-v2.md`
 
 Then continue to generation step.
 ```
