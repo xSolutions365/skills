@@ -48,12 +48,21 @@ function escapeHtml(text) {
     .replace(/'/g, "&#39;");
 }
 
-
 function replaceFirstTag(html, tag, value) {
   const re = new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`);
   return html.replace(re, `<${tag}>${value}</${tag}>`);
 }
 
+function replaceFirstNthTag(html, tag, n, value) {
+  let idx = 0;
+  return html.replace(new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`, "g"), (m) => {
+    idx += 1;
+    if (idx === n) {
+      return `<${tag}>${value}</${tag}>`;
+    }
+    return m;
+  });
+}
 
 function buildList(items) {
   return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("\n        ");
@@ -71,73 +80,23 @@ function loadSnippet(name) {
   return fs.readFileSync(path.join(snippetsDir, `${name}.html`), "utf8");
 }
 
-function parseMarkdownSections(rawContent) {
-  const sections = [];
-  let current = null;
-  for (const raw of rawContent.split(/\r?\n/)) {
-    const line = raw.trim();
-    const h2 = line.match(/^##\s+(.+)/);
-    const bulletText = line.match(/^(?:[-*+]|\d+[.)])\s+(.+)/);
-    if (h2) {
-      if (current) sections.push(current);
-      current = { heading: h2[1].trim(), bullets: [], body: [] };
-    } else if (current && bulletText) {
-      current.bullets.push(bulletText[1].trim());
-    } else if (current && line && !line.startsWith("#")) {
-      current.body.push(line);
-    }
-  }
-  if (current) sections.push(current);
-  return sections;
-}
-
-function makeCenteredSlide(heading, body) {
-  return `<section data-background-color="#0A0019">
-  <h2>${escapeHtml(heading)}</h2>
-  <p>${escapeHtml(body)}</p>
-  <div class="slide-footer">
-    <img src="../../assets/images/image3.png" alt="CreateFuture">
-  </div>
-</section>`;
-}
-
-function makeBulletSlide(heading, bullets, body) {
-  const intro = body ? `\n  <p>${escapeHtml(body)}</p>` : "";
-  if (bullets.length <= 5) {
-    return `<section data-background-color="#0A0019">
-  <h2>${escapeHtml(heading)}</h2>${intro}
-  <ul>
-    ${buildList(bullets)}
-  </ul>
-  <div class="slide-footer">
-    <img src="../../assets/images/image3.png" alt="CreateFuture">
-  </div>
-</section>`;
-  }
-  const mid = Math.ceil(bullets.length / 2);
-  return `<section data-background-color="#0A0019">
-  <h2>${escapeHtml(heading)}</h2>${intro}
-  <div class="layout-two-col">
-    <div><ul>\n        ${buildList(bullets.slice(0, mid))}\n      </ul></div>
-    <div><ul>\n        ${buildList(bullets.slice(mid))}\n      </ul></div>
-  </div>
-  <div class="slide-footer">
-    <img src="../../assets/images/image3.png" alt="CreateFuture">
-  </div>
-</section>`;
-}
-
 function assembleDeck({ title, rawContent }) {
-  const mdSections = parseMarkdownSections(rawContent);
+  const lines = rawContent
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
-  const allText = mdSections.length
-    ? mdSections.flatMap((s) => [...s.body, ...s.bullets]).join(" ")
-    : rawContent.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).join(" ");
-  const sentences = sentenceSplit(allText);
-  const quote =
-    sentences.find((s) => /inspir|empower|skills|thrive|learn|grow/i.test(s)) ||
-    sentences[0] ||
-    `${title} helps teams move from learning to outcomes.`;
+  const bodyText = lines.join(" ");
+  const sentences = sentenceSplit(bodyText);
+  const summary = lines[0] || sentences[0] || `${title} overview`;
+
+  // Quote: first line trimmed to 12 words so it doesn't overflow the slide
+  const firstLine = lines[0] || sentences[0] || `${title} helps teams move from learning to outcomes.`;
+  const quoteWords = firstLine.replace(/[.!?]+$/, "").split(/\s+/);
+  const quote = quoteWords.length > 12 ? quoteWords.slice(0, 12).join(" ") + "…" : quoteWords.join(" ");
+
+  // Use lines directly as bullets when content is line-based, otherwise use sentences
+  const bullets = (lines.length >= 3 ? lines : sentences.map((s) => s.replace(/[.!?]+$/, ""))).filter(Boolean);
 
   let cover = loadSnippet("cover");
   cover = cover.replace(/<p\s+class="eyebrow">[\s\S]*?<\/p>/, "");
@@ -145,21 +104,40 @@ function assembleDeck({ title, rawContent }) {
   cover = replaceFirstTag(cover, "h1", escapeHtml(title));
   cover = stripLogoImage(cover);
 
-  let contentSlides;
-  if (mdSections.length === 0) {
-    const bullets = sentences.map((s) => s.replace(/[.!?]+$/, "")).filter(Boolean);
-    const summary = sentences[0] || `${title} overview`;
-    let overview = loadSnippet("section-divider");
-    overview = replaceFirstTag(overview, "h2", "Overview");
-    overview = replaceFirstTag(overview, "p", escapeHtml(summary));
-    contentSlides = [overview, makeBulletSlide(title, bullets.slice(0, 10), "")];
-  } else {
-    contentSlides = mdSections.map((sec) => {
-      const body = sec.body.join(" ");
-      return sec.bullets.length > 0
-        ? makeBulletSlide(sec.heading, sec.bullets, body)
-        : makeCenteredSlide(sec.heading, body);
-    });
+  let section = loadSnippet("section-divider");
+  section = replaceFirstTag(section, "h2", "Overview");
+  section = replaceFirstTag(section, "p", escapeHtml(summary));
+
+  function topicName(bullet) {
+    const m = bullet.match(/^(.+?)\s+[—–]\s+/);
+    return m ? m[1].trim() : bullet.split(/\s+/).slice(0, 3).join(" ");
+  }
+
+  const contentSlides = [];
+  for (let i = 0; i < bullets.length; i += 6) {
+    const chunk = bullets.slice(i, i + 6);
+    const leftBullets = chunk.slice(0, 3);
+    const rightBullets = chunk.slice(3);
+
+    const first = topicName(chunk[0]);
+    const last = topicName(chunk[chunk.length - 1]);
+    const slideLabel = first === last ? escapeHtml(first) : `${escapeHtml(first)} — ${escapeHtml(last)}`;
+
+    let twoCol = loadSnippet("two-col");
+    twoCol = twoCol.replace(/<p>Content for the (left|right) side\.<\/p>\s*/g, "");
+    twoCol = replaceFirstTag(twoCol, "h2", slideLabel);
+    twoCol = replaceFirstNthTag(twoCol, "h3", 1, "Key Concepts");
+    twoCol = replaceFirstNthTag(twoCol, "h3", 2, "Deep Dive");
+    twoCol = replaceFirstNthTag(twoCol, "ul", 1, `\n        ${buildList(leftBullets)}\n      `);
+
+    if (rightBullets.length > 0) {
+      twoCol = replaceFirstNthTag(twoCol, "ul", 2, `\n        ${buildList(rightBullets)}\n      `);
+    } else {
+      // Remove the right column entirely when there's nothing to show
+      twoCol = twoCol.replace(/<div>\s*<h3>Deep Dive<\/h3>\s*<ul>[\s\S]*?<\/ul>\s*<\/div>/, "");
+    }
+
+    contentSlides.push(twoCol);
   }
 
   let quoteSlide = loadSnippet("quote");
@@ -173,7 +151,7 @@ function assembleDeck({ title, rawContent }) {
   end = replaceFirstTag(end, "h2", "Thank You");
   end = stripLogoImage(end);
 
-  return [cover, ...contentSlides, quoteSlide, end].join("\n\n");
+  return [cover, section, ...contentSlides, quoteSlide, end].join("\n\n");
 }
 
 function wrapHtml(title, sections) {
