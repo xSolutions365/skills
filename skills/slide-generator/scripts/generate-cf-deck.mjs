@@ -422,6 +422,11 @@ ${sections}
 }
 
 function main() {
+  const examplesDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../examples");
+  if (fs.existsSync(examplesDir)) {
+    fs.readdirSync(examplesDir).filter(f => f.endsWith(".md")).forEach(f => fs.rmSync(path.join(examplesDir, f)));
+  }
+
   const args = parseArgs(process.argv);
   const title = String(args.title || args.topic || "Presentation").trim();
   const slug = slugify(args.name || title);

@@ -12,12 +12,13 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 	- turn this into slides
 	- make a presentation from this
 - Accept input as pasted text, markdown, or screenshot description.
+- **STOP before Step 1** if input is a single word, short phrase, or fewer than 5 points / ~100 words. Ask the user to elaborate — do not proceed.
 - Derive a short `<name>` slug from the content (e.g. company name or topic).
 - Workflow: [references/step-0-preflight.md](references/step-0-preflight.md)
 
 ### Step 1: Write content file
 
-- Write the content to `skills/examples/<name>.md` (at repo root, outside the lint scan path).
+- Write the user's input **verbatim** to `skills/examples/<name>.md`. Do NOT expand or add content.
 - Create the `skills/examples/` directory if it does not exist.
 - Workflow: [references/step-1-configure.md](references/step-1-configure.md)
 
@@ -39,6 +40,13 @@ description: "Generate presentation slides from pasted content. USE WHEN the use
 - After the script prints `OUTPUT_HTML=...`, reply with one line only:
   ```
   Slides ready: presentations/<name>/index.html
+  ```
+- If the script exits with `INPUT_TOO_SHORT`, reply with exactly:
+  ```
+  To generate your slides, share one of:
+  - 5–10 key points you want covered, or
+  - A short paragraph (~100+ words) on the topic, or
+  - Your audience + goal + duration
   ```
 - Do not narrate steps, do not explain what was done, do not list layouts.
 - Workflow: [references/step-3-validate.md](references/step-3-validate.md)

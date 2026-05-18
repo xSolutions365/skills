@@ -3,13 +3,12 @@
 
 ## Goal
 
-Transform user input into slide sections that match CreateFuture layouts.
+Save the user's input to a file so the generation script can validate and process it.
 
 ## Rules
 
-- Choose snippet layouts from `skills/skills/slide-generator/snippets`.
-- Keep the deck to 5-10 slides unless the user asks otherwise.
-- Use the snippet that matches the content shape instead of forcing everything into a generic bullet slide.
+- Write the user's input **verbatim** to the content file. Do NOT expand, paraphrase, reformat, or add content.
+- The script will validate the content and exit with `INPUT_TOO_SHORT` if it is insufficient.
 
 ## Suggested mapping
 

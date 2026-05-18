@@ -3,9 +3,8 @@
 
 ## Direct execution rule
 
-- When this skill is selected, proceed immediately with slide generation.
-- Do not pause for setup confirmations.
-- Use sensible defaults when details are missing.
+- Do not pause for setup confirmations or tool availability checks.
+- Do NOT use sensible defaults when content is missing — ask instead.
 
 ## Trigger examples
 
@@ -30,6 +29,16 @@
 ## When to stop and ask follow-up
 
 - Content is completely missing
+- Input is a single word, short phrase, or topic name with no supporting detail
+- Input is fewer than 5 distinct points or fewer than ~100 words
 - User intent is not about creating slides
 - Content is sensitive and needs confirmation before transformation
+
+When input is too thin, reply with exactly:
+> To generate your slides, share one of:
+> - 5–10 key points you want covered, or
+> - A short paragraph (~100+ words) on the topic, or
+> - Your audience + goal + duration
+
+Do NOT proceed to Step 1 until the threshold is met.
 ```
