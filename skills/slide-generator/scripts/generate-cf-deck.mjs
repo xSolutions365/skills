@@ -435,6 +435,19 @@ function main() {
     rawContent = title;
   }
 
+  const words = rawContent.trim().split(/\s+/).filter(Boolean);
+  const bulletCount = (rawContent.match(/^(?:[-*+]|\d+[.)])\s/gm) || []).length;
+  if (words.length < 30 && bulletCount < 5) {
+    console.error(
+      "INPUT_TOO_SHORT: Provide at least 5 bullet points or ~100 words.\n" +
+      "Share one of:\n" +
+      "  - 5-10 key points you want covered\n" +
+      "  - A short paragraph (~100+ words) on the topic\n" +
+      "  - Your audience + goal + duration (e.g. 'senior devs, deep dive, 20 minutes')"
+    );
+    process.exit(1);
+  }
+
   ensureDir(presentationsDir);
 
   const outputBase = path.join(presentationsDir, slug);
