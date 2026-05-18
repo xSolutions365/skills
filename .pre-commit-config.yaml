@@ -1,6 +1,13 @@
 repos:
   - repo: local
     hooks:
+      - id: clean-slide-examples
+        name: clean-slide-examples
+        entry: bash -c "find skills/slide-generator/examples -name '*.md' -delete 2>/dev/null; exit 0"
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
       - id: quality-gates
         name: quality-gates
         entry: bash scripts/run-ci-quality-gates.sh --fix --stage
