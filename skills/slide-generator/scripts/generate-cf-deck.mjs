@@ -48,10 +48,6 @@ function escapeHtml(text) {
     .replace(/'/g, "&#39;");
 }
 
-function replaceTagContent(html, tag, className, value) {
-  const re = new RegExp(`<${tag}\\s+class=\"${className}\">[\\s\\S]*?<\\/${tag}>`);
-  return html.replace(re, `<${tag} class=\"${className}\">${value}</${tag}>`);
-}
 
 function replaceFirstTag(html, tag, value) {
   const re = new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`);
@@ -171,7 +167,7 @@ function assembleDeck({ title, rawContent }) {
     /<blockquote>[\s\S]*?<\/blockquote>/,
     `<blockquote>\n      ${escapeHtml(quote)}\n    </blockquote>`
   );
-  quoteSlide = replaceTagContent(quoteSlide, "p", "attribution", "- Source Summary");
+  quoteSlide = quoteSlide.replace(/<p\s+class="attribution">[\s\S]*?<\/p>/, "");
 
   let end = loadSnippet("end");
   end = replaceFirstTag(end, "h2", "Thank You");
