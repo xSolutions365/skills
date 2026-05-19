@@ -7,3 +7,6 @@ scripts/deploy-skill-local.sh
 examples/
 skills/slide-generator/examples/
 skills/slide-generator/presentations/
+skills/create-activity-plan/
+skills/deep-ux-design/
+skills/ux-design/

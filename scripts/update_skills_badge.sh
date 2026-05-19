@@ -32,7 +32,17 @@ count_skills() {
     return
   fi
 
-  find "$skills_root" -mindepth 1 -maxdepth 1 -type d ! -name '.*' | wc -l | tr -d ' '
+  find "$skills_root" -mindepth 1 -maxdepth 1 -type d ! -name '.*' |
+    while IFS= read -r skill_dir; do
+      local rel_path
+      rel_path="${skill_dir#$REPO_ROOT/}"
+      if git -C "$REPO_ROOT" check-ignore -q "$rel_path"; then
+        continue
+      fi
+      printf '%s\n' "$skill_dir"
+    done |
+    wc -l |
+    tr -d ' '
 }
 
 render_payload() {
