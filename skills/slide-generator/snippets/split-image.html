@@ -1,0 +1,50 @@
+<!--
+  Layout: layout-split-image
+  Theme:  dark
+  Background Color: #24004C (Midnight — MUST match .split-content bg for fullscreen)
+  Acid Bar: no
+  Footer Logo: bottom-right, white logo (image3.png)
+
+  IMPORTANT: Section needs style="padding: 0;" (inline) for full-bleed.
+  Left column (.split-content) has built-in #24004C background.
+  Right column (.split-image) has built-in #F2F2F2 background.
+
+  Copy this <section> into your presentation.
+-->
+<section data-background-color="#24004C" style="padding: 0;">
+  <div class="layout-split-image">
+    <div class="split-content">
+      <h2>Your Title Here</h2>
+      <p>Description text explaining the image or feature on the right.</p>
+    </div>
+    <div class="split-image">
+      <img src="./assets/your-image.png" alt="Feature image">
+    </div>
+  </div>
+  <div class="slide-footer">
+    <img src="../../assets/images/image3.png" alt="CreateFuture">
+  </div>
+</section>
+
+<!-- VARIANT: Dark right panel (e.g., phone mockup on dark bg) -->
+<!--
+<section data-background-color="#24004C" style="padding: 0;">
+  <div class="layout-split-image">
+    <div class="split-content">
+      <h2>Your Title Here</h2>
+      <p>Description text.</p>
+      <div style="margin-top: var(--cf-space-lg);">
+        <span class="badge badge-acid">Tag One</span>
+        <span class="badge badge-acid">Tag Two</span>
+      </div>
+    </div>
+    <div class="split-image" style="background: var(--cf-color-midnight);">
+      <img src="./assets/mockup.png" alt="Mockup"
+           style="object-fit: contain; max-height: 80%; width: auto;">
+    </div>
+  </div>
+  <div class="slide-footer">
+    <img src="../../assets/images/image3.png" alt="CreateFuture">
+  </div>
+</section>
+-->

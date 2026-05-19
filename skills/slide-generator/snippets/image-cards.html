@@ -1,0 +1,83 @@
+<!--
+  Layout: layout-image-cards
+  Theme:  dark or light
+  Acid Bar: no
+  Footer Logo: bottom-right
+
+  Structure: .cards-header > h2, then .cards > .image-card children.
+  Each .image-card: .card-img > img, .card-body > h4 + .card-tag
+
+  === VARIANT A: Dark background ===
+  Background Color: #0A0019 (Carbon)
+  Footer Logo: white (image3.png)
+-->
+<section data-background-color="#0A0019">
+  <div class="layout-image-cards">
+    <div class="cards-header">
+      <h2>Your Title Here</h2>
+    </div>
+    <div class="cards">
+      <div class="image-card fragment scale-in">
+        <div class="card-img">
+          <img src="./assets/your-image-1.png" alt="Card 1">
+        </div>
+        <div class="card-body">
+          <h4>Card Title One</h4>
+          <span class="card-tag">Category</span>
+        </div>
+      </div>
+      <div class="image-card fragment scale-in">
+        <div class="card-img">
+          <img src="./assets/your-image-2.png" alt="Card 2">
+        </div>
+        <div class="card-body">
+          <h4>Card Title Two</h4>
+          <span class="card-tag">Category</span>
+        </div>
+      </div>
+      <div class="image-card fragment scale-in">
+        <div class="card-img">
+          <img src="./assets/your-image-3.png" alt="Card 3">
+        </div>
+        <div class="card-body">
+          <h4>Card Title Three</h4>
+          <span class="card-tag">Category</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <img src="../../assets/images/image3.png" alt="CreateFuture">
+  </div>
+</section>
+
+<!--
+  === VARIANT B: Light background ===
+  Background Color: #F2F2F2
+  Theme: data-theme="light"
+  Footer Logo: dark logo (image2.png)
+-->
+<!--
+<section data-theme="light" data-background-color="#F2F2F2">
+  <div class="layout-image-cards">
+    <div class="cards-header">
+      <h2>Your Title Here</h2>
+    </div>
+    <div class="cards">
+      <div class="image-card fragment scale-in">
+        <div class="card-img">
+          <img src="./assets/your-image-1.png" alt="Card 1">
+        </div>
+        <div class="card-body">
+          <h4>Card Title</h4>
+          <span class="card-tag">Category</span>
+        </div>
+      </div>
+      ...repeat cards...
+    </div>
+  </div>
+  <div class="slide-footer">
+    <img src="../../assets/images/image2.png" alt="CreateFuture">
+  </div>
+</section>
+-->
