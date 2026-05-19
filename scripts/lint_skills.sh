@@ -96,6 +96,20 @@ extract_frontmatter_field() {
   local field="$2"
   local end_line="$3"
   awk -v field="$field" -v end_line="$end_line" '
+    function ltrim(value) {
+      sub(/^[[:space:]]+/, "", value)
+      return value
+    }
+
+    function rtrim(value) {
+      sub(/[[:space:]]+$/, "", value)
+      return value
+    }
+
+    function trim_value(value) {
+      return rtrim(ltrim(value))
+    }
+
     NR > 1 && NR < end_line {
       raw = $0
       if (raw ~ /^[[:space:]]*$/) next
@@ -107,7 +121,24 @@ extract_frontmatter_field() {
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", key)
       if (key != field) next
       value = substr(raw, colon_index + 1)
-      gsub(/^[[:space:]]+/, "", value)
+      value = trim_value(value)
+      if (value == ">" || value == "|") {
+        block_value = ""
+        while ((getline next_raw) > 0) {
+          if (NR >= end_line) break
+          if (next_raw ~ /^[[:space:]]*$/) {
+            if (block_value != "") block_value = block_value " "
+            continue
+          }
+          if (next_raw !~ /^[[:space:]]/) break
+          next_value = trim_value(next_raw)
+          if (next_value ~ /^#/) continue
+          if (block_value != "") block_value = block_value " "
+          block_value = block_value next_value
+        }
+        print block_value
+        exit
+      }
       print value
       exit
     }

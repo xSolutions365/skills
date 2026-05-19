@@ -56,9 +56,3 @@ pre-commit install --hook-type commit-msg
 ```
 
 This repo uses a centralized pre-commit and CI runner at `scripts/run-ci-quality-gates.sh`. That runner executes a custom shell-based linter for this repository's opinionated skill structure and enforces parity between local hooks and the GitHub Actions quality gate workflow.
-
-## Included skills
-
-- `create-skill`
-- `adaptive-prose`
-- `visual-explainer`
