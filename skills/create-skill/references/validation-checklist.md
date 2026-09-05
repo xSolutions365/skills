@@ -8,13 +8,13 @@ Use this checklist after preview generation and after final file generation. Out
   - frontmatter parses as valid YAML
   - `name` exists and matches the directory name
   - generated output quotes frontmatter string values
-  - `description` includes exactly one `USE WHEN` clause
-  - `description` is one routing sentence under 200 characters
-  - detailed capability lists, preset catalogues, and colon-labelled enumerations are absent from frontmatter
+  - `description` contains only one routing sentence beginning with `Use when`
+  - `description` is under 200 characters
+  - capability summaries, detailed capability lists, preset catalogues, and colon-labelled enumerations are absent from frontmatter
 - `G2` Route classification:
   - exactly one route is selected
   - generated file shape matches the selected route
-  - route-specific line limits are satisfied
+  - every generated `SKILL.md` and `references/*.md` file is at or under 120 lines
 - `G3` Link and path integrity:
   - all relative links resolve within the skill root
   - no absolute filesystem paths appear in generated content
@@ -37,7 +37,6 @@ Before evaluating route-specific rules, identify `template_type` from the approv
 - `multi-step-workflow`: evaluate `R4` only; ignore `R1`, `R2`, and `R3`.
 
 If `template_type` is missing or not one of these exact values, fail `G2`.
-
 When validating an existing skill without an approved payload, infer the route from file shape:
 
 - `# Guidance` plus single `SKILL.md`: infer `behaviour-guidance`.
@@ -54,11 +53,11 @@ When validating an existing skill without an approved payload, infer the route f
 - `R2` Simple task inline:
   - body starts at `# Task`
   - generated output is a single `SKILL.md`
-  - total `SKILL.md` length is at or under 500 lines
+  - total `SKILL.md` length is at or under 120 lines
   - procedure, validation, and output guidance are self-contained
 - `R3` Simple task runbook index:
   - body starts at `# Task`
-  - `SKILL.md` stays at or under 500 lines
+  - `SKILL.md` and every runbook stay at or under 120 lines
   - every runbook is under `references/*.md`
   - every runbook is linked from `SKILL.md`
   - runbooks are optional to load at runtime, but every generated runbook file must be linked from `SKILL.md`
@@ -68,7 +67,7 @@ When validating an existing skill without an approved payload, infer the route f
   - `## Output` includes `### Result Format`
   - each `### Step N` includes exactly one workflow reference link to `references/*workflow.md`
   - step numbering is contiguous and ordered
-  - `README.md` exists with Overview, When to use it, and Example prompts sections
+  - `SKILL.md` and every workflow reference stay at or under 120 lines
   - no redundant H1 title block, summary paragraph, or primary use-case bullets appear before `# Workflow`
 
 ## Natural-language quality rules

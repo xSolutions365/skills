@@ -1,6 +1,6 @@
 ---
 name: "answer-style"
-description: "Guide concise technical responses. USE WHEN replies need direct, low-noise engineering prose."
+description: "Use when replies need direct, low-noise engineering prose."
 ---
 
 # Guidance

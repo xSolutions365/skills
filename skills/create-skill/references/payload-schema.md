@@ -5,8 +5,7 @@ Use this schema as the source-of-truth contract for preview and generation.
 ## Shared required fields
 
 - `skill_id` (string): lowercase letters, digits, and hyphens only; max 64 chars.
-- `description` (string): concise routing sentence for the skill capability; keep under 200 chars.
-- `use_when` (string): explicit routing trigger appended to frontmatter as `USE WHEN`.
+- `description` (string): one routing sentence beginning with `Use when`; keep under 200 chars and exclude capability summaries.
 - `template_type` (string): one of `behaviour-guidance`, `simple-task:inline`, `simple-task:runbook-index`, or `multi-step-workflow`.
 
 ## Route fields
@@ -58,13 +57,13 @@ Use this schema as the source-of-truth contract for preview and generation.
 
 1. `skill_id` must match the generated directory name.
 2. Generated `SKILL.md` frontmatter must remain valid YAML after substitution and quote string values.
-3. `description` must stay to one routing sentence, avoid colon-labelled enumerations or preset catalogues, and reserve detailed capability lists for the body or references.
+3. `description` must contain only one routing sentence beginning with `Use when`; capability lists, summaries, preset catalogues, and colon-labelled enumerations are prohibited.
 4. All generated paths must be relative to the generated skill root.
 5. `generation-summary.md`, `output_contract`, and retained summary paths are prohibited.
-6. `behaviour-guidance` must generate only `SKILL.md` and target at or under 100 lines.
-7. `simple-task:inline` must generate only `SKILL.md` and target at or under 500 lines.
-8. `simple-task:runbook-index` must keep `SKILL.md` at or under 500 lines and link every `reference_docs.path`.
-9. `multi-step-workflow` is required for any skill over 500 lines, and for any skill with ordered checkpoints or approval gates at any length.
+6. Every generated `SKILL.md` and `references/*.md` file must stay at or under 120 lines.
+7. `behaviour-guidance` must generate only `SKILL.md` and target at or under 100 lines.
+8. `simple-task:inline` must generate only `SKILL.md`.
+9. `simple-task:runbook-index` must link every `reference_docs.path`.
 10. `multi-step-workflow.workflow_steps.step` must be sorted ascending, start at `0` or `1`, and remain contiguous.
 11. Every `multi-step-workflow.workflow_steps.reference` must exist in `reference_docs.path`.
 12. `multi-step-workflow` must generate `README.md` using the required README section order: Overview, When to use it, Example prompts, then optional References.
@@ -76,8 +75,7 @@ Use this schema as the source-of-truth contract for preview and generation.
 ```json
 {
   "skill_id": "example-skill",
-  "description": "Guide repeatable work.",
-  "use_when": "you need repeatable task guidance",
+  "description": "Use when the user needs repeatable task guidance.",
   "template_type": "simple-task:inline",
   "task_sections": [
     {

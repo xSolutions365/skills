@@ -10,7 +10,7 @@ Apply shared and route-specific validation before any file write.
 2. Record one evidence line for every applicable checklist group:
    - shared frontmatter
    - route classification
-   - route layout and line limit
+   - route layout and file-by-file line counts
    - link and path integrity
    - self-contained constraint
    - natural-language quality

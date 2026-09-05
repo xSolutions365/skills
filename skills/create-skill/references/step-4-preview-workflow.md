@@ -21,15 +21,17 @@ Produce deterministic previews for all files before any write.
    - reference documents sorted by `path` ascending
 4. Validate `SKILL.md` frontmatter before presenting preview:
    - quote frontmatter string values instead of relying on YAML plain scalars
-   - keep `description` to one routing sentence under 200 chars
-   - include exactly one `USE WHEN` clause
+   - keep `description` to one routing sentence beginning with `Use when` and under 200 characters
+   - exclude capability summaries and separate routing clauses from `description`
 5. Reject preview text that copies generator-only author guidance into generated outputs.
-6. Reject any generated file named `generation-summary.md`.
-7. For each file, present:
+6. Reject any generated `SKILL.md` or `references/*.md` file over 120 lines.
+7. Reject any generated file named `generation-summary.md`.
+8. For each file, present:
    - target relative path
    - complete proposed content
+   - line count
    - concise change summary versus current file (`new`, `replace`, or `no-change`)
-8. If any preview is rejected, revise payload and rerun preview.
+9. If any preview is rejected, revise payload and rerun preview.
 
 ## Done when
 

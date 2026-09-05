@@ -377,7 +377,7 @@ first_body_heading() {
 check_skill_frontmatter() {
   local skill_dir="$1"
   local path="$2"
-  local first_line end_line raw_name raw_description name description
+  local first_line end_line raw_name raw_description name description description_lower
 
   first_line="$(awk 'NR == 1 { print; exit }' "$path")"
   if [[ "$first_line" != "---" ]]; then
@@ -395,6 +395,7 @@ check_skill_frontmatter() {
   raw_description="$(extract_frontmatter_field "$path" "description" "$end_line")"
   name="$(strip_quotes "$raw_name")"
   description="$(strip_quotes "$raw_description")"
+  description_lower="$(to_lower "$description")"
 
   if [[ -z "$name" ]]; then
     add_issue "$path" 1 "SKILL.md frontmatter must include 'name'."
@@ -406,8 +407,8 @@ check_skill_frontmatter() {
 
   if [[ -z "$description" ]]; then
     add_issue "$path" 1 "SKILL.md frontmatter must include 'description'."
-  elif [[ "$description" != *"USE WHEN"* ]]; then
-    add_issue "$path" 1 "Skill description must include an explicit 'USE WHEN ...' clause."
+  elif [[ "$description_lower" != *"use when"* ]]; then
+    add_issue "$path" 1 "Skill description must include an explicit 'Use when ...' clause."
   fi
 }
 

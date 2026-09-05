@@ -1,6 +1,6 @@
 ---
 name: "create-skill"
-description: "Create or update skills through route-specific templates and validation. USE WHEN you need portable skill authoring without repo-specific tooling."
+description: "Use when a task needs to create or update an agent skill"
 ---
 
 # Workflow

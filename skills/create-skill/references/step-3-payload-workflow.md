@@ -9,14 +9,14 @@ Build one deterministic route-specific payload contract that drives preview and 
 1. Create a payload object that matches [payload-schema.md](payload-schema.md) for the selected `template_type`.
 2. Validate shared invariants before presenting payload:
    - `skill_id` matches lowercase-hyphen naming rules
-   - `description` is one routing sentence under 200 characters
-   - `use_when` is explicit and concise
-   - generated frontmatter will include `USE WHEN`
+   - `description` contains only one routing sentence beginning with `Use when` and stays under 200 characters
+   - generated frontmatter contains no capability summary or separate routing clause
    - all generated paths remain relative to the target skill root
    - no payload field names or values require `generation-summary.md`
 3. Validate route invariants:
+   - every generated `SKILL.md` and `references/*.md` file is at or under 120 lines
    - `behaviour-guidance` has no reference documents and targets at or under 100 lines
-   - `simple-task:inline` has no reference documents and targets at or under 500 lines
+   - `simple-task:inline` has no reference documents
    - `simple-task:runbook-index` has unique `references/*.md` runbooks linked from `SKILL.md`
    - `multi-step-workflow` has contiguous ordered workflow steps, one workflow reference per step, `README.md` content, and output text for `### Result Format`
 4. Attach a deterministic file plan in this fixed order:

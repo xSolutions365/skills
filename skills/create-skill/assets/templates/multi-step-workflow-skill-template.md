@@ -1,6 +1,6 @@
 ---
 name: "<skill_id>"
-description: "<description>. USE WHEN <use_when>."
+description: "<description>"
 ---
 
 # Workflow

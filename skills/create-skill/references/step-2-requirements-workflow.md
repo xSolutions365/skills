@@ -6,7 +6,7 @@ Capture a complete requirement set for the selected route and freeze it before p
 
 ## Required actions
 
-1. Collect the shared fields from [payload-schema.md](payload-schema.md): `skill_id`, `description`, `use_when`, and `template_type`.
+1. Collect the shared fields from [payload-schema.md](payload-schema.md): `skill_id`, `description`, and `template_type`.
 2. Collect only the selected route's required body and reference fields.
 3. Use [authoring-rules.md](authoring-rules.md) to keep the generated layout aligned with the selected route.
 4. Ask clarifying questions until every selected-route field is concrete and testable.
