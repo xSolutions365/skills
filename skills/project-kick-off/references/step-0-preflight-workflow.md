@@ -6,7 +6,7 @@ Confirm that the inputs are good enough to build both packs, fix the engagement 
 
 ## Required actions
 
-1. Load [audience-boundary-rules.md](audience-boundary-rules.md), [missing-data-rules.md](missing-data-rules.md), and [cross-reference-rules.md](cross-reference-rules.md). Apply all three to every later step.
+1. Load [audience-boundary-rules.md](audience-boundary-rules.md), [missing-data-rules.md](missing-data-rules.md), [cross-reference-rules.md](cross-reference-rules.md), and [reading-guide-rules.md](reading-guide-rules.md). Apply all four to every later step.
 2. Collect the required inputs and confirm each one:
    - the signed SoW, or the latest proposal version if signature is pending (record which version)
    - casting: name, role, allocation %, start date, known leave, for every person

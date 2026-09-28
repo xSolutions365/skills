@@ -20,10 +20,11 @@ Return `PASS` only when both packs are safe to share with their audiences, fully
    - `V11 Labels`: every inferred value carries `TO CONFIRM`, and every section fed by a missing or partial input carries `LOW CONTEXT`.
    - `V12 Gap routing`: every client-answerable `TO CONFIRM` appears in the prerequisites or the kick-off questions. Every CreateFuture-answerable one appears in the pitch-lead questions.
    - `V14 Cross-references`: every ID is named. On first use in each file, it shows its home file name and section as plain text. No prefix collides with another. No client file references an internal file or uses an internal-only prefix. Every referenced file and section exists.
+   - `V15 Reading guide`: `internal/README.md` has an entry for every cast person, every uncast role, and the account lead. Each `Read first` list fits in about 15 minutes. Every deliverable, week lead, and open decision appears under exactly one entry's `You own`. Every file and section named exists.
    - `V13 Readiness`: apply the readiness verdict from the missing data rules and record `READY`, `READY WITH GAPS`, or `HOLD`, with the questions that clear any hold.
 2. Fix every failure and rerun the failed checks.
 3. Record the results at the end of `internal/evidence-ledger.md`.
 
 ## Done when
 
-- `V1` to `V12` and `V14` all pass and `V13` has a verdict, or the user explicitly accepts a named failure.
+- `V1` to `V12`, `V14` and `V15` all pass and `V13` has a verdict, or the user explicitly accepts a named failure.

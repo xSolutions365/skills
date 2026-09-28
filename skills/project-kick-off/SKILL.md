@@ -6,7 +6,7 @@ metadata:
   stage: "discover, deliver"
   engagement: "discovery, build, strategic"
   owner: "product-and-experience"
-  version: "0.4"
+  version: "0.5"
 ---
 
 # Workflow
@@ -17,7 +17,7 @@ metadata:
 - **When**: Run once at the start of every request.
 - Require the signed or latest SoW or proposal, the casting list, and at least one pitch or scope transcript or set of notes; ask for anything missing.
 - Classify the engagement as `discovery`, `build`, or `strategic` and set `@OUTPUT_ROOT` for the internal and client packs.
-- Load the audience boundary, missing data, and cross-reference rules before reading any input, and rate context coverage.
+- Load the audience boundary, missing data, cross-reference, and reading guide rules before reading any input, and rate context coverage.
 - Workflow: [references/step-0-preflight-workflow.md](references/step-0-preflight-workflow.md)
 
 ### Step 1: Build the evidence ledger
@@ -34,6 +34,7 @@ metadata:
 - **When**: Run after the ledger is complete.
 - Draft the handover brief, expectation register, plan and ownership, trade-offs and RAID, and growth map from the internal templates.
 - Treat casting as fixed; raise only uncast roles or unowned deliverables back to casting.
+- Open the internal README with a reading guide: for each cast person, what to read first, what to skim, and what they own.
 - Workflow: [references/step-2-internal-pack-workflow.md](references/step-2-internal-pack-workflow.md)
 
 ### Step 3: Draft the client kick-off pack
@@ -62,7 +63,7 @@ metadata:
 
 ### Result Format
 
-- `@OUTPUT_ROOT/internal/` holds the handover brief, expectation register, plan and ownership, trade-offs and RAID, growth map, pitch-lead questions when needed, and a `README.md` index. Mark every file `INTERNAL: do not share with client`.
+- `@OUTPUT_ROOT/internal/` holds the handover brief, expectation register, plan and ownership, trade-offs and RAID, growth map, pitch-lead questions when needed, and a `README.md` that opens with a reading guide by cast person, then the file index. Mark every file `INTERNAL: do not share with client`.
 - `@OUTPUT_ROOT/client/` holds a `README.md` index plus the kick-off agenda and deck content, engagement plan, prerequisites checklist, research access plan, ways of working, and final playback skeleton.
 - Start the chat response with the readiness verdict (`READY`, `READY WITH GAPS`, or `HOLD`), then give: open decisions, casting asks, and the three most urgent prerequisites with owners and dates.
 - Never invent names, dates, figures, or commitments that are missing from the evidence ledger; mark them `TO CONFIRM`, and mark sections built on missing inputs `LOW CONTEXT`.

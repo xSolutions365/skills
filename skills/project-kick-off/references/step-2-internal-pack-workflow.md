@@ -27,10 +27,11 @@ Hand the cast team the full context of the pitch and a plan that works with the 
 7. Mark any missing or inferred fact `TO CONFIRM`, and add `LOW CONTEXT` to any section fed by a missing or partial input category.
 8. Where availability is unknown, write `Lead: TO CONFIRM (candidate: <name>)`. Do not name a firm lead.
 9. Write `internal/pitch-lead-questions.md` with every `TO CONFIRM` someone at CreateFuture can answer, grouped by pitch lead, account lead, and casting. When pitch or scope calls are missing, add the discovery questions from the missing data rules.
-10. Write `internal/README.md` as the pack index, following the cross-reference rules. On first use in each file, name every ID and show its home file and section.
+10. Write `internal/README.md` from [../assets/templates/internal/readme-template.md](../assets/templates/internal/readme-template.md): a reading guide by cast person, following [reading-guide-rules.md](reading-guide-rules.md), then the pack index, following the cross-reference rules. On first use in each file, name every ID and show its home file and section.
 
 ## Done when
 
 - All five internal files, plus pitch-lead questions when needed, exist and each starts with the internal marker.
 - Every SoW deliverable has a suggested lead in the plan.
 - Every `DRIFT:` row appears in the expectation register.
+- `internal/README.md` opens with a reading guide entry for every cast person, every uncast role, and the account lead.

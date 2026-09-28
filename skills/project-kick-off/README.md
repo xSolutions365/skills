@@ -5,6 +5,7 @@
 Turns the material from a won engagement (the SoW or proposal, pitch and scope-call transcripts, internal notes, and casting) into two local draft packs. Commercial context never reaches the client pack. Anything the inputs don't support is marked `TO CONFIRM` or `LOW CONTEXT` rather than invented. A readiness verdict (`READY`, `READY WITH GAPS` or `HOLD`) tells you whether the client pack can be sent yet.
 
 **Internal team pack:**
+- **Start here (README):** a reading guide for each person as cast, with what to read first, what to skim, and what they own, followed by the file index.
 - **Team handover brief:** the story so far, the client, the brief, who's who, a glossary, and commercial ways of working.
 - **Expectation register:** what each stakeholder expects, including scope that moved after the proposal.
 - **Plan and ownership:** the plan laid out against the team as cast, with leads, backups and casting asks.
@@ -38,6 +39,7 @@ Turns the material from a won engagement (the SoW or proposal, pitch and scope-c
 ## References
 
 - Main workflow: [SKILL.md](SKILL.md)
+- Reading guide rules: [references/reading-guide-rules.md](references/reading-guide-rules.md)
 - Audience boundary rules: [references/audience-boundary-rules.md](references/audience-boundary-rules.md)
 - Engagement shape defaults: [references/engagement-shape-guide.md](references/engagement-shape-guide.md)
 - Validation checks: [references/step-4-validation-workflow.md](references/step-4-validation-workflow.md)
