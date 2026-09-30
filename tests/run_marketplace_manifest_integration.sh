@@ -15,9 +15,11 @@ make_fixture() {
     "$FIXTURE_ROOT/$fixture/skills/beta/SKILL.md"
   cat >"$FIXTURE_ROOT/$fixture/.claude-plugin/marketplace.json" <<'EOF'
 {
+  "name": "example-marketplace",
+  "owner": {"name": "Example"},
   "plugins": [
-    {"name": "alpha", "skills": ["./skills/alpha"]},
-    {"name": "beta", "skills": ["./skills/beta"]}
+    {"name": "alpha", "source": "./", "skills": ["./skills/alpha"]},
+    {"name": "beta", "source": "./", "skills": ["./skills/beta"]}
   ]
 }
 EOF
@@ -49,6 +51,45 @@ run_invalid_fixture() {
 make_fixture valid
 run_valid_fixture
 
+make_fixture missing_marketplace_name
+python3 - "$FIXTURE_ROOT/missing_marketplace_name/.claude-plugin/marketplace.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+manifest_path = Path(sys.argv[1])
+manifest = json.loads(manifest_path.read_text())
+manifest.pop("name")
+manifest_path.write_text(json.dumps(manifest))
+PY
+run_invalid_fixture missing_marketplace_name "marketplace must have a non-empty name"
+
+make_fixture missing_owner
+python3 - "$FIXTURE_ROOT/missing_owner/.claude-plugin/marketplace.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+manifest_path = Path(sys.argv[1])
+manifest = json.loads(manifest_path.read_text())
+manifest.pop("owner")
+manifest_path.write_text(json.dumps(manifest))
+PY
+run_invalid_fixture missing_owner "marketplace owner must have a non-empty name"
+
+make_fixture missing_source
+python3 - "$FIXTURE_ROOT/missing_source/.claude-plugin/marketplace.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+manifest_path = Path(sys.argv[1])
+manifest = json.loads(manifest_path.read_text())
+manifest["plugins"][0].pop("source")
+manifest_path.write_text(json.dumps(manifest))
+PY
+run_invalid_fixture missing_source "plugin alpha must have a non-empty source"
+
 make_fixture malformed
 printf '{not json\n' >"$FIXTURE_ROOT/malformed/.claude-plugin/marketplace.json"
 run_invalid_fixture malformed "cannot read valid JSON"
@@ -61,7 +102,11 @@ from pathlib import Path
 
 manifest_path = Path(sys.argv[1])
 manifest = json.loads(manifest_path.read_text())
-manifest["plugins"][0] = {"name": "not-found", "skills": ["./skills/not-found"]}
+manifest["plugins"][0] = {
+    "name": "not-found",
+    "source": "./",
+    "skills": ["./skills/not-found"],
+}
 manifest_path.write_text(json.dumps(manifest))
 PY
 run_invalid_fixture missing_path "missing skill file: skills/not-found/SKILL.md"

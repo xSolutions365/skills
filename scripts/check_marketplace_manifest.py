@@ -18,7 +18,18 @@ def check_manifest(root):
     except (OSError, json.JSONDecodeError) as error:
         return fail(f"cannot read valid JSON from {manifest_path}: {error}")
 
-    if not isinstance(manifest, dict) or not isinstance(manifest.get("plugins"), list):
+    if not isinstance(manifest, dict):
+        return fail("manifest must be an object")
+
+    name = manifest.get("name")
+    if not isinstance(name, str) or not name.strip():
+        return fail("marketplace must have a non-empty name")
+
+    owner = manifest.get("owner")
+    if not isinstance(owner, dict) or not isinstance(owner.get("name"), str) or not owner["name"].strip():
+        return fail("marketplace owner must have a non-empty name")
+
+    if not isinstance(manifest.get("plugins"), list):
         return fail("plugins must be an array")
 
     declared_skills = set()
@@ -33,6 +44,13 @@ def check_manifest(root):
         if name in plugin_names:
             return fail(f"duplicate plugin entry: {name}")
         plugin_names.add(name)
+
+        source = plugin.get("source")
+        if not (
+            isinstance(source, str) and source.strip()
+            or isinstance(source, dict) and source
+        ):
+            return fail(f"plugin {name} must have a non-empty source")
 
         skills = plugin.get("skills")
         if not isinstance(skills, list) or len(skills) != 1:
