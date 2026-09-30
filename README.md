@@ -14,6 +14,7 @@
 The npx skills installer scans for `SKILL.md` files. This repo intentionally uses:
 
 - `skills/<skill-folder>/SKILL.md`
+- `.claude-plugin/marketplace.json` listing each skill as an installable plugin
 
 This allows `npx skills add <repo> --list` discovers a collection of skills.
 
@@ -29,6 +30,27 @@ If starting fresh, use `create-skill`. If importing an existing skill that is ov
 `Refactor <skill-in-question> to align with the create-skill multi-step workflow route, retaining all content with granular detail moving to reference files`
 
 ## Install
+
+### Claude Code / Claude (plugin marketplace)
+
+Add the marketplace once:
+
+```text
+/plugin marketplace add xSolutions365/skills
+```
+
+Then install only the skills you want:
+
+```text
+/plugin install create-skill@xsolutions365-skills
+/plugin install slide-generator@xsolutions365-skills
+```
+
+Available plugins: `adaptive-prose`, `create-agent`, `create-project-docs`, `create-skill`, `estimation-pack`, `human-writing-style`, `slide-generator`, `visual-explainer`.
+
+Each plugin is defined in `.claude-plugin/marketplace.json`. To add a new skill, add a matching plugin entry there.
+
+### Other agents (npx skills)
 
 By default, `npx skills add` installs into the current project's `.agents/` directory. Use `-g` to install these skills at user level instead.
 
