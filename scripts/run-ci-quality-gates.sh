@@ -59,7 +59,9 @@ run_step "Check skills badge payload" bash "$ROOT_DIR/scripts/update_skills_badg
 fi
 run_step "Skill lint" bash "$ROOT_DIR/scripts/lint_skills.sh"
 run_step "Lint integration tests" bash "$ROOT_DIR/tests/run_lint_skills_integration.sh"
-run_step "Shell syntax check" bash -n "$ROOT_DIR/scripts/update_skills_badge.sh" "$ROOT_DIR/scripts/lint_skills.sh" "$ROOT_DIR/scripts/run-ci-quality-gates.sh" "$ROOT_DIR/tests/run_lint_skills_integration.sh"
+run_step "Marketplace manifest check" python3 "$ROOT_DIR/scripts/check_marketplace_manifest.py" --root "$ROOT_DIR"
+run_step "Marketplace manifest integration tests" bash "$ROOT_DIR/tests/run_marketplace_manifest_integration.sh"
+run_step "Shell syntax check" bash -n "$ROOT_DIR/scripts/update_skills_badge.sh" "$ROOT_DIR/scripts/lint_skills.sh" "$ROOT_DIR/scripts/run-ci-quality-gates.sh" "$ROOT_DIR/tests/run_lint_skills_integration.sh" "$ROOT_DIR/tests/run_marketplace_manifest_integration.sh"
 run_step "Parity guard" check_parity
 
 if [[ "$FIX_MODE" == "true" ]]; then
