@@ -1,0 +1,84 @@
+{
+  "name": "xsolutions365-skills",
+  "owner": {
+    "name": "xSolutions365"
+  },
+  "metadata": {
+    "description": "An opinionated approach to the agentskills.io standard",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "adaptive-prose",
+      "source": "./",
+      "strict": false,
+      "description": "Draft or redraft context-bound prose using explicit style presets and judgment-based validation",
+      "skills": [
+        "./skills/adaptive-prose"
+      ]
+    },
+    {
+      "name": "create-agent",
+      "source": "./",
+      "strict": false,
+      "description": "Create reusable agent specs from role templates and output-format templates",
+      "skills": [
+        "./skills/create-agent"
+      ]
+    },
+    {
+      "name": "create-project-docs",
+      "source": "./",
+      "strict": false,
+      "description": "Generate a concise README plus evidence-backed reference docs from repo analysis",
+      "skills": [
+        "./skills/create-project-docs"
+      ]
+    },
+    {
+      "name": "create-skill",
+      "source": "./",
+      "strict": false,
+      "description": "Create or update agent skills using a structured, validated workflow",
+      "skills": [
+        "./skills/create-skill"
+      ]
+    },
+    {
+      "name": "estimation-pack",
+      "source": "./",
+      "strict": false,
+      "description": "Qualify software delivery opportunities, shape estimates, and recommend delivery approaches",
+      "skills": [
+        "./skills/estimation-pack"
+      ]
+    },
+    {
+      "name": "human-writing-style",
+      "source": "./",
+      "strict": false,
+      "description": "Produce writing that sounds authentically human and avoids AI-detectable patterns",
+      "skills": [
+        "./skills/human-writing-style"
+      ]
+    },
+    {
+      "name": "slide-generator",
+      "source": "./",
+      "strict": false,
+      "description": "Generate presentation slides from pasted content",
+      "skills": [
+        "./skills/slide-generator"
+      ]
+    },
+    {
+      "name": "visual-explainer",
+      "source": "./",
+      "strict": false,
+      "description": "Generate self-contained HTML visual explainers for technical systems and data",
+      "skills": [
+        "./skills/visual-explainer"
+      ]
+    }
+  ]
+}
