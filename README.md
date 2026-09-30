@@ -11,12 +11,13 @@
 
 ## Repo structure
 
-The npx skills installer scans for `SKILL.md` files. This repo intentionally uses:
+The `npx skills` installer scans for `SKILL.md` files. This repo intentionally uses:
 
 - `skills/<skill-folder>/SKILL.md`
-- `.claude-plugin/marketplace.json` listing each skill as an installable plugin
 
-This allows `npx skills add <repo> --list` discovers a collection of skills.
+This allows `npx skills add <repo> --list` to discover a collection of skills.
+
+Separately, `.claude-plugin/marketplace.json` is consumed by Claude Code's plugin marketplace and lists each skill as an installable plugin.
 
 The repo accepts these skill layouts, aligned with [Agent Skills specification](https://agentskills.io/specification):
 
@@ -31,7 +32,7 @@ If starting fresh, use `create-skill`. If importing an existing skill that is ov
 
 ## Install
 
-### Claude Code / Claude (plugin marketplace)
+### Claude Code (plugin marketplace)
 
 Add the marketplace once:
 
