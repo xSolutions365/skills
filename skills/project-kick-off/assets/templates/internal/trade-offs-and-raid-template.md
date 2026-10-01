@@ -10,7 +10,7 @@ INTERNAL: do not share with client
 
 ## Risks
 
-Use IDs `R1`, `A1`, `I1`, `DEP1` and `OD1`. Name and link references to other files, following the cross-reference rules.
+Use IDs `R1`, `A1`, `I1`, `DEP1` and `OD1`. Name references to other files in plain text, following the cross-reference rules.
 
 | # | Risk | Likelihood | Impact | Mitigation | Owner | Review by |
 |---|---|---|---|---|---|---|
