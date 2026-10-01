@@ -7,7 +7,7 @@ Extract everything the later steps need into one sourced ledger, so no artefact 
 ## Required actions
 
 1. Create `@OUTPUT_ROOT/internal/evidence-ledger.md` and put `INTERNAL: do not share with client` as its first line.
-2. Read the inputs in date order, oldest first, so later decisions override earlier ones.
+2. Read the inputs in date order, oldest first. Treat a later source as superseding an earlier one only when it records an explicit decision by an authorised person; otherwise preserve both and log the conflict as a `DRIFT:` row. Keep the signed SoW as the contractual baseline until a confirmed change-control decision replaces it.
 3. Record each finding as one table row with these columns: `ID`, `Type`, `Statement`, `Source`, `Date`, `Tag`.
    - `Source` is the file name plus the speaker, slide, or section, e.g. `scope call 28 Apr, client sponsor`.
    - `Tag` is `client-safe` or `internal-only`, following the audience boundary rules.
