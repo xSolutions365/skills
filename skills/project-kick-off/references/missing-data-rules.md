@@ -36,8 +36,8 @@ Never invent a fact. Label every gap, turn each gap into a question for someone 
    - the research participant route, when the engagement includes research
 8. Give exactly one readiness verdict:
    - `READY`: no critical fact is `TO CONFIRM`.
-   - `READY WITH GAPS`: critical facts are `TO CONFIRM`, but only the client can answer them, and each one is already in the prerequisites or the kick-off questions.
-   - `HOLD`: a critical fact that someone at CreateFuture could answer is still `TO CONFIRM`, and it would change what the client pack commits to. Name the questions that clear the hold.
+   - `READY WITH GAPS`: critical facts are `TO CONFIRM`, but none is a CreateFuture-answerable gap that would change what the client pack commits to, and every gap is already routed to the prerequisites, kick-off questions, or pitch-lead questions.
+   - `HOLD`: at least one critical fact that someone at CreateFuture could answer is still `TO CONFIRM` and would change what the client pack commits to. Name the questions that clear the hold.
 
 ## Done when
 
