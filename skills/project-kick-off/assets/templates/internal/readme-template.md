@@ -4,7 +4,7 @@ INTERNAL: do not share with client
 
 <DRAFT stamp>
 
-**Readiness: `<READY | READY WITH GAPS | HOLD>`.** <One sentence: what clears it, as a named ID with its home file.> The client pack is indexed in client/README.md.
+**Readiness: `<READY | READY WITH GAPS | HOLD>`.** <For `READY`, say that no critical facts are outstanding. Otherwise, state what clears each gap as a named ID with its home file.> The client pack is indexed in client/README.md.
 
 ## Start here: what to read by role
 
