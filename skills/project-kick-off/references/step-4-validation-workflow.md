@@ -7,7 +7,7 @@ Return `PASS` only when both packs are safe to share with their audiences, fully
 ## Required actions
 
 1. Run each check below and record `PASS` or `FAIL` with one line of evidence.
-   - `V1 Boundary`: search the client pack for price, budget, margin, rate, utilisation, follow-on, pull-through, other client names not cited in the proposal, and stakeholder opinions. Any hit fails.
+   - `V1 Boundary`: verify every client-pack statement traces only to `client-safe` ledger rows. Also search for pricing models, budget pressure, day rates, margin, utilisation, follow-on, pull-through, uncited client names, and stakeholder opinions; each confirmed `internal-only` occurrence fails.
    - `V2 Markers`: every internal file starts with `INTERNAL: do not share with client`.
    - `V3 Sourcing`: every name, date, figure, and commitment in both packs traces to a ledger row, or is marked `TO CONFIRM` or `DEFAULT`.
    - `V4 Deliverable coverage`: every SoW deliverable, including any added through `DRIFT:` rows, appears in the plan, the RACI, and the playback skeleton, with an owner.
