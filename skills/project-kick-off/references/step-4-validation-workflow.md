@@ -27,4 +27,4 @@ Return `PASS` only when both packs are safe to share with their audiences, fully
 
 ## Done when
 
-- `V1` to `V12`, `V14` and `V15` all pass and `V13` has a verdict, or the user explicitly accepts a named failure.
+- `V1` to `V12`, `V14` and `V15` all pass and `V13` has a verdict.
