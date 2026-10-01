@@ -10,7 +10,7 @@ Return `PASS` only when both packs are safe to share with their audiences, fully
    - `V1 Boundary`: verify every client-pack statement traces only to `client-safe` ledger rows. Also search for pricing models, budget pressure, day rates, margin, utilisation, follow-on, pull-through, uncited client names, and stakeholder opinions; each confirmed `internal-only` occurrence fails.
    - `V2 Markers`: every internal file starts with `INTERNAL: do not share with client`.
    - `V3 Sourcing`: every name, date, figure, and commitment in both packs traces to a ledger row, or is marked `TO CONFIRM` or `DEFAULT`.
-   - `V4 Deliverable coverage`: every SoW deliverable, including any added through `DRIFT:` rows, appears in the plan, the RACI, and the playback skeleton, with an owner.
+   - `V4 Deliverable coverage`: every signed SoW deliverable appears in the plan, the RACI, and the playback skeleton, with an owner. A deliverable from a `DRIFT:` row appears there only when its expectation-register response is `meet` and the client has confirmed the scope change; `reset` and `park` items remain internal.
    - `V5 Drift coverage`: every `DRIFT:` row appears in the expectation register with a response and an owner.
    - `V6 Availability`: no week or deliverable lead is someone who is on leave or not yet started that week. List unknown availability; it never counts as a pass.
    - `V7 Prerequisite dates`: every "needed by" date falls before the session that uses it, and the checklist reaches the client at least five working days before week one.
