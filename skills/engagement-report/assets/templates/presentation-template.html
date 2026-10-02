@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engagement Report</title>
+<style>
+:root {
+  --purple-dark: #2d1b4e;
+  --purple: #4a2c7a;
+  --table-purple: #6b2fa0;
+  --lime: #d4ff3d;
+  --ink: #1a1a2e;
+  --muted: #64748b;
+  --past: #e8e0f1;
+  --future: #f8fafc;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: #e2e8f0; overflow: hidden; }
+#deck { width: 100vw; height: 100vh; }
+.slide { display: none; width: 100vw; height: 100vh; padding: 54px 64px 70px; background: #fff; overflow-y: auto; position: relative; }
+.slide.active { display: block; }
+.cover.active, .closing.active { display: flex; flex-direction: column; justify-content: center; }
+.cover { border-left: 24px solid var(--lime); padding-left: 88px; }
+.cover h1, .closing h1 { font-size: clamp(42px, 6vw, 68px); margin: 8px 0 22px; }
+.cover .subtitle { color: #475569; margin: 4px 0; }
+.client-logo { position: absolute; top: 48px; right: 64px; max-height: 54px; max-width: 220px; }
+.closing { color: #fff; background: linear-gradient(135deg, var(--purple-dark), var(--purple)); padding-left: 88px; }
+h2 { font-size: 32px; margin: 0 0 28px; }
+.page { position: absolute; bottom: 24px; left: 64px; color: #94a3b8; font-size: 12px; }
+.brand { position: absolute; bottom: 24px; right: 64px; font-weight: 700; }
+.rag-table, .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rag-table td, .data-table td, .data-table th { padding: 11px 14px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+.rag-table .dimension, .data-table th { color: #fff; background: var(--table-purple); font-weight: 700; }
+.rag-table .status { width: 92px; font-weight: 700; }
+.status-Green { background: #eef6e9; }
+.status-Amber { background: #fef3e6; }
+.status-Red { background: #fdecec; }
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.panel h3 { margin: 0; padding: 11px 14px; color: #fff; background: var(--table-purple); font-size: 14px; }
+.panel .body { min-height: 130px; padding: 14px 18px; background: #f8fafc; line-height: 1.55; }
+.panel ul { margin: 0; padding-left: 20px; }
+.actions { margin-top: 22px; }
+.actions strong { display: block; margin: 12px 0 4px; }
+.visual-frame { height: calc(100vh - 180px); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
+.visual-frame img { max-width: 100%; max-height: calc(100% - 58px); object-fit: contain; border: 1px solid #e2e8f0; box-shadow: 0 8px 24px rgba(45,27,78,.12); }
+.visual-caption { color: var(--muted); text-align: center; }
+.remote-card { width: min(640px, 90%); padding: 32px; border: 2px dashed #cbd5e1; border-radius: 12px; text-align: center; background: #f8fafc; }
+.remote-card a { color: var(--purple); font-weight: 700; overflow-wrap: anywhere; }
+.timeline { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 22px; position: relative; }
+.timeline-card { position: relative; padding: 14px 16px 14px 48px; border: 1px solid #ddd6e8; border-radius: 10px; min-height: 92px; background: #fff; }
+.timeline-card::before { content: ""; position: absolute; left: 18px; top: 18px; width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--purple); background: var(--purple); }
+.timeline-card.past { background: var(--past); }
+.timeline-card.future { background: var(--future); border-style: dashed; }
+.timeline-card.future::before { background: #fff; }
+.timeline-card.current { border: 3px solid var(--purple); background: #f5ffd5; }
+.timeline-card.current::before { background: var(--lime); }
+.timeline-card .date { color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+.timeline-card .label { font-weight: 700; line-height: 1.35; }
+.timeline-card .type { display: inline-block; margin-top: 8px; padding: 3px 8px; border-radius: 999px; background: #ede9fe; color: var(--purple); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
+#nav { position: fixed; z-index: 20; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: rgba(255,255,255,.96); border: 1px solid #cbd5e1; border-radius: 8px; }
+#nav button { padding: 5px 12px; border: 1px solid #cbd5e1; background: #fff; border-radius: 5px; cursor: pointer; }
+#nav button:disabled { opacity: .4; }
+#counter { color: var(--muted); min-width: 54px; text-align: center; font-size: 12px; }
+@media (max-width: 760px) {
+  .slide { padding: 36px 28px 70px; }
+  .columns, .timeline { grid-template-columns: 1fr; }
+  .page { left: 28px; }
+  .brand { right: 28px; }
+}
+@media print {
+  body { overflow: visible; }
+  #deck { height: auto; }
+  #nav { display: none; }
+  .slide { display: block !important; page-break-after: always; height: 100vh; }
+}
+</style>
+</head>
+<body>
+<div id="deck"></div>
+<div id="nav">
+  <button id="prev" type="button">&larr; Prev</button>
+  <span id="counter"></span>
+  <button id="next" type="button">Next &rarr;</button>
+</div>
+<script>
+const REPORT = __REPORT_JSON__;
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[character]));
+}
+
+function formatDate(iso) {
+  const parsed = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(parsed.getTime())
+    ? escapeHtml(iso)
+    : parsed.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function safeRemoteUrl(value) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" ? parsed.href : "#";
+  } catch {
+    return "#";
+  }
+}
+
+function chrome(page) {
+  return `<div class="page">${page}</div><div class="brand">CreateFuture</div>`;
+}
+
+function cover() {
+  const logo = REPORT.client_logo
+    ? `<img class="client-logo" src="${escapeHtml(REPORT.client_logo)}" alt="Client logo">`
+    : "";
+  return `<section class="slide cover">${logo}<strong>Engagement Report</strong>
+    <h1>${escapeHtml(REPORT.engagement)}</h1>
+    <div class="subtitle">${formatDate(REPORT.period_start)} &ndash; ${formatDate(REPORT.period_end)}</div>
+    ${REPORT.team_leadership ? `<div class="subtitle">${escapeHtml(REPORT.team_leadership)}</div>` : ""}
+    <div class="brand">CreateFuture</div></section>`;
+}
+
+function overall(page) {
+  if (!REPORT.overall?.length) return "";
+  const rows = REPORT.overall.map(row => {
+    const status = String(row.status || "");
+    return `<tr class="status-${escapeHtml(status)}"><td class="dimension">${escapeHtml(row.dimension)}</td>
+      <td class="status">${escapeHtml(status)}</td><td>${escapeHtml(row.detail)}</td></tr>`;
+  }).join("");
+  return `<section class="slide"><h2>${escapeHtml(REPORT.engagement)} update</h2>
+    <table class="rag-table">${rows}</table>${chrome(page)}</section>`;
+}
+
+function keyPoints(page) {
+  const delivered = REPORT.key_points?.delivered || [];
+  const next = REPORT.key_points?.next || [];
+  const actions = REPORT.actions || [];
+  if (!delivered.length && !next.length && !actions.length) return "";
+  const list = items => `<ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+  const actionHtml = actions.length ? `<div class="panel actions"><h3>Actions</h3><div class="body">${
+    actions.map(action => `<strong>${escapeHtml(action.owner)}</strong>${list(action.items || [])}`).join("")
+  }</div></div>` : "";
+  return `<section class="slide"><h2>${escapeHtml(REPORT.engagement)} update</h2>
+    <div class="columns"><div class="panel"><h3>Value delivered this period</h3><div class="body">${list(delivered)}</div></div>
+    <div class="panel"><h3>Decisions for next period</h3><div class="body">${list(next)}</div></div></div>
+    ${actionHtml}${chrome(page)}</section>`;
+}
+
+function normalizedVisuals() {
+  if (Array.isArray(REPORT.plan_visuals) && REPORT.plan_visuals.length) return REPORT.plan_visuals;
+  return REPORT.plan_visual
+    ? [{ caption: "Plan visual", alt: "Plan visual", kind: "progress", remote: false, src: REPORT.plan_visual }]
+    : [];
+}
+
+function visualSlides(startPage) {
+  return normalizedVisuals().map((image, index) => {
+    const title = normalizedVisuals().length > 1 ? `Progress visual ${index + 1}` : "Progress visual";
+    const content = image.remote
+      ? `<div class="remote-card"><p>${escapeHtml(image.caption || image.alt || "Remote image")}</p>
+          <a href="${escapeHtml(safeRemoteUrl(image.src))}" target="_blank" rel="noopener noreferrer">Open remote image</a></div>`
+      : `<img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt || image.caption || "Progress visual")}">`;
+    return `<section class="slide"><h2>${escapeHtml(title)}</h2><div class="visual-frame">${content}
+      <div class="visual-caption">${escapeHtml(image.caption || image.alt || "")}</div></div>${chrome(startPage + index)}</section>`;
+  });
+}
+
+function timelinePoints() {
+  const events = [...(REPORT.timeline || [])];
+  const markerLabels = new Set(["today", "reporting date", "period end"]);
+  const unique = new Map();
+  events.forEach(event => {
+    const marker = markerLabels.has(String(event.label || "").trim().toLowerCase());
+    const key = marker ? `marker:${event.date}` : `${event.date}:${String(event.label || "").toLowerCase()}`;
+    if (!unique.has(key)) unique.set(key, event);
+  });
+  const hasPeriodEnd = [...unique.values()].some(event => event.date === REPORT.period_end);
+  if (!hasPeriodEnd) {
+    unique.set(`marker:${REPORT.period_end}`, { date: REPORT.period_end, label: "Reporting date", type: "current" });
+  }
+  return [...unique.values()].sort((a, b) =>
+    String(a.date).localeCompare(String(b.date)) || String(a.label).localeCompare(String(b.label))
+  );
+}
+
+function timeline(page) {
+  if (!REPORT.timeline?.length) return "";
+  const cards = timelinePoints().map(event => {
+    const state = event.date < REPORT.period_end ? "past" : (event.date === REPORT.period_end ? "current" : "future");
+    return `<article class="timeline-card ${state}"><div class="date">${formatDate(event.date)}</div>
+      <div class="label">${escapeHtml(event.label)}</div><span class="type">${escapeHtml(event.type || "milestone")}</span></article>`;
+  }).join("");
+  return `<section class="slide"><h2>Timeline</h2><div class="timeline">${cards}</div>${chrome(page)}</section>`;
+}
+
+function dataTable(page, title, headers, rows) {
+  if (!rows.length) return "";
+  return `<section class="slide"><h2>${escapeHtml(title)}</h2><table class="data-table">
+    <thead><tr>${headers.map(header => `<th>${escapeHtml(header.label)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(row => `<tr>${headers.map(header => `<td>${escapeHtml(row[header.key] || "")}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table>${chrome(page)}</section>`;
+}
+
+function buildSlides() {
+  let page = 2;
+  const slides = [cover()];
+  const add = value => { if (value) { slides.push(value); page += 1; } };
+  add(overall(page));
+  add(keyPoints(page));
+  visualSlides(page).forEach(value => add(value));
+  add(timeline(page));
+  add(dataTable(page, "Key RAIDs", [
+    { key: "type", label: "Type" }, { key: "category", label: "Category" },
+    { key: "raised", label: "Raised" }, { key: "detail", label: "Detail" },
+    { key: "next_steps", label: "Next steps" }
+  ], REPORT.raids || []));
+  add(dataTable(page, "Casting", [
+    { key: "who", label: "Who" }, { key: "role", label: "Role" },
+    { key: "grade", label: "Grade" }, { key: "start", label: "Start date" },
+    { key: "end", label: "End date" }, { key: "notes", label: "Notes" }
+  ], REPORT.casting || []));
+  slides.push(`<section class="slide closing"><h1>Feedback welcome</h1><strong>CreateFuture</strong></section>`);
+  return slides;
+}
+
+let current = 0;
+const slides = buildSlides();
+document.getElementById("deck").innerHTML = slides.join("");
+
+function show(index) {
+  if (index < 0 || index >= slides.length) return;
+  current = index;
+  document.querySelectorAll(".slide").forEach((slide, slideIndex) => slide.classList.toggle("active", slideIndex === index));
+  document.getElementById("counter").textContent = `${index + 1} / ${slides.length}`;
+  document.getElementById("prev").disabled = index === 0;
+  document.getElementById("next").disabled = index === slides.length - 1;
+}
+
+document.getElementById("prev").addEventListener("click", () => show(current - 1));
+document.getElementById("next").addEventListener("click", () => show(current + 1));
+document.addEventListener("keydown", event => {
+  if (event.key === "ArrowLeft") show(current - 1);
+  if (event.key === "ArrowRight") show(current + 1);
+});
+show(0);
+</script>
+</body>
+</html>

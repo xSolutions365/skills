@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120" viewBox="0 0 320 120">
+  <rect width="320" height="120" fill="#f8fafc"/>
+  <polyline points="10,105 90,84 170,70 250,38 310,18" fill="none" stroke="#4a2c7a" stroke-width="6"/>
+  <text x="12" y="112" font-family="sans-serif" font-size="12">Dependency burnup</text>
+</svg>

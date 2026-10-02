@@ -1,0 +1,18 @@
+# Weekly status
+
+The statement of work ends on 2026-06-30.
+
+## Report timeline
+
+| Date | Event | Type |
+| --- | --- | --- |
+| 2026-03-20 | Release 2 launches | release |
+| 2026-01-05 | SOW starts | sow-start |
+
+- 2026-02-14 | Release 1 | release
+
+## Progress
+
+![Release burndown](images/release-burndown.svg "Release burndown after sprint 8")
+![Partner dashboard](https://example.com/progress.png "Partner-hosted progress visual")
+![Unsafe chart](../../../outside.svg)

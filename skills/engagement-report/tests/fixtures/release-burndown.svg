@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120" viewBox="0 0 320 120">
+  <rect width="320" height="120" fill="#f8fafc"/>
+  <polyline points="10,20 90,42 170,65 250,82 310,105" fill="none" stroke="#6b2fa0" stroke-width="6"/>
+  <text x="12" y="112" font-family="sans-serif" font-size="12">Release burndown</text>
+</svg>

@@ -45,6 +45,15 @@
       ]
     },
     {
+      "name": "engagement-report",
+      "source": "./",
+      "strict": false,
+      "description": "Create or update engagement reports and standalone presentations from period notes",
+      "skills": [
+        "./skills/engagement-report"
+      ]
+    },
+    {
       "name": "estimation-pack",
       "source": "./",
       "strict": false,
